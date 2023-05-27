@@ -34,8 +34,7 @@ import com.affan.capstone_project.ui.theme.GreenMed
 @Composable
 fun BottomBar(
     modifier: Modifier = Modifier,
-    containerColor: Color = NavigationBarDefaults.containerColor,
-    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
+    openDialog:()->Unit,
     tonalElevation: Dp = NavigationBarDefaults.Elevation,
     windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
     content: @Composable RowScope.() -> Unit
@@ -63,7 +62,7 @@ fun BottomBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 content = content
             )
-            IconButton(onClick = { /*TODO*/ }, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier.size(54.dp).clip(
+            IconButton(onClick =  openDialog, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier.size(54.dp).clip(
                 RoundedCornerShape(15.dp)
             )) {
                 Icon(painter = painterResource(id = R.drawable.leaf), contentDescription = null, tint = Color.White)
