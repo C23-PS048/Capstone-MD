@@ -33,7 +33,7 @@ fun NavigationBottomBar(
                 route = Screen.Home
             ), NavItem(
                 name = "HOME",
-                icon = painterResource(id = R.drawable.chat),
+                icon = painterResource(id = R.drawable.user_fill),
                 route = Screen.Forum
             ),
         )

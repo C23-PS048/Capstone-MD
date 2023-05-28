@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.affan.capstone_project.ui.theme.GreenMed
@@ -62,12 +63,26 @@ fun BottomBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 content = content
             )
-            IconButton(onClick =  openDialog, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier.size(54.dp).clip(
-                RoundedCornerShape(15.dp)
-            )) {
+            IconButton(onClick =  openDialog, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier
+                .size(54.dp)
+                .clip(
+                    RoundedCornerShape(15.dp)
+                )) {
                 Icon(painter = painterResource(id = R.drawable.leaf), contentDescription = null, tint = Color.White)
             }
         }
 
+    }
+}
+
+@Preview
+@Composable
+fun Prev() {
+    IconButton(onClick = {  }, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier
+        .size(54.dp)
+        .clip(
+            RoundedCornerShape(15)
+        )) {
+        Icon(painter = painterResource(id = R.drawable.leaf), contentDescription = null, tint = Color.White)
     }
 }
