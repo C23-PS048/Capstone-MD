@@ -1,5 +1,6 @@
 package com.affan.capstone_project.ui.component.navigation
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -8,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -22,7 +25,14 @@ import com.affan.capstone_project.ui.theme.GreenMed
 fun NavigationBottomBar(
     navController: NavController,openDialog:()->Unit, modifier: Modifier = Modifier
 ) {
-    BottomBar(modifier = modifier,openDialog=openDialog) {
+    BottomBar(   modifier = modifier.graphicsLayer {
+
+        shape = RoundedCornerShape(
+            topStart = 16.dp,
+            topEnd = 16.dp
+        )
+        clip = true
+    },openDialog=openDialog) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -32,8 +42,8 @@ fun NavigationBottomBar(
                 icon = painterResource(id = R.drawable.home),
                 route = Screen.Home
             ), NavItem(
-                name = "HOME",
-                icon = painterResource(id = R.drawable.user_fill),
+                name = "Profile",
+                icon = painterResource(id = R.drawable.user_regular),
                 route = Screen.Forum
             ),
         )

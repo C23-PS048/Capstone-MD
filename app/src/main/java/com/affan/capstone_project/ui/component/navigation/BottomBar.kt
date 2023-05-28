@@ -3,6 +3,7 @@ package com.affan.capstone_project.ui.component.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,47 +13,63 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.affan.capstone_project.R
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.affan.capstone_project.R
+import com.affan.capstone_project.ui.screen.Screen
+import com.affan.capstone_project.ui.theme.GreenLight
 import com.affan.capstone_project.ui.theme.GreenMed
 
 @Composable
 fun BottomBar(
     modifier: Modifier = Modifier,
-    openDialog:()->Unit,
+    openDialog: () -> Unit,
     tonalElevation: Dp = NavigationBarDefaults.Elevation,
     windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
     content: @Composable RowScope.() -> Unit
 ) {
     Surface(
-        color =  Color.White,
+        color = Color.White,
         contentColor = Color.White,
         tonalElevation = tonalElevation,
-        modifier = modifier.background(
-            color = Color.Blue,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-        )
+
+        modifier = modifier.graphicsLayer {
+
+            shape = RoundedCornerShape(
+                topStart = 16.dp,
+                topEnd = 16.dp
+            )
+            clip = true
+        }
     ) {
-        Box(contentAlignment = Alignment.Center,modifier = modifier.background(
-            color = Color.White,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-        )) {
+        Box(
+            contentAlignment = Alignment.Center,modifier = modifier.graphicsLayer {
+
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp
+                )
+                clip = true
+            }
+        ) {
 
             Row(
                 modifier = Modifier
@@ -63,12 +80,21 @@ fun BottomBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 content = content
             )
-            IconButton(onClick =  openDialog, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier
-                .size(54.dp)
-                .clip(
-                    RoundedCornerShape(15.dp)
-                )) {
-                Icon(painter = painterResource(id = R.drawable.leaf), contentDescription = null, tint = Color.White)
+            Button(
+                onClick = { },
+                modifier = Modifier.size(56.dp),
+
+                shape = RoundedCornerShape(15),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GreenMed
+                ),
+                contentPadding = PaddingValues(4.dp)
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.leaf),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(36.dp)
+                )
             }
         }
 
@@ -78,11 +104,42 @@ fun BottomBar(
 @Preview
 @Composable
 fun Prev() {
-    IconButton(onClick = {  }, colors = IconButtonDefaults.iconButtonColors(containerColor = GreenMed), modifier = Modifier
-        .size(54.dp)
-        .clip(
-            RoundedCornerShape(15)
-        )) {
-        Icon(painter = painterResource(id = R.drawable.leaf), contentDescription = null, tint = Color.White)
+    BottomBar(modifier = Modifier, openDialog = {}) {
+
+
+
+        val navItems = listOf(
+            NavItem(
+                name = "HOME",
+                icon = painterResource(id = R.drawable.home),
+                route = Screen.Home
+            ),
+            NavItem(
+                name = "HOME",
+                icon = painterResource(id = R.drawable.user_fill),
+                route = Screen.Forum
+            ),
+        )
+        BottomBar(openDialog = { }) {
+            navItems.map { item ->
+                NavigationBarItem(
+                    icon = {
+                        Icon(painter = item.icon, contentDescription = item.name)
+                    },
+                    label = { Text(text = item.name) },
+                    selected = true,
+                    onClick = {
+
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Color.White,
+                        selectedIconColor = GreenMed,
+                        selectedTextColor = GreenMed,
+                        unselectedIconColor = GreenLight
+                    ),
+                    alwaysShowLabel = false
+                )
+            }
+        }
     }
 }
