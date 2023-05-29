@@ -23,7 +23,7 @@ import com.affan.capstone_project.ui.theme.Ivory
 @Composable
 fun CameraButton(onclick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(100.dp)
             .clip(CircleShape)
             .background(Ivory)
@@ -37,12 +37,12 @@ fun CameraButton(onclick: () -> Unit, modifier: Modifier = Modifier) {
                 contentColor = GreenMed
             ), border = BorderStroke(2.dp, GreenMed),
             shape = CircleShape,
-            modifier = modifier.size(110.dp)
+            modifier = Modifier.size(110.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.leaf),
                 "",
-                modifier = modifier.size(54.dp)
+                modifier = Modifier.size(54.dp)
             )
         }
     }

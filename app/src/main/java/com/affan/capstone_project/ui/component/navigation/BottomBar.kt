@@ -81,7 +81,7 @@ fun BottomBar(
                 content = content
             )
             Button(
-                onClick = { },
+                onClick =  openDialog,
                 modifier = Modifier.size(56.dp),
 
                 shape = RoundedCornerShape(15),
