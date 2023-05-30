@@ -1,7 +1,8 @@
 package com.affan.capstone_project.ui
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,13 +15,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.affan.capstone_project.CameraActivity
 import com.affan.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.affan.capstone_project.ui.screen.ForumScreen
 import com.affan.capstone_project.ui.screen.HomeScreen
@@ -36,7 +38,8 @@ fun App(
     navController: NavHostController = rememberNavController(),
     outputDirectory: File,
     cameraExecutor: ExecutorService,
-    handleImageCapture: (Uri) -> Unit
+    handleImageCapture: (Uri) -> Unit,
+    context: Context
 ) {
 
 
@@ -51,11 +54,12 @@ fun App(
     CapstoneProjectTheme() {
         Scaffold(
             bottomBar = {
-                if (currentRoute == Screen.Home.route || currentRoute==Screen.Forum.route) {
+                if (currentRoute == Screen.Home.route || currentRoute == Screen.Forum.route) {
                     NavigationBottomBar(
                         navController = navController,
                         openDialog = {
-                            navController.navigate(Screen.Camera.route)
+                            val intent = Intent(context, CameraActivity::class.java)
+                            startActivity(context,intent,null)
                         },
                         modifier = modifier.graphicsLayer {
 
@@ -67,7 +71,6 @@ fun App(
                         }
                     )
                 }
-
 
 
             }, modifier = modifier
@@ -87,18 +90,7 @@ fun App(
                 composable(Screen.Forum.route) {
                     ForumScreen()
                 }
-                composable(Screen.Camera.route) {
-                    CameraView(
-                        outputDirectory = outputDirectory,
-                        executor = cameraExecutor,
-                        onImageCaptured = handleImageCapture,
-                        onError = { Log.e("kilo", "View error:", it) },
-                        context = LocalContext.current,
-                        navBack = {
-                            navController.navigateUp()
-                        }
-                    )
-                }
+
             }
         }
 

@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    App(outputDirectory = outputDirectory, cameraExecutor = cameraExecutor,handleImageCapture =  ::handleImageCapture)
+                    App(outputDirectory = outputDirectory, cameraExecutor = cameraExecutor,handleImageCapture =  ::handleImageCapture, context = this)
                 }
             }
 

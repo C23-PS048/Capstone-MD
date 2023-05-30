@@ -116,7 +116,7 @@ fun Prev() {
             ),
             NavItem(
                 name = "HOME",
-                icon = painterResource(id = R.drawable.user_fill),
+                icon = painterResource(id = R.drawable.user_regular),
                 route = Screen.Forum
             ),
         )
