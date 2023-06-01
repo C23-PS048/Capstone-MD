@@ -1,6 +1,10 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +12,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,16 +23,34 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
-
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberImagePainter
+import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
+import java.io.FileNotFoundException
+
 
 @Composable
-fun ResultScreen(onBack: () -> Unit, photoUri: Uri, modifier: Modifier = Modifier) {
+fun ResultScreen(
+    onBack: () -> Unit,
+    photoUri: Uri,
+    modifier: Modifier = Modifier,
+    classifer: DeseaseClassifier,
+    context: Context
+) {
+var result: List<DeseaseClassifier.Recognition> = listOf()
+
+    val bitmap: Bitmap? = decodeUriAsBitmap(context, photoUri)
+    if (bitmap != null) { result =  classifer.recognizeImage(
+        bitmap
+        )
+
+    }
+    Log.d("TAG", "ResultScreen: ${result}")
     CapstoneProjectTheme() {
         Scaffold(
             topBar = {
@@ -57,16 +78,38 @@ fun ResultScreen(onBack: () -> Unit, photoUri: Uri, modifier: Modifier = Modifie
             },
             modifier = modifier
         ) { padding ->
-            Column(modifier = Modifier.padding(padding).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = rememberImagePainter(photoUri),
-                    contentDescription = null,
-                    modifier = Modifier.width(300.dp).height(300.dp)
-                        .aspectRatio(1f)
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(300.dp)
+                            .height(300.dp)
+                            .aspectRatio(1f)
 
-                )
+                    )
+                }
+                Text(text = result[0].title)
             }
         }
     }
 }
 
+fun decodeUriAsBitmap(context: Context, uri: Uri?): Bitmap? {
+    var bitmap: Bitmap? = null //from   w  ww  . j  a  v  a2s.  c om
+    bitmap = try {
+        BitmapFactory.decodeStream(
+            context
+                .contentResolver.openInputStream(uri!!)
+        )
+    } catch (e: FileNotFoundException) {
+        e.printStackTrace()
+        return null
+    }
+    return bitmap
+}

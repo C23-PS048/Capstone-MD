@@ -50,6 +50,7 @@ fun HomeScreen(
             )
         }
     }
+
     Column(
         modifier = modifier
             .fillMaxWidth()

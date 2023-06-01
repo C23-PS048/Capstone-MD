@@ -25,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bangkit.capstone_project.ScreenState
 import com.bangkit.capstone_project.data.LocationViewModel
+import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.CameraScreen
 import com.bangkit.capstone_project.ui.screen.ForumScreen
@@ -47,7 +48,8 @@ fun App(
     context: Context,
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
-    outputDirectory: File
+    outputDirectory: File,
+    classifer: DeseaseClassifier
 ) {
     lateinit var photoUri: Uri
     val locationPermissions = rememberMultiplePermissionsState(
@@ -130,6 +132,8 @@ fun App(
                                 ResultScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     photoUri = photoUri,
+                                    classifer = classifer,
+                                    context = context,
                                     onBack = {
                                         currentState.value = ScreenState.Camera
                                     }

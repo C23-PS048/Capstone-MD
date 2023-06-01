@@ -56,7 +56,10 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
-
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
 }
 
 
@@ -110,7 +113,11 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // Needed if targeting API > 31 (Android 12+)
-    implementation ("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+
+    //Tflite
+
+    implementation 'org.tensorflow:tensorflow-lite:2.7.0'
 }
