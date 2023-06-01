@@ -31,6 +31,8 @@ import com.bangkit.capstone_project.data.LocationViewModel
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.ForumScreen
 import com.bangkit.capstone_project.ui.screen.HomeScreen
+import com.bangkit.capstone_project.ui.screen.ListScreen
+import com.bangkit.capstone_project.ui.screen.PlantInfoScreen
 import com.bangkit.capstone_project.ui.screen.Screen
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -102,6 +104,9 @@ fun App(
             ) {
                 composable(Screen.Home.route) {
                     HomeScreen(currentLocation = currentLocation)
+                
+             /*   ListScreen(onBack = {})*/
+                   /* PlantInfoScreen()*/
                 }
                 composable(Screen.Forum.route) {
                     ForumScreen()

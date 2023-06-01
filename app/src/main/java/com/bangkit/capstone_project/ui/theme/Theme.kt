@@ -22,9 +22,9 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = GreenMed,
+    secondary = GreenLight,
+    tertiary = Ivory
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -37,6 +37,7 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+/*
 @Composable
 fun CapstoneProjectTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -59,6 +60,27 @@ fun CapstoneProjectTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}*/
+@Composable
+fun CapstoneProjectTheme(
+    darkTheme: Boolean = false, // Always use the light theme
+    content: @Composable () -> Unit
+) {
+    val colorScheme = LightColorScheme
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
         }
     }
 
