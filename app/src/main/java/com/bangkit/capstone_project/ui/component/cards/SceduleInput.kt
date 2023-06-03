@@ -20,7 +20,15 @@ import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 
 
 @Composable
-fun ScheduleInput(value: Boolean, onValueChange: (Boolean) -> Unit,selectDialog: Boolean, isSelectOpen: (Boolean) -> Unit, modifier: Modifier = Modifier,Date:String) {
+fun ScheduleInput(
+    value: Boolean,
+    onValueChange: (Boolean) -> Unit,
+    selectDialog: Boolean,
+    isSelectOpen: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    Date: String,
+    Selected: String
+) {
 
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -53,7 +61,7 @@ fun ScheduleInput(value: Boolean, onValueChange: (Boolean) -> Unit,selectDialog:
             ) {
                 Text(text = "Repeat")
                 Row() {
-                    Text(text = "Date")
+                    Text(text =Selected)
                     Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                 }
 
@@ -67,6 +75,6 @@ fun ScheduleInput(value: Boolean, onValueChange: (Boolean) -> Unit,selectDialog:
 @Composable
 fun InputPrev() {
     CapstoneProjectTheme {
-        ScheduleInput(false, { true },false, { true }, Date = "12131")
+        ScheduleInput(false, { true }, false, { true }, Date = "12131", Selected = "selectedOption")
     }
 }

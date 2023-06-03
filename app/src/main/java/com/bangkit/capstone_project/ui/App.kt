@@ -47,7 +47,6 @@ import com.bangkit.capstone_project.ScreenState
 import com.bangkit.capstone_project.data.LocationViewModel
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
-import com.bangkit.capstone_project.ui.component.dialog.Date
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.CameraScreen
 import com.bangkit.capstone_project.ui.screen.ForumScreen
@@ -56,6 +55,7 @@ import com.bangkit.capstone_project.ui.screen.ListScreen
 import com.bangkit.capstone_project.ui.screen.PlantInfoScreen
 import com.bangkit.capstone_project.ui.screen.ResultScreen
 import com.bangkit.capstone_project.ui.screen.Screen
+import com.bangkit.capstone_project.ui.screen.TaskScreen
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -140,7 +140,11 @@ fun App(
             ) {
                 composable(Screen.Home.route) {
                     HomeScreen(currentLocation = currentLocation)
-/*Date()*/
+                    /*Date()*/
+
+                }
+                composable(Screen.Task.route) {
+                    TaskScreen(onBack = { navController.navigateUp() })
 
                 }
                 composable(Screen.Forum.route) {
@@ -148,11 +152,11 @@ fun App(
                 }
                 composable(Screen.ListPlant.route) {
                     ListScreen(
-                        onBack = {navController.navigateUp()},
+                        onBack = { navController.navigateUp() },
                         onclick = { navController.navigate(Screen.DetailPlant.route) })
                 }
                 composable(Screen.DetailPlant.route) {
-                    PlantInfoScreen { navController.navigateUp() }
+                    PlantInfoScreen(navigateTask = { navController.navigate(Screen.Task.route) }, onBack = { navController.navigateUp() })
                 }
                 composable(Screen.Camera.route) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -230,8 +234,10 @@ fun App(
                             textAlign = TextAlign.Center
                         )
                         ButtonIcon(
-                            onClick = { navController.navigate(Screen.ListPlant.route)
-                                openBottomSheet = false},
+                            onClick = {
+                                navController.navigate(Screen.ListPlant.route)
+                                openBottomSheet = false
+                            },
                             title = "Planning To Plant",
                             description = "button",
                             icon = painterResource(

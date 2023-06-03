@@ -72,7 +72,7 @@ import com.bangkit.capstone_project.ui.theme.GreenDark
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
-fun PlantInfoScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack: () -> Unit) {
 
 
 
@@ -306,7 +306,7 @@ fun PlantInfoScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
                 .align(Alignment.BottomCenter)
         ) {
             ButtonIcon(
-                onClick = {},
+                onClick = navigateTask,
                 title = "Add Plant",
                 description = "Button to add your plant",
                 icon = painterResource(id = R.drawable.leaf),
@@ -317,77 +317,7 @@ fun PlantInfoScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
         }
 
 
-        if (openWeatherDate.value) {
-            val confirmEnabled = derivedStateOf { dateWeatherState.selectedDateMillis != null }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.8f)),
-                contentAlignment = Alignment.Center
-            ) {
-                DatePickerDialog(
-                    onDismissRequest = {
 
-                        openWeatherDate.value = false
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                openWeatherDate.value = false
-                            },
-                            enabled = confirmEnabled.value
-                        ) {
-                            Text("OK")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                openWeatherDate.value = false
-                            }
-                        ) {
-                            Text("Cancel")
-                        }
-                    }
-                ) {
-                    DatePicker(state = dateWeatherState)
-                }
-            }
-        }
-        if (openWeatherRepeat.value) {
-            AlertDialog(
-                onDismissRequest = {
-                    // Dismiss the dialog when the user clicks outside the dialog or on the back
-                    // button. If you want to disable that functionality, simply use an empty
-                    // onDismissRequest.
-                    openWeatherRepeat.value = false
-                }
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .wrapContentHeight(),
-                    shape = MaterialTheme.shapes.large,
-                    tonalElevation = AlertDialogDefaults.TonalElevation
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "This area typically contains the supportive text " +
-                                    "which presents the details regarding the Dialog's purpose.",
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        TextButton(
-                            onClick = {
-                                openWeatherRepeat.value = false
-                            },
-                            modifier = Modifier.align(Alignment.End)
-                        ) {
-                            Text("Confirm")
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
