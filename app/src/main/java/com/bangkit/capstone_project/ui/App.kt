@@ -42,6 +42,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.affan.storyapp_compose.ui.screen.register.RegisterScreen
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
 import com.bangkit.capstone_project.data.LocationViewModel
@@ -52,6 +53,7 @@ import com.bangkit.capstone_project.ui.screen.CameraScreen
 import com.bangkit.capstone_project.ui.screen.ForumScreen
 import com.bangkit.capstone_project.ui.screen.HomeScreen
 import com.bangkit.capstone_project.ui.screen.ListScreen
+import com.bangkit.capstone_project.ui.screen.LoginScreen
 import com.bangkit.capstone_project.ui.screen.PlantInfoScreen
 import com.bangkit.capstone_project.ui.screen.ResultScreen
 import com.bangkit.capstone_project.ui.screen.Screen
@@ -133,7 +135,7 @@ fun App(
             )
             NavHost(
                 navController = navController,
-                startDestination = Screen.Home.route,
+                startDestination = Screen.Login.route,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -143,121 +145,140 @@ fun App(
                     /*Date()*/
 
                 }
+
+                composable(Screen.Login.route) {
+                    LoginScreen(navigateMain = { navController.navigate(Screen.Home.route) }, navigateRegis = {navController.navigate(Screen.Register.route)})
+
+                    }
+                composable(Screen.Register.route) {
+                    RegisterScreen(navigateLogin = { navController.navigate(Screen.Login.route) }, onBack = {navController.navigateUp()})
+
+                }
+
+
                 composable(Screen.Task.route) {
-                    TaskScreen(onBack = { navController.navigateUp() })
+                        TaskScreen(onBack = { navController.navigateUp() })
 
-                }
-                composable(Screen.Forum.route) {
-                    ForumScreen()
-                }
-                composable(Screen.ListPlant.route) {
-                    ListScreen(
-                        onBack = { navController.navigateUp() },
-                        onclick = { navController.navigate(Screen.DetailPlant.route) })
-                }
-                composable(Screen.DetailPlant.route) {
-                    PlantInfoScreen(navigateTask = { navController.navigate(Screen.Task.route) }, onBack = { navController.navigateUp() })
-                }
-                composable(Screen.Camera.route) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when (currentState.value) {
-                            is ScreenState.Camera -> {
-                                CameraScreen(
-                                    modifier = Modifier.fillMaxSize(),
-                                    outputDirectory = outputDirectory,
-                                    executor = cameraExecutor,
-                                    onImageCaptured = { uri ->
-                                        photoUri = uri
-                                        currentState.value = ScreenState.Photo
-                                    },
-                                    onError = { Log.e("kilo", "View error:", it) },
-                                    onBack = { navController.navigateUp() }
-                                )
-                            }
+                    }
 
-                            is ScreenState.Photo -> {
-                                ResultScreen(
-                                    modifier = Modifier.fillMaxSize(),
-                                    photoUri = photoUri,
-                                    classifer = classifer,
-                                    context = context,
-                                    onBack = {
-                                        currentState.value = ScreenState.Camera
+                    composable(Screen.Task.route) {
+                        TaskScreen(onBack = { navController.navigateUp() })
 
-                                    }
-                                )
+                    }
+                    composable(Screen.Forum.route) {
+                        ForumScreen()
+                    }
+                    composable(Screen.ListPlant.route) {
+                        ListScreen(
+                            onBack = { navController.navigateUp() },
+                            onclick = { navController.navigate(Screen.DetailPlant.route) })
+                    }
+                    composable(Screen.DetailPlant.route) {
+                        PlantInfoScreen(
+                            navigateTask = { navController.navigate(Screen.Task.route) },
+                            onBack = { navController.navigateUp() })
+                    }
+                    composable(Screen.Camera.route) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when (currentState.value) {
+                                is ScreenState.Camera -> {
+                                    CameraScreen(
+                                        modifier = Modifier.fillMaxSize(),
+                                        outputDirectory = outputDirectory,
+                                        executor = cameraExecutor,
+                                        onImageCaptured = { uri ->
+                                            photoUri = uri
+                                            currentState.value = ScreenState.Photo
+                                        },
+                                        onError = { Log.e("kilo", "View error:", it) },
+                                        onBack = { navController.navigateUp() }
+                                    )
+                                }
+
+                                is ScreenState.Photo -> {
+                                    ResultScreen(
+                                        modifier = Modifier.fillMaxSize(),
+                                        photoUri = photoUri,
+                                        classifer = classifer,
+                                        context = context,
+                                        onBack = {
+                                            currentState.value = ScreenState.Camera
+
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
+
                 }
-
             }
-        }
-        if (openBottomSheet) {
-            val windowInsets = if (edgeToEdgeEnabled)
-                WindowInsets(0) else BottomSheetDefaults.windowInsets
+            if (openBottomSheet) {
+                val windowInsets = if (edgeToEdgeEnabled)
+                    WindowInsets(0) else BottomSheetDefaults.windowInsets
 
-            ModalBottomSheet(
-                onDismissRequest = { openBottomSheet = false },
-                sheetState = bottomSheetState,
-                windowInsets = windowInsets,
-                modifier = Modifier.height(200.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 32.dp), verticalArrangement = Arrangement.spacedBy(32.dp)
+                ModalBottomSheet(
+                    onDismissRequest = { openBottomSheet = false },
+                    sheetState = bottomSheetState,
+                    windowInsets = windowInsets,
+                    modifier = Modifier.height(200.dp)
                 ) {
-                    Text(
-                        text = "Add Your Plant",
-                        textAlign = TextAlign.Center,
-                        modifier = modifier.fillMaxWidth()
-                    )
-                    Row(
-                        modifier = modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(18.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp, 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
-                        ButtonIcon(
-                            onClick = {
-                                navController.navigate(Screen.Camera.route)
-                                openBottomSheet = false
-                            },
-                            title = "Already Planted",
-                            description = "button",
-                            icon = painterResource(
-                                id = R.drawable.scanner
-                            ),
-                            corner = 15,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
+                        Text(
+                            text = "Add Your Plant",
+                            textAlign = TextAlign.Center,
+                            modifier = modifier.fillMaxWidth()
                         )
-                        ButtonIcon(
-                            onClick = {
-                                navController.navigate(Screen.ListPlant.route)
-                                openBottomSheet = false
-                            },
-                            title = "Planning To Plant",
-                            description = "button",
-                            icon = painterResource(
-                                id = R.drawable.leaf
-                            ),
-                            corner = 15,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            modifier = modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(18.dp)
+                        ) {
+                            ButtonIcon(
+                                onClick = {
+                                    navController.navigate(Screen.Camera.route)
+                                    openBottomSheet = false
+                                },
+                                title = "Already Planted",
+                                description = "button",
+                                icon = painterResource(
+                                    id = R.drawable.scanner
+                                ),
+                                corner = 15,
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            ButtonIcon(
+                                onClick = {
+                                    navController.navigate(Screen.ListPlant.route)
+                                    openBottomSheet = false
+                                },
+                                title = "Planning To Plant",
+                                description = "button",
+                                icon = painterResource(
+                                    id = R.drawable.leaf
+                                ),
+                                corner = 15,
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
-            }
 
 
 //
 
 // Sheet content
 
+            }
         }
     }
-}
 
