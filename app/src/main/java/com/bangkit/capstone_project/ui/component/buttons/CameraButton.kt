@@ -3,6 +3,7 @@ package com.bangkit.capstone_project.ui.component.buttons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -24,7 +25,7 @@ import com.bangkit.capstone_project.ui.theme.Ivory
 fun CameraButton(onclick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .size(100.dp)
+            .size(75.dp)
             .clip(CircleShape)
             .background(Ivory)
             .padding(8.dp)
@@ -37,12 +38,13 @@ fun CameraButton(onclick: () -> Unit, modifier: Modifier = Modifier) {
                 contentColor = GreenMed
             ), border = BorderStroke(2.dp, GreenMed),
             shape = CircleShape,
-            modifier = Modifier.size(110.dp)
+            modifier = Modifier.size(65.dp),
+            contentPadding = PaddingValues(4.dp)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.leaf),
                 "",
-                modifier = Modifier.size(54.dp)
+
             )
         }
     }

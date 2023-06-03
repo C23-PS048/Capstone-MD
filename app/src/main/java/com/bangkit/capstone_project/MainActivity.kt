@@ -31,8 +31,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var cameraExecutor: ExecutorService
 
     private val mInputSize = 224
-    private val mModelPath = "chili_disease3.tflite"
-    private val mLabelPath = "label.txt"
+    private val mModelPath = "plant.tflite"
+    private val mLabelPath = "LabelPlants.txt"
     private lateinit var classifier: DeseaseClassifier
 
     private var currentState: MutableState<ScreenState> = mutableStateOf(ScreenState.Camera)

@@ -1,14 +1,11 @@
 package com.bangkit.capstone_project.ui.screen
 
-import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,7 +29,7 @@ import com.bangkit.capstone_project.ui.component.cards.PlantCards
 import com.bangkit.capstone_project.ui.theme.GrayLight
 
 @Composable
-fun ListScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun ListScreen(onBack: () -> Unit, modifier: Modifier = Modifier, onclick: () -> Unit) {
     Scaffold(topBar = {
         Column() {
             Row(
@@ -59,7 +56,7 @@ fun ListScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         ) {
             items(5) {
                 Box(Modifier.width(150.dp), contentAlignment = Alignment.Center) {
-                    PlantCards(onClick = {})
+                    PlantCards(onClick = onclick)
                 }
             }
         }

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.helper.rotateImage
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
@@ -42,11 +43,12 @@ fun ResultScreen(
     classifer: DeseaseClassifier,
     context: Context
 ) {
-var result: List<DeseaseClassifier.Recognition> = listOf()
+    var result: List<DeseaseClassifier.Recognition> = listOf()
 
-    val bitmap: Bitmap? = decodeUriAsBitmap(context, photoUri)
-    if (bitmap != null) { result =  classifer.recognizeImage(
-        bitmap
+    val bitmap: Bitmap? = decodeUriAsBitmap(context, photoUri)?.let { rotateImage(it) }
+    if (bitmap != null) {
+        result = classifer.recognizeImage(
+            bitmap
         )
 
     }
@@ -83,19 +85,26 @@ var result: List<DeseaseClassifier.Recognition> = listOf()
                     .padding(padding)
                     .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (bitmap != null) {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .width(300.dp)
-                            .height(300.dp)
-                            .aspectRatio(1f)
+                if (result.isNotEmpty()) {
+                    if (bitmap != null) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(300.dp)
+                                .aspectRatio(1f)
 
-                    )
+                        )
+                    }
+                    Text(text = result[0].title)
+                } else {
+                    Text(text = "Not Detected")
                 }
-                Text(text = result[0].title)
             }
+        }
+        BackHandler() {
+            onBack()
         }
     }
 }
