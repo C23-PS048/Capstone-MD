@@ -46,14 +46,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bangkit.capstone_project.helper.convertMillisToDateString
+import com.bangkit.capstone_project.model.Task
 import com.bangkit.capstone_project.ui.component.cards.ScheduleInput
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
+import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(onBack:()->Unit,modifier:Modifier = Modifier) {
+fun TaskScreen(onBack: () -> Unit, modifier: Modifier = Modifier, taskViewModel: TaskViewModel) {
     val openWeatherDate = remember { mutableStateOf(false) }
     val openWeatherRepeat = remember { mutableStateOf(false) }
     val radioOptions = listOf("Calls", "Missed", "Friends")
@@ -104,7 +106,10 @@ fun TaskScreen(onBack:()->Unit,modifier:Modifier = Modifier) {
                           onValueChange = { textLocation.value = it },
                           label = { Text("Enter your text") }
                       )
-                      Button(onClick = { saveData(location = textLocation.value,frequency = selectedOption,startDate = dateWeatherState.selectedDateMillis) }) {
+                      Button(onClick = {
+                          saveData(location = textLocation.value,frequency = selectedOption,startDate = dateWeatherState.selectedDateMillis,taskviewmodel = taskViewModel)
+
+                      }) {
                           Text(text = "Input")
                       }
                   }
@@ -209,6 +214,12 @@ fun TaskScreen(onBack:()->Unit,modifier:Modifier = Modifier) {
     }
 }
 
-fun saveData(frequency: String, startDate: Long?, location: String) {
+fun saveData(frequency: String, startDate: Long?, location: String, taskviewmodel: TaskViewModel) {
+   val task = startDate?.let { Task(location = location, startDate = it, nextScheduledDate = startDate, lastScheduledDate = startDate, frequency = 3) }
+    if (task != null) {
+        taskviewmodel.insert(task)
+    }
+
     Log.d("TAG", "saveData: $frequency  $location  $startDate")
+
 }

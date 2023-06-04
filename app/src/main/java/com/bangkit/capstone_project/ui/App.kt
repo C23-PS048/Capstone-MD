@@ -59,6 +59,7 @@ import com.bangkit.capstone_project.ui.screen.ResultScreen
 import com.bangkit.capstone_project.ui.screen.Screen
 import com.bangkit.capstone_project.ui.screen.TaskScreen
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
+import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import java.io.File
@@ -75,7 +76,8 @@ fun App(
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
     outputDirectory: File,
-    classifer: DeseaseClassifier
+    classifer: DeseaseClassifier,
+    taskViewModel: TaskViewModel
 ) {
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     var skipPartiallyExpanded by remember { mutableStateOf(false) }
@@ -141,7 +143,7 @@ fun App(
                     .padding(padding)
             ) {
                 composable(Screen.Home.route) {
-                    HomeScreen(currentLocation = currentLocation)
+                    HomeScreen(currentLocation = currentLocation, taskViewModel = taskViewModel)
                     /*Date()*/
 
                 }
@@ -157,14 +159,10 @@ fun App(
 
 
                 composable(Screen.Task.route) {
-                        TaskScreen(onBack = { navController.navigateUp() })
+                        TaskScreen(onBack = { navController.navigateUp() }, taskViewModel = taskViewModel)
 
                     }
 
-                    composable(Screen.Task.route) {
-                        TaskScreen(onBack = { navController.navigateUp() })
-
-                    }
                     composable(Screen.Forum.route) {
                         ForumScreen()
                     }

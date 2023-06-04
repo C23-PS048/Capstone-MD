@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'kotlin-parcelize'
 }
 kapt {
     correctErrorTypes = true
@@ -118,6 +119,11 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
 
     //Tflite
-
     implementation 'org.tensorflow:tensorflow-lite:2.7.0'
+
+    //Room
+    implementation 'androidx.room:room-runtime:2.5.1'
+    kapt 'androidx.room:room-compiler:2.5.1'
+    // Room Kotlin extensions
+    implementation "androidx.room:room-ktx:2.5.1"
 }

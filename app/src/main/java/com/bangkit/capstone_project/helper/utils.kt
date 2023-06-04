@@ -16,6 +16,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executor
@@ -80,4 +81,23 @@ fun convertMillisToDateString(milliseconds: Long): String {
     val date = Date(milliseconds)
     val format = SimpleDateFormat("yyyy-MM-dd") // Customize the date format as per your requirement
     return format.format(date)
+}
+
+fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = startDate
+
+
+    val lastScheduledDate = calendar.timeInMillis
+
+
+    when (frequency) {
+        1 -> calendar.add(Calendar.MONTH, 1)
+        2 -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
+       3 -> calendar.add(Calendar.DAY_OF_YEAR, 3)
+        4 -> calendar.add(Calendar.DAY_OF_YEAR, 1)
+    }
+    val nextScheduledDate = calendar.timeInMillis
+
+    return Pair(lastScheduledDate, nextScheduledDate)
 }

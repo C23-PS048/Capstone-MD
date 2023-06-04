@@ -15,9 +15,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.App
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
+import com.bangkit.capstone_project.viewmodel.task.TaskVMFactory
+import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -36,6 +39,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var classifier: DeseaseClassifier
 
     private var currentState: MutableState<ScreenState> = mutableStateOf(ScreenState.Camera)
+    private lateinit var taskViewModel: TaskViewModel
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -89,6 +93,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            taskViewModel = obtainViewModel(this@MainActivity)
             initClassifier()
             requestPermissionsOnFirstLaunch()
             outputDirectory = getOutputDirectory()
@@ -104,7 +109,8 @@ class MainActivity : ComponentActivity() {
                         currentState = currentState,
                         outputDirectory = outputDirectory,
                         cameraExecutor = cameraExecutor,
-                        classifer = classifier
+                        classifer = classifier,
+                        taskViewModel = taskViewModel
                     )
 
                 }
@@ -112,6 +118,10 @@ class MainActivity : ComponentActivity() {
 
 
         }
+    }
+    private fun obtainViewModel(activity: ComponentActivity): TaskViewModel {
+        val factory = TaskVMFactory.getInstance(activity.application)
+        return ViewModelProvider(activity, factory)[TaskViewModel::class.java]
     }
 
 
