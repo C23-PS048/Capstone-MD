@@ -4,10 +4,8 @@ import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -46,7 +44,8 @@ fun HomeScreen(
     weatherViewModel: WeatherViewModel = viewModel(
         factory = ViewModelFactory(Injection.provideRepository())
     ),
-    currentLocation: Location?
+    currentLocation: Location?,
+    navigatetoOwned: () -> Unit
 ) {
     currentLocation?.latitude?.let { lat ->
         currentLocation.longitude.let { long ->
@@ -66,7 +65,8 @@ fun HomeScreen(
                 HomeContent(
                     weatherViewModel = weatherViewModel,
                     currentLocation = currentLocation,
-                    listTask = uiState.data
+                    listTask = uiState.data,
+                    navigatetoOwned = navigatetoOwned
                 )
                 Log.d("TAG", "HomeScreen: ${uiState.data}")
             }
@@ -83,7 +83,8 @@ fun HomeContent(
     modifier: Modifier = Modifier,
     currentLocation: Location?,
     listTask: List<Task>?,
-    weatherViewModel: WeatherViewModel
+    weatherViewModel: WeatherViewModel,
+    navigatetoOwned: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -117,24 +118,29 @@ fun HomeContent(
             context = LocalContext.current
         )
         Text(text = "Your Plant", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-            if (listTask != null) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
+        if (listTask != null) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
 
                 items(listTask) {
 
-                    it.location?.let { it1 -> OwnPlantCard(location = it1) }
+                    it.location?.let { it1 ->
+                        OwnPlantCard(
+                            location = it1,
+                            navigatetoOwned = navigatetoOwned
+                        )
+                    }
                 }
 
 
-        }
-            }else{
-
-                   Text(text = "Notask")
-
             }
+        } else {
+
+            Text(text = "Notask")
+
+        }
 
     }
 }

@@ -32,8 +32,8 @@ import com.bangkit.capstone_project.ui.theme.RedDark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OwnPlantCard(location:String,modifier:Modifier=Modifier) {
-    Card(onClick = { /*TODO*/ }, modifier = modifier
+fun OwnPlantCard(location:String,modifier:Modifier=Modifier,navigatetoOwned :()->Unit) {
+    Card(onClick =  navigatetoOwned, modifier = modifier
         .fillMaxWidth()
         .height(110.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) ) {
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -57,5 +57,5 @@ fun OwnPlantCard(location:String,modifier:Modifier=Modifier) {
 @Preview
 @Composable
 fun OwnPlantPrev() {
-    OwnPlantCard("sdw")
+    OwnPlantCard("sdw", navigatetoOwned = {})
 }

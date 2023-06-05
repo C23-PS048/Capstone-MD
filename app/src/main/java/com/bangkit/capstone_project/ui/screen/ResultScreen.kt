@@ -99,6 +99,17 @@ fun ResultScreen(
                     }
                     Text(text = result[0].title)
                 } else {
+                    bitmap?.asImageBitmap()?.let {
+                        Image(
+                            bitmap = it,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(300.dp)
+                                .aspectRatio(1f)
+
+                        )
+                    }
                     Text(text = "Not Detected")
                 }
             }

@@ -3,7 +3,6 @@ package com.bangkit.capstone_project.helper
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.location.Geocoder
 import android.net.Uri
@@ -13,7 +12,6 @@ import androidx.camera.core.ImageCaptureException
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -21,7 +19,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executor
 
-fun getAddressName(context:Context,lat: Double, lon: Double): MutableState<String?> {
+fun getAddressName(context: Context, lat: Double, lon: Double): MutableState<String?> {
     var addressName: MutableState<String?> = mutableStateOf(null)
     val geocoder = Geocoder(context, Locale.US)
     try {
@@ -35,13 +33,14 @@ fun getAddressName(context:Context,lat: Double, lon: Double): MutableState<Strin
     }
     return addressName
 }
-fun rotateImage(bitmap: Bitmap, isBack: Boolean = false): Bitmap {
+
+fun rotateImage(bitmap: Bitmap): Bitmap {
     val matrix = Matrix()
-    val rotate = if (isBack)  -90f else 90f
+    val rotate = 90f
     matrix.postRotate(rotate)
-    if (!isBack) {
-        matrix.postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
-    }
+
+
+
     val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     return result
 }
@@ -62,7 +61,7 @@ fun takePhoto(
 
     val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-    imageCapture.takePicture(outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
+    imageCapture.takePicture(outputOptions, executor, object : ImageCapture.OnImageSavedCallback {
         override fun onError(exception: ImageCaptureException) {
             Log.e("kilo", "Take photo error:", exception)
             onError(exception)
@@ -94,7 +93,7 @@ fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
     when (frequency) {
         1 -> calendar.add(Calendar.MONTH, 1)
         2 -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
-       3 -> calendar.add(Calendar.DAY_OF_YEAR, 3)
+        3 -> calendar.add(Calendar.DAY_OF_YEAR, 3)
         4 -> calendar.add(Calendar.DAY_OF_YEAR, 1)
     }
     val nextScheduledDate = calendar.timeInMillis

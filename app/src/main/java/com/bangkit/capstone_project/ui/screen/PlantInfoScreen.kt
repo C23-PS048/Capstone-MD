@@ -69,16 +69,14 @@ import com.bangkit.capstone_project.ui.theme.GreenDark
 
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 
 fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack: () -> Unit) {
 
 
 
-    val openWeatherDate = remember { mutableStateOf(false) }
-    val openWeatherRepeat = remember { mutableStateOf(false) }
-    val dateWeatherState = rememberDatePickerState(initialSelectedDateMillis = 1578096000000)
+
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(

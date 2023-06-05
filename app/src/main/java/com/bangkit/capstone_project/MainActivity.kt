@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
                         currentState = currentState,
                         outputDirectory = outputDirectory,
                         cameraExecutor = cameraExecutor,
-                        classifer = classifier,
+                        classifier = classifier,
                         taskViewModel = taskViewModel
                     )
 

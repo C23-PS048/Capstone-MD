@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,7 +31,9 @@ fun ScheduleInput(
     Selected: String
 ) {
 
-    Card(modifier = modifier.fillMaxWidth()) {
+    Card(modifier = modifier
+
+        .fillMaxWidth(), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
         Column(
             modifier = modifier
                 .fillMaxWidth()
@@ -39,7 +42,8 @@ fun ScheduleInput(
         ) {
             Text(text = "Weather")
             Row(modifier = modifier
-                .fillMaxWidth().clickable {
+                .fillMaxWidth()
+                .clickable {
                     onValueChange(!value)
                 }
                 , horizontalArrangement = Arrangement.SpaceBetween) {
@@ -54,9 +58,11 @@ fun ScheduleInput(
             }
             Divider()
             Row(
-                modifier = modifier.fillMaxWidth().clickable {
-                    isSelectOpen(!selectDialog)
-                },
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        isSelectOpen(!selectDialog)
+                    },
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Repeat")

@@ -41,7 +41,7 @@ fun WeatherCards(
     context:Context
 ) {
     var address: MutableState<String?> = remember { mutableStateOf("") }
-    Card(onClick = { /*TODO*/ }, modifier = modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), elevation =CardDefaults.cardElevation(defaultElevation = 4.dp) ) {
+    Card( modifier = modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), elevation =CardDefaults.cardElevation(defaultElevation = 4.dp) ) {
     weatherViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
         when (uiState) {
