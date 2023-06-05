@@ -15,13 +15,13 @@ data class Task(
     @ColumnInfo(name = "location")
     var location: String? = null,
     @ColumnInfo(name = "startDate")
-    val startDate: Long,
+    var startDate: Long,
     @ColumnInfo(name = "frequency")
-    val frequency: Int,
+    var frequency: Int,
     @ColumnInfo(name = "lastScheduledDate")
-    val lastScheduledDate: Long? = null,
+    var lastScheduledDate: Long? = null,
     @ColumnInfo(name = "nextScheduledDate")
-    val nextScheduledDate: Long? = null,
+    var nextScheduledDate: Long? = null,
     @ColumnInfo(name = "plantId")
     var plantId: Int = 0,
     @ColumnInfo(name = "userId")

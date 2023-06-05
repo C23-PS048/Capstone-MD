@@ -45,7 +45,7 @@ fun HomeScreen(
         factory = ViewModelFactory(Injection.provideRepository())
     ),
     currentLocation: Location?,
-    navigatetoOwned: () -> Unit
+    navigatetoOwned: (Int) -> Unit
 ) {
     currentLocation?.latitude?.let { lat ->
         currentLocation.longitude.let { long ->
@@ -84,7 +84,7 @@ fun HomeContent(
     currentLocation: Location?,
     listTask: List<Task>?,
     weatherViewModel: WeatherViewModel,
-    navigatetoOwned: () -> Unit
+    navigatetoOwned: (Int) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -129,7 +129,8 @@ fun HomeContent(
                     it.location?.let { it1 ->
                         OwnPlantCard(
                             location = it1,
-                            navigatetoOwned = navigatetoOwned
+                            navigatetoOwned = navigatetoOwned,
+                            id = it.id
                         )
                     }
                 }

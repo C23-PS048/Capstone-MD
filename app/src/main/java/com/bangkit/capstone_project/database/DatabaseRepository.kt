@@ -31,4 +31,9 @@ class DatabaseRepository(application: Application) {
     suspend fun update(task: Task) = withContext(Dispatchers.IO) {
         mTaskDao.update(task)
     }
+
+    suspend fun getTaskById(taskId: Int) = withContext(Dispatchers.IO) {
+        mTaskDao.getTaskById(taskId)
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.bangkit.capstone_project.ui.screen
 
+import com.bangkit.capstone_project.model.Task
+
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Forum : Screen("forum")
@@ -11,6 +13,12 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
 
     object Register : Screen("register")
-    object OwnedPlant : Screen("ownedplant")
+    object OwnedPlant : Screen("ownPlant/{id}"){
+        fun createRoute(id:Int) = "ownPlant/$id"
+    }
+
+    object EditTask : Screen("editTask/{id}"){
+        fun createRoute(id:Int) = "editTask/$id"
+    }
 
 }

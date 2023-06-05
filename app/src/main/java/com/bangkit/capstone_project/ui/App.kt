@@ -37,10 +37,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.affan.storyapp_compose.ui.screen.register.RegisterScreen
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
@@ -49,6 +51,7 @@ import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.CameraScreen
+import com.bangkit.capstone_project.ui.screen.EditTaskScreen
 import com.bangkit.capstone_project.ui.screen.ForumScreen
 import com.bangkit.capstone_project.ui.screen.HomeScreen
 import com.bangkit.capstone_project.ui.screen.ListScreen
@@ -142,18 +145,51 @@ fun App(
                     .padding(padding)
             ) {
                 composable(Screen.Home.route) {
-                    HomeScreen(currentLocation = currentLocation, taskViewModel = taskViewModel) {
-                        navController.navigate(
-                            Screen.OwnedPlant.route
-                        )
-                    }
+                    HomeScreen(
+                        currentLocation = currentLocation,
+                        taskViewModel = taskViewModel,
+                        navigatetoOwned = { id ->
+                            navController.navigate(
+                                Screen.OwnedPlant.createRoute(id)
+                            )
+                        })
                     /*Date()*/
 
                 }
-                composable(Screen.OwnedPlant.route) {
-                    OwnedPlantScreen(onBack = { navController.navigateUp() })
+                composable(
+                    route = Screen.OwnedPlant.route,
+                    arguments = listOf(navArgument("id") { type = NavType.IntType })
+                ) {
+                    val id = it.arguments?.getInt("id") ?: -1L
+                    OwnedPlantScreen(
+                        plantId = id as Int,
+                        onBack = { navController.navigateUp() },
+                        taskViewModel = taskViewModel,
+                        navigateEdit = { taskId ->
+                            navController.navigate(
+                                Screen.EditTask.createRoute(
+                                    taskId
+                                )
+                            )
+                        }
+                    )
 
                 }
+
+                composable(
+                    route = Screen.EditTask.route,
+                    arguments = listOf(navArgument("id") { type = NavType.IntType })
+                ) {
+                    val id = it.arguments?.getInt("id") ?: -1L
+                    EditTaskScreen(
+                        id = id as Int,
+                        onBack = { navController.navigateUp() },
+                        taskViewModel = taskViewModel,
+                        navigateHome = { navController.navigate(Screen.Home.route) },
+                    )
+
+                }
+
 
                 composable(Screen.Login.route) {
                     LoginScreen(

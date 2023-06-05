@@ -19,6 +19,10 @@ class TaskViewModel(application: Application) : ViewModel() {
     val uiState: StateFlow<UiState<List<Task>>>
         get() = _uiState
 
+    private val _detailState: MutableStateFlow<UiState<Task>> = MutableStateFlow(UiState.Loading)
+    val detailState: StateFlow<UiState<Task>>
+        get() = _detailState
+
     fun getAllTasks() {
         viewModelScope.launch {
             try {
@@ -26,6 +30,17 @@ class TaskViewModel(application: Application) : ViewModel() {
                 _uiState.value = UiState.Success(tasks)
             } catch (exception: Exception) {
                 _uiState.value = UiState.Error("Failed to retrieve tasks: ${exception.message}")
+            }
+        }
+    }
+
+    fun getTaskById(taskId: Int) {
+        viewModelScope.launch {
+            try {
+                val tasks = mTaskRepository.getTaskById(taskId)
+                _detailState.value = UiState.Success(tasks)
+            } catch (exception: Exception) {
+                _detailState.value = UiState.Error("Failed to retrieve tasks: ${exception.message}")
             }
         }
     }

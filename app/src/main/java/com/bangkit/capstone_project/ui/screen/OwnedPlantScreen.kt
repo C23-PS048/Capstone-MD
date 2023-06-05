@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,19 +46,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.helper.getDaysBetween
+import com.bangkit.capstone_project.model.Task
+import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.GrayDark
 import com.bangkit.capstone_project.ui.theme.GreenMed
 import com.bangkit.capstone_project.ui.theme.Ivory
+import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 @Composable
-fun OwnedPlantScreen(onBack:()->Unit) {
-    OwnedPlantContent(onBack = onBack)
+fun OwnedPlantScreen(onBack: () -> Unit, plantId: Int, taskViewModel: TaskViewModel, navigateEdit:(Int)->Unit) {
+    Log.d("TAG", "OwnedPlantScreen: $plantId")
+
+
+    taskViewModel.detailState.collectAsState(initial = UiState.Loading).value.let { detailState ->
+        when (detailState) {
+            is UiState.Loading -> {
+                taskViewModel.getTaskById(plantId)
+            }
+
+            is UiState.Success -> {
+                val startTimestamp = System.currentTimeMillis()
+                val daysBetween =
+                    detailState.data?.nextScheduledDate?.let { getDaysBetween(startTimestamp, it) }
+                val location =    detailState.data?.location
+                if (daysBetween != null) {
+                    if (location != null) {
+                        OwnedPlantContent(onBack = onBack,daysBetween = daysBetween,location = location, task = detailState.data, navigateEdit=navigateEdit)
+                    }
+                }
+                Log.d("TAG", "HomeScreen: ${detailState.data}")
+            }
+
+            is UiState.Error -> {}
+        }
+    }
 }
 
 @Composable
-fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
+fun OwnedPlantContent(
+    task:Task,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    daysBetween: Long,
+    location: String,
+    navigateEdit:(Int)->Unit
+) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -65,17 +101,20 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
     ) {
 
         Column(modifier = modifier.fillMaxSize()) {
-          Box(modifier =modifier
-              .fillMaxWidth().height(300.dp) ){
-              AsyncImage(
-                  model = "https://images.unsplash.com/photo-1615213612138-4d1195b1c0e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=765&q=80",
-                  contentDescription = "Image of Your Plant",
-                  contentScale = ContentScale.FillWidth,
-                  modifier = modifier
-                      .fillMaxSize()
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                AsyncImage(
+                    model = "https://images.unsplash.com/photo-1615213612138-4d1195b1c0e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=765&q=80",
+                    contentDescription = "Image of Your Plant",
+                    contentScale = ContentScale.FillWidth,
+                    modifier = modifier
+                        .fillMaxSize()
 
-              )
-          }
+                )
+            }
             Row(
                 modifier = modifier
                     .fillMaxWidth()
@@ -106,7 +145,7 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
                         modifier = modifier.size(14.dp)
                     )
                     Text(
-                        text = "location",
+                        text = location,
                         style = MaterialTheme.typography.bodySmall,
                         color = GreenMed
                     )
@@ -260,7 +299,7 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
-                                        text = "8",
+                                        text = daysBetween.toString(),
                                         style = MaterialTheme.typography.titleLarge,
                                         color = Color.White,
                                         textAlign = TextAlign.Center
@@ -278,15 +317,17 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
                 }
             }
         }
-        IconButton(onClick =onBack) {
+        IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back To Home Button",
 
-            )
+                )
         }
-        Box( modifier = modifier
-            .align(Alignment.TopEnd)) {
+        Box(
+            modifier = modifier
+                .align(Alignment.TopEnd)
+        ) {
             var expanded by remember { mutableStateOf(false) }
 
             IconButton(onClick = { expanded = !expanded }) {
@@ -296,7 +337,7 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuItem(
                     text = { Text("Edit") },
-                    onClick = { /* Handle edit! */ },
+                    onClick = { navigateEdit(task.id)},
                     leadingIcon = {
                         Icon(
                             Icons.Outlined.Edit,
@@ -315,10 +356,12 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
             }
 
         }
-        Box(modifier = modifier
-            .fillMaxWidth()
-            .align(Alignment.BottomCenter)
-            .padding(16.dp)) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        ) {
             ButtonIcon(
                 onClick = { /*TODO*/ },
                 title = "Something Wrong? scan here ",
@@ -337,6 +380,6 @@ fun OwnedPlantContent(onBack:()->Unit,modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun previewOwned() {
-    OwnedPlantContent(onBack = {})
+    OwnedPlantContent(onBack = {}, daysBetween = 7, location = "location", navigateEdit = {1}, task = Task(1,"ad",1231313131L,3,1231313131L,1231313131L))
 }
 

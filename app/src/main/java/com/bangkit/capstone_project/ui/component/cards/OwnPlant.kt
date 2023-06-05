@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.component.cards
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,8 +33,8 @@ import com.bangkit.capstone_project.ui.theme.RedDark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OwnPlantCard(location:String,modifier:Modifier=Modifier,navigatetoOwned :()->Unit) {
-    Card(onClick =  navigatetoOwned, modifier = modifier
+fun OwnPlantCard(location:String,modifier:Modifier=Modifier,navigatetoOwned :(Int)->Unit,id:Int) {
+    Card(onClick = { navigatetoOwned(id) }, modifier = modifier
         .fillMaxWidth()
         .height(110.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) ) {
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -52,10 +53,11 @@ fun OwnPlantCard(location:String,modifier:Modifier=Modifier,navigatetoOwned :()-
             AsyncImage(model = "https://images.unsplash.com/photo-1615213612138-4d1195b1c0e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=765&q=80", contentDescription = null,modifier.fillMaxHeight())
         }
     }
+
 }
 
 @Preview
 @Composable
 fun OwnPlantPrev() {
-    OwnPlantCard("sdw", navigatetoOwned = {})
+    OwnPlantCard("sdw", navigatetoOwned = {}, id = 2)
 }

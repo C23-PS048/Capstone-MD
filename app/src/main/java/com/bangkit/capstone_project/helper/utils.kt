@@ -18,6 +18,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.Executor
+import java.util.concurrent.TimeUnit
 
 fun getAddressName(context: Context, lat: Double, lon: Double): MutableState<String?> {
     var addressName: MutableState<String?> = mutableStateOf(null)
@@ -99,4 +100,9 @@ fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
     val nextScheduledDate = calendar.timeInMillis
 
     return Pair(lastScheduledDate, nextScheduledDate)
+}
+
+fun getDaysBetween(startMillis: Long, endMillis: Long): Long {
+    val differenceMillis = endMillis - startMillis
+    return TimeUnit.MILLISECONDS.toDays(differenceMillis)
 }

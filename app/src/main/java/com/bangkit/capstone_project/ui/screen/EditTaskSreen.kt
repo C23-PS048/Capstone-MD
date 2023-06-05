@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,8 +57,10 @@ import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.helper.calculateScheduleDates
 import com.bangkit.capstone_project.helper.convertMillisToDateString
+import com.bangkit.capstone_project.helper.getDaysBetween
 import com.bangkit.capstone_project.model.Frequency
 import com.bangkit.capstone_project.model.Task
+import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.cards.ScheduleInput
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
@@ -67,26 +70,73 @@ import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(
+fun EditTaskScreen(
+    id: Int,
     onBack: () -> Unit,
     navigateHome: () -> Unit,
     modifier: Modifier = Modifier,
     taskViewModel: TaskViewModel
 ) {
+    taskViewModel.detailState.collectAsState(initial = UiState.Loading).value.let { detailState ->
+        when (detailState) {
+            is UiState.Loading -> {
+                taskViewModel.getTaskById(id)
+            }
+
+            is UiState.Success -> {
+                val startTimestamp = System.currentTimeMillis()
+                val daysBetween =
+                    detailState.data?.nextScheduledDate?.let { getDaysBetween(startTimestamp, it) }
+                val location = detailState.data?.location
+                if (daysBetween != null) {
+                    if (location != null) {
+                        EditTaskContent(
+                            task = detailState.data,
+                            onBack = onBack,
+                            navigateHome = navigateHome,
+                            taskViewModel = taskViewModel
+                        )
+                    }
+                }
+                Log.d("TAG", "HomeScreen: ${detailState.data}")
+            }
+
+            is UiState.Error -> {}
+        }
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditTaskContent(
+    task: Task,
+    onBack: () -> Unit,
+    navigateHome: () -> Unit,
+    modifier: Modifier = Modifier,
+    taskViewModel: TaskViewModel
+) {
+
     val openWeatherDate = remember { mutableStateOf(false) }
     val openWeatherRepeat = remember { mutableStateOf(false) }
     val radioOptions = listOf(
-Frequency("Once a Month",1),
-Frequency("Once a Week",2),
-Frequency("Every 3 Days",3),
-Frequency("Every Day",4),
+        Frequency("Once a Month", 1),
+        Frequency("Once a Week", 2),
+        Frequency("Every 3 Days", 3),
+        Frequency("Every Day", 4),
 
-    )
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
-    val textLocation = mutableStateOf("")
-    val dateWeatherState = rememberDatePickerState(initialSelectedDateMillis =  System.currentTimeMillis())
+        )
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[task.frequency - 1]) }
+    val textLocation = mutableStateOf(task.location)
+    val dateWeatherState =
+        rememberDatePickerState(initialSelectedDateMillis = task.lastScheduledDate)
+    Log.d("TAG", "EditTaskContent:${dateWeatherState.selectedDateMillis} ")
     CapstoneProjectTheme() {
-        Box(modifier = modifier.fillMaxSize().background(Color.White)) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
             Scaffold(
                 topBar = {
                     Column {
@@ -124,7 +174,11 @@ Frequency("Every Day",4),
                             .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                        Card(modifier = modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp)) {
+                        Card(
+                            modifier = modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.Bottom,
@@ -167,40 +221,65 @@ Frequency("Every Day",4),
 
                         dateWeatherState.selectedDateMillis?.let {
                             convertMillisToDateString(it)
-                        }?.let {
+                        }?.let { date ->
                             ScheduleInput(
                                 value = openWeatherDate.value,
                                 onValueChange = { openWeatherDate.value = it },
                                 selectDialog = openWeatherRepeat.value,
                                 isSelectOpen = { openWeatherRepeat.value = it },
-                                Date = it,
+                                Date = date,
                                 Selected = selectedOption.label,
-                                modifier = modifier.background(Color.White))
+                                modifier = modifier.background(Color.White)
+                            )
                         }
 
-                        OutlinedTextField(
-                            value = textLocation.value,
-                            onValueChange = { textLocation.value = it },
-                            label = { Text("Plant Location") },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.marker),
-                                    contentDescription = " Location Input"
-                                )
+                        textLocation.value?.let { it ->
+                            OutlinedTextField(
+                                value = it,
+                                onValueChange = { textLocation.value = it },
+                                label = { Text("Plant Location") },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.marker),
+                                        contentDescription = " Location Input"
+                                    )
+                                },
+                                modifier = modifier.fillMaxWidth()
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                textLocation.value?.let {
+                                    dateWeatherState.selectedDateMillis?.let { it1 ->
+                                        updateData(
+                                            task = task,
+                                            location = it,
+                                            frequency = selectedOption.frequency,
+                                            lastDate = it1,
+                                            startDate = task.startDate,
+                                            taskViewModel = taskViewModel
+                                        )
+                                    }
+                                }
+                                onBack()
                             },
                             modifier = modifier.fillMaxWidth()
-                        )
-                        Button(onClick = {
-                            saveData(
-                                location = textLocation.value,
-                                frequency = selectedOption.frequency,
-                                startDate = dateWeatherState.selectedDateMillis,
-                                taskviewmodel = taskViewModel
-                            )
-                            navigateHome()
-                        },
-                            modifier = modifier.fillMaxWidth()) {
+                        ) {
                             Text(text = "Input")
+                        }
+                        Button(
+                            onClick = {
+
+                                deleteData(
+                                    task = task,
+                                    taskViewModel = taskViewModel
+                                )
+
+                                navigateHome()
+                            },
+                            modifier = modifier.fillMaxWidth()
+                        ) {
+                            Text(text = "Delete")
                         }
                     }
                 }
@@ -243,7 +322,7 @@ Frequency("Every Day",4),
                 }
             }
             if (openWeatherRepeat.value) {
-                val confirmEnabled = derivedStateOf { dateWeatherState.selectedDateMillis != null }
+
                 AlertDialog(
                     onDismissRequest = {
 
@@ -259,7 +338,7 @@ Frequency("Every Day",4),
                         tonalElevation = AlertDialogDefaults.TonalElevation
                     ) {
 
-// Note that Modifier.selectableGroup() is essential to ensure correct accessibility behavior
+
                         Column(modifier.fillMaxWidth()) {
                             Column(Modifier.selectableGroup()) {
                                 radioOptions.forEach { text ->
@@ -277,7 +356,7 @@ Frequency("Every Day",4),
                                     ) {
                                         RadioButton(
                                             selected = (text == selectedOption),
-                                            onClick = null // null recommended for accessibility with screenreaders
+                                            onClick = null
                                         )
                                         Text(
                                             text = text.label,
@@ -304,22 +383,31 @@ Frequency("Every Day",4),
     }
 }
 
-fun saveData(frequency: Int, startDate: Long?, location: String, taskviewmodel: TaskViewModel) {
+fun updateData(
+    task: Task,
+    frequency: Int,
+    lastDate: Long,
+    startDate: Long,
+    location: String,
+    taskViewModel: TaskViewModel
+) {
 
-    val task = startDate?.let {
-        val (lastDate,NextDate) = calculateScheduleDates(frequency = frequency, startDate = startDate)
-        Task(
-            location = location,
-            startDate = it,
-            nextScheduledDate = NextDate,
-            lastScheduledDate = lastDate,
-            frequency = frequency
+    task.let {
+        val (lastScheduledDate, nextScheduledDate) = calculateScheduleDates(
+            lastDate,
+            frequency
         )
+        task.lastScheduledDate = lastScheduledDate
+        task.nextScheduledDate = nextScheduledDate
+        task.startDate = startDate
+
+        task.location = location
+        task.frequency = frequency
+
     }
-    if (task != null) {
-        taskviewmodel.insert(task)
-    }
+    taskViewModel.update(task)
+}
 
-
-
+fun deleteData(task: Task, taskViewModel: TaskViewModel) {
+    taskViewModel.delete(task)
 }
