@@ -2,7 +2,6 @@ package com.bangkit.capstone_project.ui.screen
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -33,11 +32,11 @@ import com.bangkit.capstone_project.helper.rotateImage
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
-import java.io.FileNotFoundException
+
 
 
 @Composable
-fun ResultScreen(
+fun DiagnoseResultScreen(
     onBack: () -> Unit,
     photoUri: Uri,
     modifier: Modifier = Modifier,

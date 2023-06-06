@@ -126,4 +126,8 @@ dependencies {
     kapt 'androidx.room:room-compiler:2.5.1'
     // Room Kotlin extensions
     implementation "androidx.room:room-ktx:2.5.1"
+
+    //datastore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
 }

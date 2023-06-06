@@ -3,6 +3,7 @@ package com.bangkit.capstone_project.helper
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.location.Geocoder
 import android.net.Uri
@@ -12,6 +13,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -105,4 +107,18 @@ fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
 fun getDaysBetween(startMillis: Long, endMillis: Long): Long {
     val differenceMillis = endMillis - startMillis
     return TimeUnit.MILLISECONDS.toDays(differenceMillis)
+}
+
+fun decodeUriAsBitmap(context: Context, uri: Uri?): Bitmap? {
+    var bitmap: Bitmap? = null //from   w  ww  . j  a  v  a2s.  c om
+    bitmap = try {
+        BitmapFactory.decodeStream(
+            context
+                .contentResolver.openInputStream(uri!!)
+        )
+    } catch (e: FileNotFoundException) {
+        e.printStackTrace()
+        return null
+    }
+    return bitmap
 }

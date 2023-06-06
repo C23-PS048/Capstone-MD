@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${googleMapsApiKey}" />
+            android:value="${MAPS_KEY}" />
     <application android:name=".data.LocationApplication"
             android:allowBackup="true"
             android:dataExtractionRules="@xml/data_extraction_rules"
