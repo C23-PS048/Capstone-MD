@@ -2,8 +2,8 @@ package com.bangkit.capstone_project.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.bangkit.capstone_project.network.weather.WeatherRepository
-import com.bangkit.capstone_project.network.weather.WeatherViewModel
+import com.bangkit.capstone_project.data.network.weather.WeatherRepository
+import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
 
 class ViewModelFactory(private val repository: WeatherRepository) :
     ViewModelProvider.NewInstanceFactory() {

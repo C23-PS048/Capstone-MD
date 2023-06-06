@@ -1,4 +1,4 @@
-package com.bangkit.capstone_project.data
+package com.bangkit.capstone_project.data.network.location
 
 import android.app.Application
 import com.bangkit.capstone_project.domain.location.DefaultLocationTracker

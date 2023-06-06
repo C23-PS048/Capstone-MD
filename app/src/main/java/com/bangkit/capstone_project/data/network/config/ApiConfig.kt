@@ -1,12 +1,14 @@
-package com.bangkit.capstone_project.network.weather
+package com.bangkit.capstone_project.data.network.config
 
 import com.bangkit.capstone_project.BuildConfig
+import com.bangkit.capstone_project.data.network.user.UserService
+import com.bangkit.capstone_project.data.network.weather.WeatherService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherConfig {
+class ApiConfig {
     companion object{
         fun getWeatherService(): WeatherService {
             val loggingInterceptor = if (BuildConfig.DEBUG) {
@@ -23,6 +25,23 @@ class WeatherConfig {
                 .client(client)
                 .build()
             return retrofit.create(WeatherService::class.java)
+        }
+
+        fun getUserService(): UserService {
+            val loggingInterceptor = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+            } else {
+                HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.NONE)
+            }
+            val client = OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build()
+            val retrofit = Retrofit.Builder()
+                .baseUrl(BuildConfig.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build()
+            return retrofit.create(UserService::class.java)
         }
     }
 }

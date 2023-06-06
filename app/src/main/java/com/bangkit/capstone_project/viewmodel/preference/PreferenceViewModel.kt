@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 
 import androidx.lifecycle.viewModelScope
 
-import com.affan.storyapp.preferences.LoginPreference
+import com.bangkit.capstone_project.data.local.LoginPreference
 import com.bangkit.capstone_project.model.UserModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch

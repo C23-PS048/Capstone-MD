@@ -30,6 +30,7 @@ android {
             useSupportLibrary true
         }
         buildConfigField "String", "WEATHER_URL", "\"https://api.openweathermap.org/data/2.5/\""
+        buildConfigField "String", "BASE_URL", "\"https://story-api.dicoding.dev\""
     }
 
     buildTypes {

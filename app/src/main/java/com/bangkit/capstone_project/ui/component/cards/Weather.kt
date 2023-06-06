@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.helper.getAddressName
-import com.bangkit.capstone_project.network.weather.WeatherViewModel
+import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.LoadingAnimation
 import com.bangkit.capstone_project.ui.theme.GreenLight

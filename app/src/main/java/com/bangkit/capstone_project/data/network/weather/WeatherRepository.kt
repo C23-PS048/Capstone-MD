@@ -1,14 +1,14 @@
-package com.bangkit.capstone_project.network.weather
+package com.bangkit.capstone_project.data.network.weather
 
-import androidx.lifecycle.MutableLiveData
+import com.bangkit.capstone_project.data.network.config.ApiConfig
 
 class WeatherRepository {
 
 
 
 
-    suspend fun getWeather(latitude: Double, longitude: Double): Response {
-        return WeatherConfig.getWeatherService().getCurrentWeather(latitude, longitude)
+    suspend fun getWeather(latitude: Double, longitude: Double): WeatherResponse {
+        return ApiConfig.getWeatherService().getCurrentWeather(latitude, longitude)
     }
     companion object {
         @Volatile

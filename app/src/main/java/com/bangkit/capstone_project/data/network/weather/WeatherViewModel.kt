@@ -1,4 +1,4 @@
-package com.bangkit.capstone_project.network.weather
+package com.bangkit.capstone_project.data.network.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() {
-    private val _uiState: MutableStateFlow<UiState<Response>> =
+    private val _uiState: MutableStateFlow<UiState<WeatherResponse>> =
         MutableStateFlow(UiState.Loading)
-    val uiState: StateFlow<UiState<Response>>
+    val uiState: StateFlow<UiState<WeatherResponse>>
         get() = _uiState
     fun getWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {

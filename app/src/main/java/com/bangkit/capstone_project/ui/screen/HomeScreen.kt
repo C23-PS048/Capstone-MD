@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.model.Task
-import com.bangkit.capstone_project.network.weather.WeatherViewModel
+import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.cards.OwnPlantCard
 import com.bangkit.capstone_project.ui.component.cards.WeatherCards
@@ -45,35 +45,42 @@ fun HomeScreen(
         factory = ViewModelFactory(Injection.provideRepository())
     ),
     currentLocation: Location?,
-    navigatetoOwned: (Int) -> Unit
+    navigatetoOwned: (Int) -> Unit,
+    token: String?,
+    navigateLogin:()->Unit
 ) {
-    currentLocation?.latitude?.let { lat ->
-        currentLocation.longitude.let { long ->
-            weatherViewModel.getWeather(
-                lat,
-                long
-            )
-        }
-    }
-    taskViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
-        when (uiState) {
-            is UiState.Loading -> {
-                taskViewModel.getAllTasks()
-            }
+  if (token!=null){
+      currentLocation?.latitude?.let { lat ->
+          currentLocation.longitude.let { long ->
+              weatherViewModel.getWeather(
+                  lat,
+                  long
+              )
+          }
+      }
+      taskViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+          when (uiState) {
+              is UiState.Loading -> {
+                  taskViewModel.getAllTasks()
+              }
 
-            is UiState.Success -> {
-                HomeContent(
-                    weatherViewModel = weatherViewModel,
-                    currentLocation = currentLocation,
-                    listTask = uiState.data,
-                    navigatetoOwned = navigatetoOwned
-                )
-                Log.d("TAG", "HomeScreen: ${uiState.data}")
-            }
+              is UiState.Success -> {
+                  HomeContent(
+                      weatherViewModel = weatherViewModel,
+                      currentLocation = currentLocation,
+                      listTask = uiState.data,
+                      navigatetoOwned = navigatetoOwned
+                  )
+                  Log.d("TAG", "HomeScreen: ${uiState.data}")
+              }
 
-            is UiState.Error -> {}
-        }
-    }
+              is UiState.Error -> {}
+
+          }
+      }
+  }else{
+      navigateLogin()
+  }
 
 
 }

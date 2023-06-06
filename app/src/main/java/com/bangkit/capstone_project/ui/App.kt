@@ -24,6 +24,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,10 +44,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.affan.storyapp_compose.ui.screen.register.RegisterScreen
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
-import com.bangkit.capstone_project.data.LocationViewModel
+import com.bangkit.capstone_project.data.network.location.LocationViewModel
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
@@ -58,10 +58,12 @@ import com.bangkit.capstone_project.ui.screen.ListScreen
 import com.bangkit.capstone_project.ui.screen.LoginScreen
 import com.bangkit.capstone_project.ui.screen.OwnedPlantScreen
 import com.bangkit.capstone_project.ui.screen.PlantInfoScreen
+import com.bangkit.capstone_project.ui.screen.RegisterScreen
 import com.bangkit.capstone_project.ui.screen.ResultScreen
 import com.bangkit.capstone_project.ui.screen.Screen
 import com.bangkit.capstone_project.ui.screen.TaskScreen
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -73,7 +75,7 @@ import java.util.concurrent.ExecutorService
 fun App(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-
+    prefViewModel: PreferenceViewModel,
     locationViewModel: LocationViewModel = hiltViewModel(),
     context: Context,
     currentState: MutableState<ScreenState>,
@@ -82,6 +84,9 @@ fun App(
     classifier: DeseaseClassifier,
     taskViewModel: TaskViewModel
 ) {
+
+    val session by prefViewModel.getLoginSession().collectAsState(initial = null)
+
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val skipPartiallyExpanded by remember { mutableStateOf(false) }
     var edgeToEdgeEnabled by remember { mutableStateOf(false) }
@@ -139,19 +144,28 @@ fun App(
             )
             NavHost(
                 navController = navController,
-                startDestination = Screen.Login.route,
+                startDestination = if (session?.token == null) {
+                    Screen.Login.route
+                } else {
+                    Screen.Home.route
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
                 composable(Screen.Home.route) {
                     HomeScreen(
+                        token = session?.token,
                         currentLocation = currentLocation,
                         taskViewModel = taskViewModel,
                         navigatetoOwned = { id ->
                             navController.navigate(
                                 Screen.OwnedPlant.createRoute(id)
                             )
+                        }, navigateLogin = {
+                            navController.navigate(Screen.Login.route) {
+                                launchSingleTop = true
+                            }
                         })
                     /*Date()*/
 
@@ -193,13 +207,18 @@ fun App(
 
                 composable(Screen.Login.route) {
                     LoginScreen(
+                        prefViewModel = prefViewModel,
                         navigateMain = { navController.navigate(Screen.Home.route) },
                         navigateRegis = { navController.navigate(Screen.Register.route) })
 
                 }
                 composable(Screen.Register.route) {
                     RegisterScreen(
-                        navigateLogin = { navController.navigate(Screen.Login.route) },
+                        navigateLogin = {
+                            navController.navigate(Screen.Login.route) {
+                                launchSingleTop = true
+                            }
+                        },
                         onBack = { navController.navigateUp() })
 
                 }
@@ -215,7 +234,7 @@ fun App(
                 }
 
                 composable(Screen.Forum.route) {
-                    ForumScreen()
+                    ForumScreen( prefViewModel = prefViewModel,)
                 }
                 composable(Screen.ListPlant.route) {
                     ListScreen(

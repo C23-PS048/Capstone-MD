@@ -15,10 +15,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
+import com.bangkit.capstone_project.data.local.LoginPreference
+import com.bangkit.capstone_project.data.local.PreferenceFactory
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.App
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import com.bangkit.capstone_project.viewmodel.task.TaskVMFactory
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,6 +33,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "session")
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -41,6 +49,8 @@ class MainActivity : ComponentActivity() {
     private var currentState: MutableState<ScreenState> = mutableStateOf(ScreenState.Camera)
     private lateinit var taskViewModel: TaskViewModel
 
+    private lateinit var prefViewModel: PreferenceViewModel
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permission ->
@@ -50,6 +60,7 @@ class MainActivity : ComponentActivity() {
             currentState.value = ScreenState.Camera
         }
     }
+
     private fun initClassifier() {
         classifier = DeseaseClassifier(assets, mModelPath, mLabelPath, mInputSize)
     }
@@ -89,9 +100,11 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val pref = LoginPreference.getInstance(dataStore)
+        prefViewModel =
+            ViewModelProvider(this, PreferenceFactory(pref))[PreferenceViewModel::class.java]
         setContent {
             taskViewModel = obtainViewModel(this@MainActivity)
             initClassifier()
@@ -110,7 +123,8 @@ class MainActivity : ComponentActivity() {
                         outputDirectory = outputDirectory,
                         cameraExecutor = cameraExecutor,
                         classifier = classifier,
-                        taskViewModel = taskViewModel
+                        taskViewModel = taskViewModel,
+                        prefViewModel = prefViewModel
                     )
 
                 }
@@ -119,11 +133,11 @@ class MainActivity : ComponentActivity() {
 
         }
     }
+
     private fun obtainViewModel(activity: ComponentActivity): TaskViewModel {
         val factory = TaskVMFactory.getInstance(activity.application)
         return ViewModelProvider(activity, factory)[TaskViewModel::class.java]
     }
-
 
 
     private fun getOutputDirectory(): File {

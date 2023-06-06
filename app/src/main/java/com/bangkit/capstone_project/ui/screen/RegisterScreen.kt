@@ -1,6 +1,6 @@
-package com.affan.storyapp_compose.ui.screen.register
+package com.bangkit.capstone_project.ui.screen
 
-import androidx.compose.foundation.background
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,22 +38,36 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bangkit.capstone_project.R
+
+import com.bangkit.capstone_project.data.network.user.UserFactory
+import com.bangkit.capstone_project.data.network.user.UserInjection
+import com.bangkit.capstone_project.data.network.user.UserViewModel
+import com.bangkit.capstone_project.ui.UiState
 
 import com.bangkit.capstone_project.ui.component.input.InputTextField
 import com.bangkit.capstone_project.ui.component.input.PasswordTextField
-import com.bangkit.capstone_project.ui.theme.GreenDark
+
 
 @Composable
 fun RegisterScreen(
     onBack: () -> Unit,
-    navigateLogin: () -> Unit
+    navigateLogin: () -> Unit,
+    viewModel: UserViewModel = viewModel(
+        factory = UserFactory(UserInjection.provideRepository())
+    )
 ) {
     var loading by remember {
         mutableStateOf(false)
     }
 
-    RegisterContent(loading = loading, navigateLogin = navigateLogin, onBack = onBack)
+    RegisterContent(
+        loading = loading,
+        navigateLogin = navigateLogin,
+        onBack = onBack,
+        viewModel = viewModel
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +76,8 @@ fun RegisterContent(
     onBack: () -> Unit,
     loading: Boolean,
     modifier: Modifier = Modifier,
-    navigateLogin: () -> Unit
+    navigateLogin: () -> Unit,
+    viewModel: UserViewModel
 ) {
     var inputEmail by remember {
         mutableStateOf("")
@@ -87,7 +104,8 @@ fun RegisterContent(
                 Box(
                     modifier = Modifier
 
-                        .fillMaxWidth().paint(
+                        .fillMaxWidth()
+                        .paint(
                             painter = painterResource(id = R.drawable.bg_input),
                             contentScale = ContentScale.FillBounds
                         )
@@ -147,12 +165,20 @@ fun RegisterContent(
                         )
                         Button(
                             onClick = {
-
+                                viewModel.registerUser(
+                                    name = username,
+                                    email = inputEmail,
+                                    password = password
+                                )
                             },
                             modifier = modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(5.dp)
                         ) {
-                            Text(text = "Login", fontWeight = FontWeight.SemiBold, fontSize = 21.sp)
+                            Text(
+                                text = "Register",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 21.sp
+                            )
                         }
                     }
                     Row(
@@ -162,14 +188,33 @@ fun RegisterContent(
                     ) {
                         Text(text = "I Have an Account?", fontSize = 16.sp)
                         TextButton(onClick = navigateLogin) {
-                            Text(text = "Register", fontSize = 16.sp)
+                            Text(text = "Login", fontSize = 16.sp)
 
                         }
                     }
                 }
             }
         }
+        viewModel.responseState.collectAsState().value.let { responseState ->
+            when (responseState) {
+                is UiState.Loading -> {
 
+                    CircularProgressIndicator(color = Color.Red)
+                }
+
+                is UiState.Success -> {
+
+                    val response = responseState.data
+
+                    Log.d("TAG", "RegisterScreen: ${response.toString()}")
+                    viewModel.resetResponseState()
+                    navigateLogin()
+                }
+
+                is UiState.Error -> {}
+                else -> {}
+            }
+        }
 
     }
 }

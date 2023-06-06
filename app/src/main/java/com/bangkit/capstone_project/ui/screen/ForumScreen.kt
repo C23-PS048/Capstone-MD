@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -37,16 +37,20 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ui.theme.BlackMed
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 
 @Composable
-fun ForumScreen() {
+fun ForumScreen(prefViewModel: PreferenceViewModel) {
     UserProfilePage()
+    Button(onClick = { prefViewModel.deleteSession()}) {
+        Text(text = "Out")
+    }
 }
 
 @Preview
 @Composable
 fun ProfilePreview() {
-    ForumScreen()
+    UserProfilePage()
 }
 
 @Composable

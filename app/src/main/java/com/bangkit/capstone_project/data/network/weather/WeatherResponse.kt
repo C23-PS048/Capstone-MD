@@ -1,8 +1,8 @@
-package com.bangkit.capstone_project.network.weather
+package com.bangkit.capstone_project.data.network.weather
 
 import com.google.gson.annotations.SerializedName
 
-data class Response(
+data class WeatherResponse(
 
 	@field:SerializedName("rain")
 	val rain: Rain? = null,

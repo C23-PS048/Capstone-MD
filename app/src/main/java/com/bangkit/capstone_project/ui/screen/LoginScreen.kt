@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,19 +32,30 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.data.network.user.UserFactory
+import com.bangkit.capstone_project.data.network.user.UserInjection
+import com.bangkit.capstone_project.data.network.user.UserViewModel
+import com.bangkit.capstone_project.model.UserModel
+import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.input.InputTextField
 import com.bangkit.capstone_project.ui.component.input.PasswordTextField
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 
 
 @Composable
 fun LoginScreen(
+    prefViewModel: PreferenceViewModel,
+    viewModel: UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = UserFactory(UserInjection.provideRepository())
+    ),
     modifier: Modifier = Modifier, navigateMain: () -> Unit, navigateRegis: () -> Unit
 ) {
     LoginContent(
-
+        viewModel = viewModel,
         loading = false,
         navigateMain = navigateMain,
-        navigateRegis = navigateRegis
+        navigateRegis = navigateRegis,
+        prefViewModel = prefViewModel
     )
 }
 
@@ -52,7 +66,9 @@ fun LoginContent(
     navigateRegis: () -> Unit,
     loading: Boolean,
     modifier: Modifier = Modifier,
-    navigateMain: () -> Unit
+    navigateMain: () -> Unit,
+    prefViewModel: PreferenceViewModel,
+    viewModel: UserViewModel
 ) {
     var inputEmail by remember {
         mutableStateOf("")
@@ -123,7 +139,12 @@ fun LoginContent(
                         modifier.fillMaxWidth()
                     )
                     Button(
-                        onClick = navigateMain,
+                        onClick = {
+                            viewModel.loginUser(
+                                inputEmail,
+                                password
+                            )
+                        },
                         modifier = modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp)
                     ) {
@@ -141,6 +162,40 @@ fun LoginContent(
 
                     }
                 }
+            }
+        }
+        viewModel.loginState.collectAsState().value.let { responseState ->
+            when (responseState) {
+                is UiState.Loading -> {
+
+                    CircularProgressIndicator(color = Color.Red)
+                }
+
+                is UiState.Success -> {
+
+                    val response = responseState.data
+                    if (response != null) {
+                        prefViewModel.saveSession(
+                            /* UserModel(
+                                 response.userResult?.name,
+                                 response.userResult?.token,
+                                 response.userResult?.id
+                             )*/
+                            UserModel(
+                                response.loginResult.name,
+                                response.loginResult.token,
+                                response.loginResult.userId
+                            )
+                        )
+                    }
+                    viewModel.resetResponseState()
+                    navigateMain()
+                    Log.d("TAG", "RegisterScreen: ${response.toString()}")
+
+                }
+
+                is UiState.Error -> {}
+                else -> {}
             }
         }
 

@@ -1,4 +1,4 @@
-package com.affan.storyapp.preferences
+package com.bangkit.capstone_project.data.local
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

@@ -1,4 +1,4 @@
-package com.bangkit.capstone_project.data
+package com.bangkit.capstone_project.data.network.location
 
 import android.location.Location
 import androidx.compose.runtime.getValue
