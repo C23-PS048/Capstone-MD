@@ -1,6 +1,11 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -17,12 +22,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +45,6 @@ import com.bangkit.capstone_project.ui.theme.GreenDark
 import com.bangkit.capstone_project.ui.theme.Ivory
 import java.io.File
 import java.util.concurrent.Executor
-
 @Composable
 fun CameraScreen(
     modifier: Modifier = Modifier,
@@ -58,6 +64,31 @@ fun CameraScreen(
         .requireLensFacing(CameraSelector.LENS_FACING_BACK)
         .build()
 
+    val pickedImageUri = remember { mutableStateOf<Uri?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val uri = data?.data
+            if (uri != null) {
+                pickedImageUri.value = uri
+                // Perform any additional logic with the picked image URI
+                // For example, you can pass it to your function takePhoto()
+                takePhoto(
+                    filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                    imageCapture = imageCapture,
+                    outputDirectory = outputDirectory,
+                    executor = executor,
+                    onImageCaptured = onImageCaptured,
+                    onError = onError,
+                    pickedImageUri = uri
+                )
+            }
+        }
+    }
+
     LaunchedEffect(key1 = Unit) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
@@ -70,25 +101,24 @@ fun CameraScreen(
 
         preview.setSurfaceProvider(previewView.surfaceProvider)
     }
+
     Scaffold(
         topBar = {
-          Box( modifier = Modifier.fillMaxWidth()) {
-              IconButton(onClick = onBack, Modifier.align(Alignment.CenterStart)) {
-                  Icon(
-                      imageVector = Icons.Default.ArrowBack,
-                      contentDescription = "Back Button",
-                      tint = GreenDark
-                  )
-              }
-              Text(text = "Diagnose Your Plant", modifier = Modifier.align(Alignment.Center))
-          }
+            Box(modifier = Modifier.fillMaxWidth()) {
+                IconButton(onClick = onBack, Modifier.align(Alignment.CenterStart)) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back Button",
+                        tint = GreenDark
+                    )
+                }
+                Text(text = "Diagnose Your Plant", modifier = Modifier.align(Alignment.Center))
+            }
         },
         bottomBar = {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-
                 CameraButton(
                     modifier = Modifier
-
                         .padding(bottom = 20.dp),
                     onclick = {
                         takePhoto(
@@ -97,11 +127,24 @@ fun CameraScreen(
                             outputDirectory = outputDirectory,
                             executor = executor,
                             onImageCaptured = onImageCaptured,
-                            onError = onError
+                            onError = onError,
+                            pickedImageUri = null
                         )
-                    },
+                    }
+                )
 
-                    )
+                Button(
+                    modifier = Modifier.padding(start = 8.dp, bottom = 20.dp),
+                    onClick = {
+                        val galleryIntent = Intent(
+                            Intent.ACTION_PICK,
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        )
+                        launcher.launch(galleryIntent)
+                    }
+                ) {
+                    Text(text = "Pick from Gallery")
+                }
             }
         }
     ) {
@@ -114,9 +157,5 @@ fun CameraScreen(
         ) {
             AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
         }
-    }
-    Box(modifier = modifier) {
-
-
     }
 }

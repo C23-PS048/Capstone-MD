@@ -43,7 +43,6 @@ fun rotateImage(bitmap: Bitmap): Bitmap {
     matrix.postRotate(rotate)
 
 
-
     val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     return result
 }
@@ -54,27 +53,35 @@ fun takePhoto(
     outputDirectory: File,
     executor: Executor,
     onImageCaptured: (Uri) -> Unit,
-    onError: (ImageCaptureException) -> Unit
+    onError: (ImageCaptureException) -> Unit,
+    pickedImageUri: Uri?
 ) {
+    if (pickedImageUri != null) {
+        onImageCaptured(pickedImageUri)
+    } else {
+        val photoFile = File(
+            outputDirectory,
+            SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
+        )
 
-    val photoFile = File(
-        outputDirectory,
-        SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
-    )
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        imageCapture.takePicture(
+            outputOptions,
+            executor,
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e("kilo", "Take photo error:", exception)
+                    onError(exception)
+                }
 
-    imageCapture.takePicture(outputOptions, executor, object : ImageCapture.OnImageSavedCallback {
-        override fun onError(exception: ImageCaptureException) {
-            Log.e("kilo", "Take photo error:", exception)
-            onError(exception)
-        }
-
-        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-            val savedUri = Uri.fromFile(photoFile)
-            onImageCaptured(savedUri)
-        }
-    })
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    val savedUri = Uri.fromFile(photoFile)
+                    onImageCaptured(savedUri)
+                }
+            }
+        )
+    }
 }
 
 

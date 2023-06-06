@@ -100,6 +100,8 @@ fun App(
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     )
+    val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+
     LaunchedEffect(key1 = locationPermissions.allPermissionsGranted) {
         if (locationPermissions.allPermissionsGranted) {
             locationViewModel.getCurrentLocation()
@@ -255,8 +257,16 @@ fun App(
                                     outputDirectory = outputDirectory,
                                     executor = cameraExecutor,
                                     onImageCaptured = { uri ->
-                                        photoUri = uri
-                                        currentState.value = ScreenState.Photo
+                                        // Check if the image was captured from the camera or picked from the gallery
+                                        if (uri != null) {
+                                            // Image captured from the camera
+                                            photoUri = uri
+                                            currentState.value = ScreenState.Photo
+                                        } else if (selectedImageUri.value != null) {
+                                            // Image picked from the gallery
+                                            photoUri = selectedImageUri.value!!
+                                            currentState.value = ScreenState.Photo
+                                        }
                                     },
                                     onError = { Log.e("kilo", "View error:", it) },
                                     onBack = { navController.navigateUp() }

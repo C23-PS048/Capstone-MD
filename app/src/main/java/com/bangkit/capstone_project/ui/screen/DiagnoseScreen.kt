@@ -97,7 +97,8 @@ fun DiagnoseScreen(
                             outputDirectory = outputDirectory,
                             executor = executor,
                             onImageCaptured = onImageCaptured,
-                            onError = onError
+                            onError = onError,
+                            pickedImageUri = null
                         )
                     },
 
