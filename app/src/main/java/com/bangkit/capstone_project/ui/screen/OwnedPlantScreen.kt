@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.helper.getDaysBetween
+
 import com.bangkit.capstone_project.model.Task
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
@@ -57,7 +59,13 @@ import com.bangkit.capstone_project.ui.theme.Ivory
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 @Composable
-fun OwnedPlantScreen(onBack: () -> Unit, plantId: Int, taskViewModel: TaskViewModel, navigateEdit:(Int)->Unit) {
+fun OwnedPlantScreen(
+    onBack: () -> Unit,
+    plantId: Int,
+    taskViewModel: TaskViewModel,
+    navigateEdit: (Int) -> Unit,
+    sendNotification: () -> Unit
+) {
     Log.d("TAG", "OwnedPlantScreen: $plantId")
 
 
@@ -73,6 +81,9 @@ fun OwnedPlantScreen(onBack: () -> Unit, plantId: Int, taskViewModel: TaskViewMo
                     detailState.data?.nextScheduledDate?.let { getDaysBetween(startTimestamp, it) }
                 val location =    detailState.data?.location
                 if (daysBetween != null) {
+                    if (daysBetween == 0L) {
+                        sendNotification()
+                    }
                     if (location != null) {
                         OwnedPlantContent(onBack = onBack,daysBetween = daysBetween,location = location, task = detailState.data, navigateEdit=navigateEdit)
                     }

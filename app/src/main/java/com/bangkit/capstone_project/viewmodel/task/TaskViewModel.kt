@@ -3,17 +3,16 @@ package com.bangkit.capstone_project.viewmodel.task
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.bangkit.capstone_project.database.DatabaseRepository
 import com.bangkit.capstone_project.model.Task
 import com.bangkit.capstone_project.ui.UiState
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
-class TaskViewModel(application: Application) : ViewModel() {
+class TaskViewModel(private var application: Application) : ViewModel() {
     private val mTaskRepository: DatabaseRepository = DatabaseRepository(application)
     private val _uiState: MutableStateFlow<UiState<List<Task>>> = MutableStateFlow(UiState.Loading)
     val uiState: StateFlow<UiState<List<Task>>>
@@ -62,4 +61,5 @@ class TaskViewModel(application: Application) : ViewModel() {
             mTaskRepository.delete(task)
         }
     }
+
 }

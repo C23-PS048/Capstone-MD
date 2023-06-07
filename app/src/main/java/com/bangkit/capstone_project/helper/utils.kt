@@ -129,3 +129,5 @@ fun decodeUriAsBitmap(context: Context, uri: Uri?): Bitmap? {
     }
     return bitmap
 }
+
+

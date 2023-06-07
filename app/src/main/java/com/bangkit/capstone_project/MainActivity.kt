@@ -1,19 +1,30 @@
 package com.bangkit.capstone_project
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -21,8 +32,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
 import com.bangkit.capstone_project.data.local.LoginPreference
 import com.bangkit.capstone_project.data.local.PreferenceFactory
+
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.App
+import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import com.bangkit.capstone_project.viewmodel.task.TaskVMFactory
@@ -38,6 +51,10 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private lateinit var alarmManager: AlarmManager
+    private lateinit var pendingIntent: PendingIntent
+
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
@@ -51,6 +68,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var prefViewModel: PreferenceViewModel
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permission ->
@@ -59,21 +77,36 @@ class MainActivity : ComponentActivity() {
 
             currentState.value = ScreenState.Camera
         }
+        val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
+        if (permission[notificationPermission] == true) {
+            // Notification permission granted
+            // Perform necessary actions here
+        } else {
+            // Notification permission denied
+            // Handle the denial or show a message to the user
+        }
     }
 
     private fun initClassifier() {
         classifier = DeseaseClassifier(assets, mModelPath, mLabelPath, mInputSize)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun requestPermissionsOnFirstLaunch() {
         val cameraPermission = Manifest.permission.CAMERA
         val locationPermissions = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
-
+        val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
         val permissionsToRequest = mutableListOf<String>()
-
+        if (ContextCompat.checkSelfPermission(
+                this,
+                notificationPermission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionsToRequest.add(notificationPermission)
+        }
         if (ContextCompat.checkSelfPermission(
                 this,
                 cameraPermission
@@ -100,8 +133,12 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+
         val pref = LoginPreference.getInstance(dataStore)
         prefViewModel =
             ViewModelProvider(this, PreferenceFactory(pref))[PreferenceViewModel::class.java]
@@ -111,8 +148,22 @@ class MainActivity : ComponentActivity() {
             requestPermissionsOnFirstLaunch()
             outputDirectory = getOutputDirectory()
             cameraExecutor = Executors.newSingleThreadExecutor()
-            CapstoneProjectTheme {
 
+
+
+            CapstoneProjectTheme {
+                LaunchedEffect(Unit) {
+                    taskViewModel.uiState.collect { uiState ->
+                        when (uiState) {
+                            is UiState.Loading -> {
+
+                            }
+                            is UiState.Success -> sendNotification()
+                            is UiState.Error ->{}
+                            // Handle other UI states if needed
+                        }
+                    }
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -125,7 +176,7 @@ class MainActivity : ComponentActivity() {
                         classifier = classifier,
                         taskViewModel = taskViewModel,
                         prefViewModel = prefViewModel
-                    )
+                    ) { sendNotification() }
 
                 }
             }
@@ -147,6 +198,31 @@ class MainActivity : ComponentActivity() {
 
         return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
     }
+    @SuppressLint("ServiceCast")
+    fun sendNotification() {
+        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val mBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.bell)
+            .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.bell))
+            .setContentTitle("Test")
+            .setContentText("Content")
+            .setSubText("Subtext")
+            .setAutoCancel(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            /* Create or update. */
+            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+            channel.description = CHANNEL_NAME
+            mBuilder.setChannelId(CHANNEL_ID)
+            mNotificationManager.createNotificationChannel(channel)
+        }
+        val notification = mBuilder.build()
+        mNotificationManager.notify(NOTIFICATION_ID, notification)
+    }
+    companion object {
+        private const val NOTIFICATION_ID = 1
+        private const val CHANNEL_ID = "channel_01"
+        private const val CHANNEL_NAME = "dicoding channel"
+    }
 }
 
 sealed class ScreenState {
@@ -160,4 +236,8 @@ suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspendCoroutin
             continuation.resume(cameraProvider.get())
         }, ContextCompat.getMainExecutor(this))
     }
+
+
+
+
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,8 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.getCameraProvider
 import com.bangkit.capstone_project.helper.takePhoto
 import com.bangkit.capstone_project.ui.component.buttons.CameraButton
@@ -74,8 +77,7 @@ fun CameraScreen(
             val uri = data?.data
             if (uri != null) {
                 pickedImageUri.value = uri
-                // Perform any additional logic with the picked image URI
-                // For example, you can pass it to your function takePhoto()
+
                 takePhoto(
                     filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
                     imageCapture = imageCapture,
@@ -116,10 +118,10 @@ fun CameraScreen(
             }
         },
         bottomBar = {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp,16.dp)) {
                 CameraButton(
                     modifier = Modifier
-                        .padding(bottom = 20.dp),
+                        .align(Alignment.Center),
                     onclick = {
                         takePhoto(
                             filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
@@ -133,8 +135,8 @@ fun CameraScreen(
                     }
                 )
 
-                Button(
-                    modifier = Modifier.padding(start = 8.dp, bottom = 20.dp),
+                IconButton(
+                    modifier = Modifier.align(Alignment.CenterStart),
                     onClick = {
                         val galleryIntent = Intent(
                             Intent.ACTION_PICK,
@@ -143,7 +145,7 @@ fun CameraScreen(
                         launcher.launch(galleryIntent)
                     }
                 ) {
-                    Text(text = "Pick from Gallery")
+                    Icon(painter = painterResource(id = R.drawable.gallery), contentDescription = "Pick Image From Galley Button")
                 }
             }
         }

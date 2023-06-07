@@ -50,6 +50,7 @@ import com.bangkit.capstone_project.data.network.location.LocationViewModel
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
+import com.bangkit.capstone_project.ui.screen.AnimatedSplash
 import com.bangkit.capstone_project.ui.screen.CameraScreen
 import com.bangkit.capstone_project.ui.screen.EditTaskScreen
 import com.bangkit.capstone_project.ui.screen.ForumScreen
@@ -82,7 +83,8 @@ fun App(
     cameraExecutor: ExecutorService,
     outputDirectory: File,
     classifier: DeseaseClassifier,
-    taskViewModel: TaskViewModel
+    taskViewModel: TaskViewModel,
+    sendNotification: () -> Unit
 ) {
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
@@ -146,15 +148,16 @@ fun App(
             )
             NavHost(
                 navController = navController,
-                startDestination = if (session?.token == null) {
-                    Screen.Login.route
-                } else {
-                    Screen.Home.route
-                },
+                startDestination =  Screen.Splash.route
+                ,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
+                composable(Screen.Splash.route) {
+                    AnimatedSplash(navController = navController)
+
+                }
                 composable(Screen.Home.route) {
                     HomeScreen(
                         token = session?.token,
@@ -169,7 +172,7 @@ fun App(
                                 launchSingleTop = true
                             }
                         })
-                    /*Date()*/
+
 
                 }
                 composable(
@@ -181,6 +184,7 @@ fun App(
                         plantId = id as Int,
                         onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
+                        sendNotification=sendNotification,
                         navigateEdit = { taskId ->
                             navController.navigate(
                                 Screen.EditTask.createRoute(
