@@ -44,16 +44,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.compose.AsyncImage
+import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
 import com.bangkit.capstone_project.data.network.location.LocationViewModel
+import com.bangkit.capstone_project.data.network.user.UserFactory
+import com.bangkit.capstone_project.data.network.user.UserInjection
+import com.bangkit.capstone_project.data.network.user.UserViewModel
+import com.bangkit.capstone_project.model.User
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.AnimatedSplash
 import com.bangkit.capstone_project.ui.screen.CameraScreen
 import com.bangkit.capstone_project.ui.screen.EditTaskScreen
-import com.bangkit.capstone_project.ui.screen.ForumScreen
+import com.bangkit.capstone_project.ui.screen.ProfileScreen
 import com.bangkit.capstone_project.ui.screen.HomeScreen
 import com.bangkit.capstone_project.ui.screen.ListScreen
 import com.bangkit.capstone_project.ui.screen.LoginScreen
@@ -78,6 +84,9 @@ fun App(
     navController: NavHostController = rememberNavController(),
     prefViewModel: PreferenceViewModel,
     locationViewModel: LocationViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = UserFactory(UserInjection.provideRepository())
+    ),
     context: Context,
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
@@ -96,6 +105,8 @@ fun App(
         skipPartiallyExpanded = skipPartiallyExpanded
     )
     lateinit var photoUri: Uri
+
+    lateinit var user:User
     val locationPermissions = rememberMultiplePermissionsState(
         permissions = listOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -116,6 +127,26 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+
+    userViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
+            is UiState.Loading -> {
+                session?.token?.let { session?.id?.let { it1 -> userViewModel.getUser(it1, it) } }
+            }
+
+            is UiState.Success -> {
+
+                val data = uiState.data?.userResult
+
+                    user = User(id =data?.id, name = data?.name, foto = BuildConfig.BASE_URL+data?.foto, email = data?.email )
+
+
+            }
+
+            is UiState.Error -> {}
+
+        }
+    }
 
     CapstoneProjectTheme() {
         Scaffold(
@@ -161,6 +192,9 @@ fun App(
                 composable(Screen.Home.route) {
                     HomeScreen(
                         token = session?.token,
+                        username = session?.name,
+                        id = session?.id,
+                        userViewModel=userViewModel,
                         currentLocation = currentLocation,
                         taskViewModel = taskViewModel,
                         navigatetoOwned = { id ->
@@ -214,12 +248,14 @@ fun App(
                 composable(Screen.Login.route) {
                     LoginScreen(
                         prefViewModel = prefViewModel,
+                        viewModel = userViewModel,
                         navigateMain = { navController.navigate(Screen.Home.route) },
                         navigateRegis = { navController.navigate(Screen.Register.route) })
 
                 }
                 composable(Screen.Register.route) {
                     RegisterScreen(
+                        viewModel = userViewModel,
                         navigateLogin = {
                             navController.navigate(Screen.Login.route) {
                                 launchSingleTop = true
@@ -240,7 +276,7 @@ fun App(
                 }
 
                 composable(Screen.Forum.route) {
-                    ForumScreen( prefViewModel = prefViewModel,)
+                    ProfileScreen( onLogout = {prefViewModel.deleteSession()},user = user)
                 }
                 composable(Screen.ListPlant.route) {
                     ListScreen(

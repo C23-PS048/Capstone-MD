@@ -25,8 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bangkit.capstone_project.R
-import com.bangkit.capstone_project.model.Task
+import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
+import com.bangkit.capstone_project.helper.getCurrentDate
+import com.bangkit.capstone_project.model.Task
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.cards.OwnPlantCard
 import com.bangkit.capstone_project.ui.component.cards.WeatherCards
@@ -47,46 +49,54 @@ fun HomeScreen(
     currentLocation: Location?,
     navigatetoOwned: (Int) -> Unit,
     token: String?,
-    navigateLogin:()->Unit
+    navigateLogin: () -> Unit,
+    username: String?,
+    userViewModel: UserViewModel,
+    id: String?
 ) {
-  if (token!=null){
-      currentLocation?.latitude?.let { lat ->
-          currentLocation.longitude.let { long ->
-              weatherViewModel.getWeather(
-                  lat,
-                  long
-              )
-          }
-      }
-      taskViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
-          when (uiState) {
-              is UiState.Loading -> {
-                  taskViewModel.getAllTasks()
-              }
 
-              is UiState.Success -> {
-                  HomeContent(
-                      weatherViewModel = weatherViewModel,
-                      currentLocation = currentLocation,
-                      listTask = uiState.data,
-                      navigatetoOwned = navigatetoOwned
-                  )
-                  Log.d("TAG", "HomeScreen: ${uiState.data}")
-              }
 
-              is UiState.Error -> {}
+    if (token != null) {
+        currentLocation?.latitude?.let { lat ->
+            currentLocation.longitude.let { long ->
+                weatherViewModel.getWeather(
+                    lat,
+                    long
+                )
+            }
+        }
+        taskViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+            when (uiState) {
+                is UiState.Loading -> {
+                    taskViewModel.getAllTasks()
+                }
 
-          }
-      }
-  }else{
-      navigateLogin()
-  }
+                is UiState.Success -> {
+                    HomeContent(
+                        weatherViewModel = weatherViewModel,
+                        currentLocation = currentLocation,
+                        listTask = uiState.data,
+                        navigatetoOwned = navigatetoOwned,
+                        username = username
+                    )
+                    Log.d("TAG", "HomeScreen: ${uiState.data}")
+                }
+
+                is UiState.Error -> {}
+
+            }
+        }
+
+    } else {
+        navigateLogin()
+    }
 
 
 }
 
 @Composable
 fun HomeContent(
+    username: String?,
     modifier: Modifier = Modifier,
     currentLocation: Location?,
     listTask: List<Task>?,
@@ -107,13 +117,15 @@ fun HomeContent(
         ) {
             Column {
                 Text(
-                    text = "Friday,19 May 2023",
+                    text = getCurrentDate(),
                     style = MaterialTheme.typography.titleMedium,
                     color = BlackLight
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(text = "Hello,", fontSize = 20.sp)
-                    Text(text = "Username", fontSize = 20.sp, color = GreenMed)
+                    if (username != null) {
+                        Text(text = username, fontSize = 20.sp, color = GreenMed)
+                    }
                 }
             }
             Icon(painter = painterResource(id = R.drawable.bell), contentDescription = null)

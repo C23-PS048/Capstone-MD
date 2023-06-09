@@ -131,3 +131,9 @@ fun decodeUriAsBitmap(context: Context, uri: Uri?): Bitmap? {
 }
 
 
+fun getCurrentDate(): String {
+    val currentDate = Calendar.getInstance().time
+    val sdf = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale("id", "ID"))
+
+    return sdf.format(currentDate)
+}

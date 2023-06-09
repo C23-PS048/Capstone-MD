@@ -45,9 +45,7 @@ import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 @Composable
 fun LoginScreen(
     prefViewModel: PreferenceViewModel,
-    viewModel: UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = UserFactory(UserInjection.provideRepository())
-    ),
+    viewModel: UserViewModel ,
     modifier: Modifier = Modifier, navigateMain: () -> Unit, navigateRegis: () -> Unit
 ) {
     LoginContent(
@@ -176,16 +174,16 @@ fun LoginContent(
                     val response = responseState.data
                     if (response != null) {
                         prefViewModel.saveSession(
-                            /* UserModel(
-                                 response.userResult?.name,
-                                 response.userResult?.token,
-                                 response.userResult?.id
-                             )*/
-                            UserModel(
-                                response.loginResult.name,
+                             UserModel(
+                                 response.loginResult.name,
+                                 response.loginResult.token,
+                                 response.loginResult.id
+                             )
+                        /*    UserModel(
+                                response.userResult.name,
                                 response.loginResult.token,
                                 response.loginResult.userId
-                            )
+                            )*/
                         )
                     }
                     viewModel.resetResponseState()

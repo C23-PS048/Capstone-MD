@@ -11,7 +11,7 @@ data class ResponseMessage(
 	@field:SerializedName("message")
 	val message: String
 )
-data class LoginResponse(
+/*data class LoginResponse(
 
 	@field:SerializedName("error")
 	val error: Boolean,
@@ -32,31 +32,32 @@ data class LoginUser(
 
 	@field:SerializedName("token")
 	val token: String
-)
-/*
+)*/
+
 data class LoginResponse(
 
-	@field:SerializedName("userResult")
-	val userResult: LoginResult? = null,
+
 
 	@field:SerializedName("error")
-	val error: Boolean? = null,
+	val error: Boolean,
 
 	@field:SerializedName("message")
-	val message: String? = null
+	val message: String,
+	@field:SerializedName("loginResult")
+	val loginResult: LoginResult,
 )
 
 data class LoginResult(
-
-	@field:SerializedName("name")
-	val name: String? = null,
-
 	@field:SerializedName("id")
-	val id: String? = null,
+	val id: String,
+	@field:SerializedName("name")
+	val name: String,
+
+
 
 	@field:SerializedName("token")
-	val token: String? = null
-)*/
+	val token: String
+)
 
 data class DetailUserResponse(
 
@@ -71,9 +72,6 @@ data class DetailUserResponse(
 )
 data class UserResult(
 
-	@field:SerializedName("password")
-	val password: String? = null,
-
 	@field:SerializedName("foto")
 	val foto: String? = null,
 
@@ -83,6 +81,6 @@ data class UserResult(
 	@field:SerializedName("email")
 	val email: String? = null,
 
-	@field:SerializedName("username")
-	val username: String? = null
+	@field:SerializedName("name")
+	val name: String? = null
 )

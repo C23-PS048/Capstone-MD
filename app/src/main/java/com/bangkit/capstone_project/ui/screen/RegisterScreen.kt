@@ -54,9 +54,7 @@ import com.bangkit.capstone_project.ui.component.input.PasswordTextField
 fun RegisterScreen(
     onBack: () -> Unit,
     navigateLogin: () -> Unit,
-    viewModel: UserViewModel = viewModel(
-        factory = UserFactory(UserInjection.provideRepository())
-    )
+    viewModel: UserViewModel
 ) {
     var loading by remember {
         mutableStateOf(false)
@@ -222,5 +220,7 @@ fun RegisterContent(
 @Preview
 @Composable
 fun RegisterPreview() {
-    RegisterScreen(navigateLogin = {}, onBack = {})
+    RegisterScreen(navigateLogin = {}, viewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = UserFactory(UserInjection.provideRepository())
+            ), onBack = {})
 }

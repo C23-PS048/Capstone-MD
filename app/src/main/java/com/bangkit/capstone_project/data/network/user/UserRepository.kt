@@ -1,12 +1,10 @@
 package com.bangkit.capstone_project.data.network.user
 
-import android.util.Log
-import com.bangkit.capstone_project.data.network.config.ApiConfig
-import retrofit2.HttpException
-
 class UserRepository {
 
+    suspend fun getUSerDetail(id: String) {
 
+    }
 
     companion object {
         @Volatile

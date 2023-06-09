@@ -4,11 +4,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-feature
-            android:name="android.hardware.camera.any"/>
+    <uses-feature android:name="android.hardware.camera.any"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_KEY}" />
@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application android:name=".data.LocationApplication"
             android:allowBackup="true"
+            android:usesCleartextTraffic="true"
+            android:networkSecurityConfig="@xml/network_security_config"
             android:dataExtractionRules="@xml/data_extraction_rules"
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher"
@@ -26,10 +28,7 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.CapstoneProject"
             tools:targetApi="31">
-        <receiver
-                android:name=".workmanager.BackgroundWorkReceiver"
-                android:enabled="true"
-                android:exported="false" />
+
 
 
         <activity
