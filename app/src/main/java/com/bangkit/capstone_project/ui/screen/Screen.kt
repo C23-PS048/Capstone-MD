@@ -11,7 +11,9 @@ sealed class Screen(val route: String) {
     object DetailPlant : Screen("detailPlant/{slug}"){
         fun createRoute(slug:String) = "detailPlant/$slug"
     }
-    object Task : Screen("task")
+    object Task : Screen("task/{slug}"){
+        fun createRoute(slug:String) = "task/$slug"
+    }
 
     object Login : Screen("login")
 

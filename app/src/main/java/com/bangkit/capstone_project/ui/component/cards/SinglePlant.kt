@@ -42,9 +42,9 @@ fun PlantCards(onClick: () -> Unit, modifier: Modifier = Modifier, data: PlantRe
                     .clip(shape = RoundedCornerShape(15))
             ) {
                 AsyncImage(
-                    model = data.image,
+                    model = data.image[0],
                     contentDescription = "Plant Hint",
-                    contentScale = ContentScale.FillWidth,
+                    contentScale = ContentScale.FillBounds,
                     modifier = modifier.fillMaxWidth()
                 )
             }

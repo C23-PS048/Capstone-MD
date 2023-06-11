@@ -50,8 +50,8 @@ class PlantViewModel : ViewModel() {
         }
     }
 
-    fun getPlant(slug: String, token: String) {
-        val headerToken = "Bearer $token"
+    fun getPlant(slug: String) {
+
         _plantState.value = UiState.Loading
 
 

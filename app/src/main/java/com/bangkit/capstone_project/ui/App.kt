@@ -257,9 +257,15 @@ fun App(
                 }
 
 
-                composable(Screen.Task.route) {
+                composable(
+                    route = Screen.Task.route,
+                    arguments = listOf(navArgument("slug") { type = NavType.StringType })
+                ) {
+                    val slug = it.arguments?.getString("slug") ?: ""
                     TaskScreen(onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
+                        plantId = slug,
+                        plantViewModel=plantViewModel,
                         navigateHome = {
                             navController.navigate(Screen.Home.route) {
 
@@ -271,13 +277,13 @@ fun App(
 
                 composable(Screen.Forum.route) {
 
-                            ProfileScreen(onLogout = {
-                                prefViewModel.deleteSession()
-                                navController.navigate(Screen.Login.route)
-                            }, prefViewModel = prefViewModel, userViewModel = userViewModel,
-                            showToast = showToast)
-
-
+                    ProfileScreen(
+                        onLogout = {
+                            prefViewModel.deleteSession()
+                            navController.navigate(Screen.Login.route)
+                        }, prefViewModel = prefViewModel, userViewModel = userViewModel,
+                        showToast = showToast
+                    )
 
 
                 }
@@ -293,10 +299,11 @@ fun App(
                     arguments = listOf(navArgument("slug") { type = NavType.StringType })
                 ) {
                     val slug = it.arguments?.getString("slug") ?: ""
-                    PlantInfoScreen(token = session?.token,
+                    PlantInfoScreen(
+                        token = session?.token,
                         plantViewModel = plantViewModel,
                         slug = slug,
-                        navigateTask = { navController.navigate(Screen.Task.route) },
+                        navigateTask = { id-> navController.navigate(Screen.Task.createRoute(id)) },
                         onBack = { navController.navigateUp() })
                 }
                 composable(Screen.Camera.route) {

@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,40 +54,93 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.data.network.plant.PlantResult
+import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.helper.calculateScheduleDates
 import com.bangkit.capstone_project.helper.convertMillisToDateString
 import com.bangkit.capstone_project.model.Frequency
 import com.bangkit.capstone_project.model.Task
+import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.cards.ScheduleInput
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun TaskScreen(
     onBack: () -> Unit,
     navigateHome: () -> Unit,
     modifier: Modifier = Modifier,
-    taskViewModel: TaskViewModel
+    taskViewModel: TaskViewModel,
+    plantViewModel: PlantViewModel,
+    plantId: String
+) {
+    plantViewModel.plantState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
+            is UiState.Loading -> {
+
+
+                plantViewModel.getPlant(plantId)
+
+
+            }
+
+            is UiState.Success -> {
+
+                val data = uiState.data?.plantResult
+                Log.d("TAG", "ListScreen: $data")
+                if (data != null) {
+                    TaskContent(
+                        onBack = onBack,
+                        navigateHome = navigateHome,
+                        taskViewModel = taskViewModel,
+                        modifier = modifier,
+                        plant=data
+                        )
+                }
+
+            }
+
+            is UiState.Error -> {}
+
+        }
+
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaskContent(
+    onBack: () -> Unit,
+    navigateHome: () -> Unit,
+    modifier: Modifier = Modifier,
+    taskViewModel: TaskViewModel,
+    plant: PlantResult,
 ) {
     val openWeatherDate = remember { mutableStateOf(false) }
     val openWeatherRepeat = remember { mutableStateOf(false) }
     val radioOptions = listOf(
-Frequency("Once a Month",1),
-Frequency("Once a Week",2),
-Frequency("Every 3 Days",3),
-Frequency("Every Day",4),
+        Frequency("Once a Month", 1),
+        Frequency("Once a Week", 2),
+        Frequency("Every 3 Days", 3),
+        Frequency("Every Day", 4),
 
-    )
+        )
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
     val textLocation = mutableStateOf("")
-    val dateWeatherState = rememberDatePickerState(initialSelectedDateMillis =  System.currentTimeMillis())
+    val dateWeatherState =
+        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
     CapstoneProjectTheme() {
-        Box(modifier = modifier.fillMaxSize().background(Color.White)) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
             Scaffold(
                 topBar = {
                     Column {
@@ -124,7 +178,11 @@ Frequency("Every Day",4),
                             .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                        Card(modifier = modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(4.dp)) {
+                        Card(
+                            modifier = modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.Bottom,
@@ -134,13 +192,13 @@ Frequency("Every Day",4),
                             ) {
                                 Column() {
                                     Text(
-                                        "Plant Name",
+                                        plant.plantName,
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = BlackMed
                                     )
                                     Text(
-                                        "Scientific",
+                                        plant.scientificName,
                                         style = MaterialTheme.typography.titleMedium,
                                         color = Color.LightGray
                                     )
@@ -151,8 +209,9 @@ Frequency("Every Day",4),
                                         .height(150.dp)
                                         .clip(shape = RoundedCornerShape(15))
                                 ) {
+                                    Log.d("TAG", "TaskContent: ${BuildConfig.BASE_URL+plant.image[0]}")
                                     AsyncImage(
-                                        model = "https://plantnet.com.au/wp-content/uploads/00.jpg",
+                                        model =plant.image[0] ,
                                         contentDescription = "Plant Hint",
                                         contentScale = ContentScale.FillWidth,
                                         modifier = modifier.fillMaxWidth()
@@ -175,7 +234,8 @@ Frequency("Every Day",4),
                                 isSelectOpen = { openWeatherRepeat.value = it },
                                 Date = it,
                                 Selected = selectedOption.label,
-                                modifier = modifier.background(Color.White))
+                                modifier = modifier.background(Color.White)
+                            )
                         }
 
                         OutlinedTextField(
@@ -190,16 +250,18 @@ Frequency("Every Day",4),
                             },
                             modifier = modifier.fillMaxWidth()
                         )
-                        Button(onClick = {
-                            saveData(
-                                location = textLocation.value,
-                                frequency = selectedOption.frequency,
-                                startDate = dateWeatherState.selectedDateMillis,
-                                taskviewmodel = taskViewModel
-                            )
-                            navigateHome()
-                        },
-                            modifier = modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = {
+                                saveData(
+                                    location = textLocation.value,
+                                    frequency = selectedOption.frequency,
+                                    startDate = dateWeatherState.selectedDateMillis,
+                                    taskviewmodel = taskViewModel
+                                )
+                                navigateHome()
+                            },
+                            modifier = modifier.fillMaxWidth()
+                        ) {
                             Text(text = "Input")
                         }
                     }
@@ -307,7 +369,10 @@ Frequency("Every Day",4),
 fun saveData(frequency: Int, startDate: Long?, location: String, taskviewmodel: TaskViewModel) {
 
     val task = startDate?.let {
-        val (lastDate,NextDate) = calculateScheduleDates(frequency = frequency, startDate = startDate)
+        val (lastDate, NextDate) = calculateScheduleDates(
+            frequency = frequency,
+            startDate = startDate
+        )
         Task(
             location = location,
             startDate = it,
@@ -319,7 +384,6 @@ fun saveData(frequency: Int, startDate: Long?, location: String, taskviewmodel: 
     if (task != null) {
         taskviewmodel.insert(task)
     }
-
 
 
 }

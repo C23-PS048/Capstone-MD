@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -53,7 +54,7 @@ import com.bangkit.capstone_project.ui.theme.GreenDark
 @Composable
 
 fun PlantInfoScreen(
-    navigateTask: () -> Unit,
+    navigateTask: (String) -> Unit,
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     slug: String,
@@ -67,7 +68,7 @@ fun PlantInfoScreen(
             is UiState.Loading -> {
                 token.let { it1 ->
                     if (it1 != null) {
-                        plantViewModel.getPlant(slug, it1)
+                        plantViewModel.getPlant(slug)
                     }
                 }
             }
@@ -95,7 +96,7 @@ fun PlantInfoScreen(
 
 @Composable
 fun DetailContent(
-    navigateTask: () -> Unit,
+    navigateTask: (String) -> Unit,
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     plant: PlantResult
@@ -149,9 +150,9 @@ fun DetailContent(
                                 .clip(shape = RoundedCornerShape(15))
                         ) {
                             AsyncImage(
-                                model = "https://plantnet.com.au/wp-content/uploads/00.jpg",
+                                model = plant.image[0],
                                 contentDescription = "Plant Hint",
-                                contentScale = ContentScale.FillWidth,
+                                contentScale = ContentScale.FillBounds,
                                 modifier = modifier.fillMaxWidth()
                             )
                         }
@@ -241,7 +242,10 @@ fun DetailContent(
 
                             }
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(text = "Tips Menyiram", style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    text = "Tips Menyiram",
+                                    style = MaterialTheme.typography.titleLarge
+                                )
                                 Text(
                                     text = plant.wateringTips,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -249,7 +253,10 @@ fun DetailContent(
                                 )
                             }
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(text = "Tips Menanam", style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    text = "Tips Menanam",
+                                    style = MaterialTheme.typography.titleLarge
+                                )
                                 Text(
                                     text = plant.plantTips,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -262,7 +269,7 @@ fun DetailContent(
                                     modifier = modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    items(5) {
+                                    items(plant.image) { image ->
                                         Box(
                                             modifier = modifier
                                                 .width(120.dp)
@@ -270,9 +277,9 @@ fun DetailContent(
                                                 .clip(shape = RoundedCornerShape(15))
                                         ) {
                                             AsyncImage(
-                                                model = "https://plantnet.com.au/wp-content/uploads/00.jpg",
+                                                model = image,
                                                 contentDescription = "Plant Hint",
-                                                contentScale = ContentScale.FillWidth,
+                                                contentScale = ContentScale.FillBounds,
                                                 modifier = modifier.fillMaxWidth()
                                             )
                                         }
@@ -292,7 +299,7 @@ fun DetailContent(
                 .align(Alignment.BottomCenter)
         ) {
             ButtonIcon(
-                onClick = navigateTask,
+                onClick = { navigateTask(plant.slug) },
                 title = "Add Plant",
                 description = "Button to add your plant",
                 icon = painterResource(id = R.drawable.leaf),
