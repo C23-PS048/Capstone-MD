@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">PlantCare</string>
     <string name="title_activity_camera">CameraActivity</string>
+    <string name="login_response">Login Sukses</string>
 </resources>

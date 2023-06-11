@@ -22,8 +22,8 @@ class PlantViewModel : ViewModel() {
     val plantState: StateFlow<UiState<SinglePlantResponse>>
         get() = _plantState
 
-    fun getAll(token: String) {
-        val headerToken = "Bearer $token"
+    fun getAll() {
+
         _uiState.value = UiState.Loading
 
 
@@ -32,7 +32,7 @@ class PlantViewModel : ViewModel() {
 
 
             try {
-                val response = ApiConfig.getPlantService().getAllPlant(headerToken)
+                val response = ApiConfig.getPlantService().getAllPlant()
 
                 Log.d("TAG", "Plants: ${response.toString()}")
                 if (response.isSuccessful) {
@@ -60,7 +60,7 @@ class PlantViewModel : ViewModel() {
 
 
             try {
-                val response = ApiConfig.getPlantService().getPlant(slug, headerToken)
+                val response = ApiConfig.getPlantService().getPlant(slug)
 
                 Log.d("TAG", "Plants: ${response.toString()}")
                 if (response.isSuccessful) {

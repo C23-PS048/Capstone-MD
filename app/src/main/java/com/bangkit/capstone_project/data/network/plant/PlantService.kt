@@ -24,13 +24,13 @@ interface PlantService {
     @GET("plant")
     suspend fun getAllPlant(
 
-        @Header("Authorization") token: String
+
     ): Response<PlantResponse>
 
     @GET("plant/{slug}")
     suspend fun getPlant(
         @Path("slug") slug: String,
-        @Header("Authorization") token: String
+
     ): Response<SinglePlantResponse>
 
 }

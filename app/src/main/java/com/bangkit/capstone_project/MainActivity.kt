@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -157,7 +158,7 @@ class MainActivity : ComponentActivity() {
                             is UiState.Loading -> {
 
                             }
-                            is UiState.Success -> sendNotification()
+                            is UiState.Success ->{}
                             is UiState.Error ->{}
                             // Handle other UI states if needed
                         }
@@ -174,8 +175,10 @@ class MainActivity : ComponentActivity() {
                         cameraExecutor = cameraExecutor,
                         classifier = classifier,
                         taskViewModel = taskViewModel,
-                        prefViewModel = prefViewModel
-                    ) { sendNotification() }
+                        prefViewModel = prefViewModel,
+                        showToast = {text->showToast(text)},
+                        sendNotification={}
+                    )
 
                 }
             }
@@ -216,6 +219,10 @@ class MainActivity : ComponentActivity() {
         }
         val notification = mBuilder.build()
         mNotificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    fun showToast(message:String){
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
     }
     companion object {
         private const val NOTIFICATION_ID = 1

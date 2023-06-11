@@ -27,13 +27,12 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bangkit.capstone_project.R
-import com.bangkit.capstone_project.data.network.user.UserFactory
-import com.bangkit.capstone_project.data.network.user.UserInjection
 import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.model.UserModel
 import com.bangkit.capstone_project.ui.UiState
@@ -45,20 +44,25 @@ import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 @Composable
 fun LoginScreen(
     prefViewModel: PreferenceViewModel,
-    viewModel: UserViewModel ,
-    modifier: Modifier = Modifier, navigateMain: () -> Unit, navigateRegis: () -> Unit
+    viewModel: UserViewModel,
+    modifier: Modifier = Modifier,
+    navigateMain: () -> Unit,
+    navigateRegis: () -> Unit,
+    showToast: (String) -> Unit
 ) {
+
     LoginContent(
         viewModel = viewModel,
         loading = false,
         navigateMain = navigateMain,
         navigateRegis = navigateRegis,
-        prefViewModel = prefViewModel
+        prefViewModel = prefViewModel,
+        showToast =  showToast
     )
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun LoginContent(
     navigateRegis: () -> Unit,
@@ -66,7 +70,8 @@ fun LoginContent(
     modifier: Modifier = Modifier,
     navigateMain: () -> Unit,
     prefViewModel: PreferenceViewModel,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    showToast: (String) -> Unit
 ) {
     var inputEmail by remember {
         mutableStateOf("")
@@ -103,7 +108,7 @@ fun LoginContent(
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = "Input your existing Account",
+                        text = "Masukkan Informasi Akun Kamu",
                         fontSize = 18.sp,
                         color = Color.LightGray
                     )
@@ -142,6 +147,8 @@ fun LoginContent(
                                 inputEmail,
                                 password
                             )
+
+
                         },
                         modifier = modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp)
@@ -180,8 +187,9 @@ fun LoginContent(
                                  response.loginResult.id
                              )
                         )
-                    navigateMain()
-
+                        showToast(stringResource(R.string.login_response))
+                        viewModel.resetResponseState()
+                        navigateMain()
                     }
                     Log.d("TAG", "RegisterScreen: ${response.toString()}")
 

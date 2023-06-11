@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -44,7 +45,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
 import com.bangkit.capstone_project.data.network.location.LocationViewModel
@@ -52,19 +52,19 @@ import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.user.UserFactory
 import com.bangkit.capstone_project.data.network.user.UserInjection
 import com.bangkit.capstone_project.data.network.user.UserViewModel
-import com.bangkit.capstone_project.model.User
+import com.bangkit.capstone_project.data.network.userplant.UserPlantItem
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.AnimatedSplash
 import com.bangkit.capstone_project.ui.screen.CameraScreen
 import com.bangkit.capstone_project.ui.screen.EditTaskScreen
-import com.bangkit.capstone_project.ui.screen.ProfileScreen
 import com.bangkit.capstone_project.ui.screen.HomeScreen
 import com.bangkit.capstone_project.ui.screen.ListScreen
 import com.bangkit.capstone_project.ui.screen.LoginScreen
 import com.bangkit.capstone_project.ui.screen.OwnedPlantScreen
 import com.bangkit.capstone_project.ui.screen.PlantInfoScreen
+import com.bangkit.capstone_project.ui.screen.ProfileScreen
 import com.bangkit.capstone_project.ui.screen.RegisterScreen
 import com.bangkit.capstone_project.ui.screen.ResultScreen
 import com.bangkit.capstone_project.ui.screen.Screen
@@ -84,10 +84,10 @@ fun App(
     navController: NavHostController = rememberNavController(),
     prefViewModel: PreferenceViewModel,
     locationViewModel: LocationViewModel = hiltViewModel(),
-    userViewModel: UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+    userViewModel: UserViewModel = viewModel(
         factory = UserFactory(UserInjection.provideRepository())
     ),
-    plantViewModel: PlantViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+    plantViewModel: PlantViewModel = viewModel(
 
     ),
     context: Context,
@@ -96,7 +96,8 @@ fun App(
     outputDirectory: File,
     classifier: DeseaseClassifier,
     taskViewModel: TaskViewModel,
-    sendNotification: () -> Unit
+    sendNotification: () -> Unit,
+    showToast: (String) -> Unit
 ) {
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
@@ -107,16 +108,26 @@ fun App(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = skipPartiallyExpanded
     )
+    val currentLocation = locationViewModel.currentLocation
+    val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    val currentRoute = navBackStackEntry?.destination?.route
+    val uiState = userViewModel.uiState.collectAsState()
+    val userPlantState = userViewModel.userPlant.collectAsState()
+
     lateinit var photoUri: Uri
 
-    lateinit var user:User
+
+    var myList: MutableList<UserPlantItem> = mutableListOf()
+
+
     val locationPermissions = rememberMultiplePermissionsState(
         permissions = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
         )
     )
-    val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+
 
     LaunchedEffect(key1 = locationPermissions.allPermissionsGranted) {
         if (locationPermissions.allPermissionsGranted) {
@@ -125,31 +136,10 @@ fun App(
             locationPermissions.launchMultiplePermissionRequest()
         }
     }
-    val currentLocation = locationViewModel.currentLocation
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
 
-    userViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
-        when (uiState) {
-            is UiState.Loading -> {
-                session?.token?.let { session?.id?.let { it1 -> userViewModel.getUser(it1, it) } }
-            }
-
-            is UiState.Success -> {
-
-                val data = uiState.data?.userResult
-
-                    user = User(id =data?.id, name = data?.name, foto = BuildConfig.BASE_URL+data?.foto, email = data?.email )
 
 
-            }
-
-            is UiState.Error -> {}
-
-        }
-    }
 
 
 
@@ -157,21 +147,16 @@ fun App(
         Scaffold(
             bottomBar = {
                 if (currentRoute == Screen.Home.route || currentRoute == Screen.Forum.route) {
-                    NavigationBottomBar(
-                        navController = navController,
-                        openDialog = {
+                    NavigationBottomBar(navController = navController, openDialog = {
 
-                            openBottomSheet = !openBottomSheet
-                        },
-                        modifier = modifier.graphicsLayer {
+                        openBottomSheet = !openBottomSheet
+                    }, modifier = modifier.graphicsLayer {
 
-                            shape = RoundedCornerShape(
-                                topStart = 16.dp,
-                                topEnd = 16.dp
-                            )
-                            clip = true
-                        }
-                    )
+                        shape = RoundedCornerShape(
+                            topStart = 16.dp, topEnd = 16.dp
+                        )
+                        clip = true
+                    })
                 }
 
 
@@ -184,33 +169,39 @@ fun App(
             )
             NavHost(
                 navController = navController,
-                startDestination =  Screen.Splash.route
-                ,
+                startDestination = Screen.Splash.route,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
                 composable(Screen.Splash.route) {
-                    AnimatedSplash(navController = navController)
+                    AnimatedSplash(
+                        navController = navController,
+                        prefViewModel = prefViewModel
+                    )
 
                 }
                 composable(Screen.Home.route) {
-                    HomeScreen(
-                        token = session?.token,
-                        username = session?.name,
-                        id = session?.id,
-                        userViewModel=userViewModel,
-                        currentLocation = currentLocation,
-                        taskViewModel = taskViewModel,
-                        navigatetoOwned = { id ->
-                            navController.navigate(
-                                Screen.OwnedPlant.createRoute(id)
+
+                    session?.token?.let { it1 ->
+                        session?.id?.let { it2 ->
+                            HomeScreen(token = it1,
+
+                                prefViewModel = prefViewModel,
+
+                                id = it2,
+                                userViewModel = userViewModel,
+                                currentLocation = currentLocation,
+
+                                plantViewModel = plantViewModel,
+                                navigatetoOwned = { id ->
+                                    navController.navigate(
+                                        Screen.OwnedPlant.createRoute(id)
+                                    )
+                                }
                             )
-                        }, navigateLogin = {
-                            navController.navigate(Screen.Login.route) {
-                                launchSingleTop = true
-                            }
-                        })
+                        }
+                    }
 
 
                 }
@@ -219,19 +210,17 @@ fun App(
                     arguments = listOf(navArgument("id") { type = NavType.IntType })
                 ) {
                     val id = it.arguments?.getInt("id") ?: -1L
-                    OwnedPlantScreen(
-                        plantId = id as Int,
+                    OwnedPlantScreen(plantId = id as Int,
                         onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
-                        sendNotification=sendNotification,
+                        sendNotification = sendNotification,
                         navigateEdit = { taskId ->
                             navController.navigate(
                                 Screen.EditTask.createRoute(
                                     taskId
                                 )
                             )
-                        }
-                    )
+                        })
 
                 }
 
@@ -251,54 +240,62 @@ fun App(
 
 
                 composable(Screen.Login.route) {
-                    LoginScreen(
-                        prefViewModel = prefViewModel,
+                    LoginScreen(prefViewModel = prefViewModel,
                         viewModel = userViewModel,
+                        showToast = showToast,
                         navigateMain = { navController.navigate(Screen.Home.route) },
                         navigateRegis = { navController.navigate(Screen.Register.route) })
 
                 }
                 composable(Screen.Register.route) {
-                    RegisterScreen(
-                        viewModel = userViewModel,
-                        navigateLogin = {
-                            navController.navigate(Screen.Login.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        onBack = { navController.navigateUp() })
+                    RegisterScreen(viewModel = userViewModel, navigateLogin = {
+                        navController.navigate(Screen.Login.route) {
+                            launchSingleTop = true
+                        }
+                    }, onBack = { navController.navigateUp() })
 
                 }
 
 
                 composable(Screen.Task.route) {
-                    TaskScreen(
-                        onBack = { navController.navigateUp() },
+                    TaskScreen(onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
-                        navigateHome = { navController.navigate(Screen.Home.route) }
-                    )
+                        navigateHome = {
+                            navController.navigate(Screen.Home.route) {
+
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
+                        })
 
                 }
 
                 composable(Screen.Forum.route) {
-                    ProfileScreen( onLogout = {prefViewModel.deleteSession()},user = user)
+
+                            ProfileScreen(onLogout = {
+                                prefViewModel.deleteSession()
+                                navController.navigate(Screen.Login.route)
+                            }, prefViewModel = prefViewModel, userViewModel = userViewModel,
+                            showToast = showToast)
+
+
+
+
                 }
                 composable(Screen.ListPlant.route) {
-                    ListScreen(
-                        token = session?.token,
+                    ListScreen(token = session?.token,
                         plantViewModel = plantViewModel,
-                        navController=navController,
+                        navController = navController,
                         onBack = { navController.navigateUp() },
                         onclick = { navController.navigate(Screen.DetailPlant.route) })
                 }
-                composable( route = Screen.DetailPlant.route,
+                composable(
+                    route = Screen.DetailPlant.route,
                     arguments = listOf(navArgument("slug") { type = NavType.StringType })
                 ) {
                     val slug = it.arguments?.getString("slug") ?: ""
-                    PlantInfoScreen(
-                        token = session?.token,
-                        plantViewModel=plantViewModel,
-                        slug =slug ,
+                    PlantInfoScreen(token = session?.token,
+                        plantViewModel = plantViewModel,
+                        slug = slug,
                         navigateTask = { navController.navigate(Screen.Task.route) },
                         onBack = { navController.navigateUp() })
                 }
@@ -306,38 +303,28 @@ fun App(
                     Box(modifier = Modifier.fillMaxSize()) {
                         when (currentState.value) {
                             is ScreenState.Camera -> {
-                                CameraScreen(
-                                    modifier = Modifier.fillMaxSize(),
+                                CameraScreen(modifier = Modifier.fillMaxSize(),
                                     outputDirectory = outputDirectory,
                                     executor = cameraExecutor,
                                     onImageCaptured = { uri ->
                                         // Check if the image was captured from the camera or picked from the gallery
-                                        if (uri != null) {
-                                            // Image captured from the camera
-                                            photoUri = uri
-                                            currentState.value = ScreenState.Photo
-                                        } else if (selectedImageUri.value != null) {
-                                            // Image picked from the gallery
-                                            photoUri = selectedImageUri.value!!
-                                            currentState.value = ScreenState.Photo
-                                        }
+                                        // Image captured from the camera
+                                        photoUri = uri
+                                        currentState.value = ScreenState.Photo
                                     },
                                     onError = { Log.e("kilo", "View error:", it) },
-                                    onBack = { navController.navigateUp() }
-                                )
+                                    onBack = { navController.navigateUp() })
                             }
 
                             is ScreenState.Photo -> {
-                                ResultScreen(
-                                    modifier = Modifier.fillMaxSize(),
+                                ResultScreen(modifier = Modifier.fillMaxSize(),
                                     photoUri = photoUri,
                                     classifer = classifier,
                                     context = context,
                                     onBack = {
                                         currentState.value = ScreenState.Camera
 
-                                    }
-                                )
+                                    })
                             }
                         }
                     }
@@ -346,8 +333,8 @@ fun App(
             }
         }
         if (openBottomSheet) {
-            val windowInsets = if (edgeToEdgeEnabled)
-                WindowInsets(0) else BottomSheetDefaults.windowInsets
+            val windowInsets =
+                if (edgeToEdgeEnabled) WindowInsets(0) else BottomSheetDefaults.windowInsets
 
             ModalBottomSheet(
                 onDismissRequest = { openBottomSheet = false },

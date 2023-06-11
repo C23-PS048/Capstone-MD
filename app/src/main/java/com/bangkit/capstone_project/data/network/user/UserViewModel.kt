@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bangkit.capstone_project.data.network.config.ApiConfig
+import com.bangkit.capstone_project.data.network.userplant.UserPlantResponse
 import com.bangkit.capstone_project.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +23,12 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         MutableStateFlow(UiState.Loading)
     val uiState: StateFlow<UiState<DetailUserResponse>>
         get() = _uiState
+
+
+    private val _userPlant: MutableStateFlow<UiState<UserPlantResponse>> =
+        MutableStateFlow(UiState.Loading)
+    val userPlant: StateFlow<UiState<UserPlantResponse>>
+        get() = _userPlant
 
     fun resetResponseState() {
         _responseState.value = null
@@ -103,6 +110,33 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
             Log.d("TAG", "registerUser: ${uiState.value}")
+        }
+    }
+
+    fun getUserPlant(id: String, token: String) {
+        _userPlant.value = UiState.Loading
+        val token = "Bearer $token"
+
+
+        viewModelScope.launch {
+
+
+            try {
+                val response = ApiConfig.getUserService().getUserPlant(id, token)
+
+                Log.d("TAG", "registerUser: ${response.toString()}")
+                if (response.isSuccessful) {
+
+                    _userPlant.value = UiState.Success(response.body())
+                } else {
+                    _userPlant.value = UiState.Error(response.toString() ?: "Unknown error")
+                }
+            } catch (e: HttpException) {
+                _userPlant.value = UiState.Error(e.message ?: "Unknown error")
+            } catch (e: Exception) {
+                _userPlant.value = UiState.Error(e.message ?: "Unknown error")
+            }
+            Log.d("TAG", "registerUser: ${userPlant.value}")
         }
     }
 

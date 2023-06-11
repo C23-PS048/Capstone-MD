@@ -45,11 +45,10 @@ fun ListScreen(
     plantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
-                token.let {  it1 ->
-                    if (it1 != null) {
-                        plantViewModel.getAll(it1)
-                    }
-                }
+
+                        plantViewModel.getAll()
+
+
             }
 
             is UiState.Success -> {

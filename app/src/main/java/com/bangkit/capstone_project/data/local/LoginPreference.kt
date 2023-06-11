@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.data.local
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -24,7 +25,7 @@ class LoginPreference private constructor(private val dataStore: DataStore<Prefe
                 preferences[ID]
             )
 
-            deleteExpiredSessions(preferences)
+
 
             userModel
         }
@@ -32,6 +33,7 @@ class LoginPreference private constructor(private val dataStore: DataStore<Prefe
 
 
     suspend fun saveSession(userModel: UserModel) {
+        Log.d("saveSession", "saveSession: $userModel")
         dataStore.edit { preferences ->
             preferences[TOKEN] = userModel.token as String
             preferences[NAME] = userModel.name as String

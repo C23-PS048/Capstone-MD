@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,11 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GreenDark
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun AnimatedSplash(navController: NavHostController) {
+fun AnimatedSplash(navController: NavHostController, prefViewModel: PreferenceViewModel,) {
     var startAnimation by remember { mutableStateOf(false) }
     val alphaAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
@@ -36,12 +38,18 @@ fun AnimatedSplash(navController: NavHostController) {
             durationMillis = 3000
         )
     )
-
+    val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(4000)
         navController.popBackStack()
+        if (session==null){
+
+        navController.navigate(Screen.Login.route)
+        }else{
         navController.navigate(Screen.Home.route)
+
+        }
     }
     SplashScreen(alpha = alphaAnim.value)
 }

@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.data.network.user
 
+import com.bangkit.capstone_project.data.network.userplant.UserPlantResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Response
@@ -37,6 +38,7 @@ interface UserService {
         @Header("Authorization") token: String
     ): Response<DetailUserResponse>
 
+
     @Multipart
     @PATCH("/user/{id}")
     fun updateUser(
@@ -46,5 +48,11 @@ interface UserService {
 
 
     ): Call<ResponseMessage>
+
+    @GET("user/{id}/plant")
+    suspend fun getUserPlant(
+        @Path("id") id: String,
+        @Header("Authorization") token: String
+    ): Response<UserPlantResponse>
 
 }
