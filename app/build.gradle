@@ -30,7 +30,7 @@ android {
             useSupportLibrary true
         }
         buildConfigField "String", "WEATHER_URL", "\"https://api.openweathermap.org/data/2.5/\""
-        buildConfigField "String", "BASE_URL", "\"http://10.0.2.2:8000/\""
+        buildConfigField "String", "BASE_URL", "\"http://10.0.2.2:5000/\""
     }
 
     buildTypes {
@@ -133,5 +133,11 @@ dependencies {
 
     //workManager
     implementation "androidx.work:work-runtime:2.8.1"
+
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2' // Optional: For JSON serialization/deserialization
+
 
 }

@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bangkit.capstone_project.data.network.config.ApiConfig
-import com.bangkit.capstone_project.model.Task
 import com.bangkit.capstone_project.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,10 +18,12 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val _loginState = MutableStateFlow<UiState<LoginResponse>?>(null)
     val loginState: StateFlow<UiState<LoginResponse>?> = _loginState
-    private val _uiState: MutableStateFlow<UiState<DetailUserResponse>> = MutableStateFlow(UiState.Loading)
+    private val _uiState: MutableStateFlow<UiState<DetailUserResponse>> =
+        MutableStateFlow(UiState.Loading)
     val uiState: StateFlow<UiState<DetailUserResponse>>
         get() = _uiState
-    fun resetResponseState(){
+
+    fun resetResponseState() {
         _responseState.value = null
         _loginState.value = null
 
@@ -36,7 +37,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
                 val response = ApiConfig.getUserService().registerUser(name, email, password)
 
                 Log.d("TAG", "registerUser: ${response.toString()}")
-                if (response.isSuccessful) {
+                if (response.body()?.error == false) {
 
                     _responseState.value = UiState.Success(response.body())
                 } else {
@@ -60,8 +61,12 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
                 Log.d("TAG", "registerUser: ${response.toString()}")
                 if (response.isSuccessful) {
+                    if (response.body()?.error == false) {
 
-                    _loginState.value = UiState.Success(response.body())
+                        _loginState.value = UiState.Success(response.body())
+                    } else {
+                        _loginState.value = UiState.Error(response.toString() ?: "Unknown error")
+                    }
                 } else {
                     _loginState.value = UiState.Error(response.toString() ?: "Unknown error")
                 }
@@ -74,7 +79,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun getUser(id: String,token:String) {
+    fun getUser(id: String, token: String) {
         _uiState.value = UiState.Loading
         val token = "Bearer $token"
 
@@ -82,10 +87,8 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
 
 
-
-
             try {
-                val response = ApiConfig.getUserService().getUserInfo(id,token)
+                val response = ApiConfig.getUserService().getUserInfo(id, token)
 
                 Log.d("TAG", "registerUser: ${response.toString()}")
                 if (response.isSuccessful) {

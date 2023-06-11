@@ -44,11 +44,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import coil.compose.AsyncImage
 import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
 import com.bangkit.capstone_project.data.network.location.LocationViewModel
+import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.user.UserFactory
 import com.bangkit.capstone_project.data.network.user.UserInjection
 import com.bangkit.capstone_project.data.network.user.UserViewModel
@@ -86,6 +86,9 @@ fun App(
     locationViewModel: LocationViewModel = hiltViewModel(),
     userViewModel: UserViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
         factory = UserFactory(UserInjection.provideRepository())
+    ),
+    plantViewModel: PlantViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+
     ),
     context: Context,
     currentState: MutableState<ScreenState>,
@@ -147,6 +150,8 @@ fun App(
 
         }
     }
+
+
 
     CapstoneProjectTheme() {
         Scaffold(
@@ -280,11 +285,20 @@ fun App(
                 }
                 composable(Screen.ListPlant.route) {
                     ListScreen(
+                        token = session?.token,
+                        plantViewModel = plantViewModel,
+                        navController=navController,
                         onBack = { navController.navigateUp() },
                         onclick = { navController.navigate(Screen.DetailPlant.route) })
                 }
-                composable(Screen.DetailPlant.route) {
+                composable( route = Screen.DetailPlant.route,
+                    arguments = listOf(navArgument("slug") { type = NavType.StringType })
+                ) {
+                    val slug = it.arguments?.getString("slug") ?: ""
                     PlantInfoScreen(
+                        token = session?.token,
+                        plantViewModel=plantViewModel,
+                        slug =slug ,
                         navigateTask = { navController.navigate(Screen.Task.route) },
                         onBack = { navController.navigateUp() })
                 }

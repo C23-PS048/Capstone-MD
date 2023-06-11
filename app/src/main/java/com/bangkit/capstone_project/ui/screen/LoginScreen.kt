@@ -179,15 +179,10 @@ fun LoginContent(
                                  response.loginResult.token,
                                  response.loginResult.id
                              )
-                        /*    UserModel(
-                                response.userResult.name,
-                                response.loginResult.token,
-                                response.loginResult.userId
-                            )*/
                         )
-                    }
-                    viewModel.resetResponseState()
                     navigateMain()
+
+                    }
                     Log.d("TAG", "RegisterScreen: ${response.toString()}")
 
                 }

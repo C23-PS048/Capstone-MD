@@ -81,6 +81,6 @@ data class UserResult(
 	@field:SerializedName("email")
 	val email: String? = null,
 
-	@field:SerializedName("name")
+	@field:SerializedName("username")
 	val name: String? = null
 )

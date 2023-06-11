@@ -1,9 +1,9 @@
 package com.bangkit.capstone_project.ui.component.cards
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,18 +20,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.size.Scale
+import com.bangkit.capstone_project.data.network.plant.PlantResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlantCards(onClick:()->Unit,modifier: Modifier = Modifier) {
+fun PlantCards(onClick: () -> Unit, modifier: Modifier = Modifier, data: PlantResult) {
+    Log.d("TAG", "PlantCards: ${data.image}")
     Card(onClick = onClick, modifier = Modifier
         .width(150.dp)
         .height(200.dp),elevation=CardDefaults.cardElevation(defaultElevation = 4.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
@@ -44,22 +42,20 @@ fun PlantCards(onClick:()->Unit,modifier: Modifier = Modifier) {
                     .clip(shape = RoundedCornerShape(15))
             ) {
                 AsyncImage(
-                    model = "https://plantnet.com.au/wp-content/uploads/00.jpg",
+                    model = data.image,
                     contentDescription = "Plant Hint",
                     contentScale = ContentScale.FillWidth,
                     modifier = modifier.fillMaxWidth()
                 )
             }
-           Column(modifier.fillMaxWidth().padding(15.dp,8.dp)) {
-               Text(text = "Plant Name", style = MaterialTheme.typography.titleLarge)
-               Text(text = "Plant Scientific", style = MaterialTheme.typography.bodySmall)
+           Column(
+               modifier
+                   .fillMaxWidth()
+                   .padding(15.dp, 8.dp)) {
+               Text(text = data.plantName, style = MaterialTheme.typography.titleLarge)
+               Text(text = data.scientificName, style = MaterialTheme.typography.bodySmall)
            }
         }
     }
 }
 
-@Preview
-@Composable
-fun PlantApp() {
-    PlantCards(onClick = {})
-}

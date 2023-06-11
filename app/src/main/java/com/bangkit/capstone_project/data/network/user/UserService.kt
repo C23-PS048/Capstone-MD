@@ -15,7 +15,7 @@ import retrofit2.http.Path
 
 interface UserService {
     @FormUrlEncoded
-    @POST("api/register")
+    @POST("register")
     suspend fun registerUser(
         @Field("name") name: String,
         @Field("email") email: String,
@@ -23,7 +23,7 @@ interface UserService {
     ): Response<ResponseMessage>
 
     @FormUrlEncoded
-    @POST("api/login")
+    @POST("login")
     suspend fun loginUser(
         @Field("email") email: String,
         @Field("password") password: String,
@@ -31,7 +31,7 @@ interface UserService {
 
 
 
-    @GET("api/user/{id}")
+    @GET("user/{id}")
     suspend fun getUserInfo(
         @Path("id") id: String,
         @Header("Authorization") token: String

@@ -2,14 +2,12 @@ package com.bangkit.capstone_project.ui.screen
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,37 +15,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,9 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
-import com.bangkit.capstone_project.helper.convertMillisToDateString
+import com.bangkit.capstone_project.data.network.plant.PlantResult
+import com.bangkit.capstone_project.data.network.plant.PlantViewModel
+import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
-import com.bangkit.capstone_project.ui.component.cards.ScheduleInput
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.GrayLight
 import com.bangkit.capstone_project.ui.theme.GreenDark
@@ -72,11 +52,54 @@ import com.bangkit.capstone_project.ui.theme.GreenDark
 
 @Composable
 
-fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun PlantInfoScreen(
+    navigateTask: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    slug: String,
+    token: String?,
+    plantViewModel: PlantViewModel
+) {
 
 
+    plantViewModel.plantState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
+            is UiState.Loading -> {
+                token.let { it1 ->
+                    if (it1 != null) {
+                        plantViewModel.getPlant(slug, it1)
+                    }
+                }
+            }
+
+            is UiState.Success -> {
+
+                val data = uiState.data?.plantResult
+                Log.d("TAG", "ListScreen: $data")
+                if (data != null) {
+                    DetailContent(
+                        navigateTask = navigateTask,
+                        modifier = modifier, onBack = onBack, plant = data
+                    )
+                }
+
+            }
+
+            is UiState.Error -> {}
+
+        }
+    }
 
 
+}
+
+@Composable
+fun DetailContent(
+    navigateTask: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    plant: PlantResult
+) {
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -108,13 +131,13 @@ fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack:
                     ) {
                         Column() {
                             Text(
-                                "Plant Name",
+                                plant.plantName,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.White
                             )
                             Text(
-                                "Scientific",
+                                plant.scientificName,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Color.LightGray
                             )
@@ -150,9 +173,12 @@ fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack:
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(32.dp)) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(text = "About", style = MaterialTheme.typography.titleLarge)
                                 Text(
-                                    text = "vel orci porta non pulvinar neque laoreet suspendisse interdum consectetur libero id faucibus nisl tincidunt eget nullam non nisi est sit amet facilisis magna etiam tempor orci eu lobortis elementum",
+                                    text = "Tentang",
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                Text(
+                                    text = plant.description,
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Justify
                                 )
@@ -180,7 +206,7 @@ fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack:
                                         )
                                     }
                                     Text(
-                                        text = "20 - 29 C",
+                                        text = plant.temperature,
                                         style = MaterialTheme.typography.titleSmall,
                                         textAlign = TextAlign.Center
                                     )
@@ -204,72 +230,34 @@ fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack:
                                         )
                                     }
                                     Text(
-                                        text = "Water Abundant",
+                                        text = plant.wateringFrequency,
                                         style = MaterialTheme.typography.titleSmall,
                                         textAlign = TextAlign.Center
                                     )
                                 }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.widthIn(max = 65.dp)
-                                ) {
-                                    Box(
-                                        modifier = modifier
-                                            .clip(RoundedCornerShape(15))
-                                            .background(GrayLight)
-                                            .padding(8.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.cloud_sun),
-                                            contentDescription = null,
-                                            tint = BlackMed,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                    Text(
-                                        text = "Light Diffused",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.widthIn(max = 65.dp)
-                                ) {
-                                    Box(
-                                        modifier = modifier
-                                            .clip(RoundedCornerShape(15))
-                                            .background(GrayLight)
-                                            .padding(8.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.soil),
-                                            contentDescription = null,
-                                            tint = BlackMed,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                    Text(
-                                        text = "Soil Dry",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+
+
                                 // Repeat the other three columns here
 
                             }
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(text = "Tips", style = MaterialTheme.typography.titleLarge)
+                                Text(text = "Tips Menyiram", style = MaterialTheme.typography.titleLarge)
                                 Text(
-                                    text = "vel orci porta non pulvinar neque laoreet suspendisse interdum consectetur libero id faucibus nisl tincidunt eget nullam non nisi est sit amet facilisis magna etiam tempor orci eu lobortis elementum",
+                                    text = plant.wateringTips,
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Justify
                                 )
                             }
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(text = "Tips", style = MaterialTheme.typography.titleLarge)
+                                Text(text = "Tips Menanam", style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    text = plant.plantTips,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Justify
+                                )
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(text = "Gambar", style = MaterialTheme.typography.titleLarge)
                                 LazyRow(
                                     modifier = modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -315,7 +303,5 @@ fun PlantInfoScreen(navigateTask:()->Unit,modifier: Modifier = Modifier, onBack:
         }
 
 
-
     }
 }
-

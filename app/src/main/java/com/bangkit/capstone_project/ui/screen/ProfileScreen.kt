@@ -68,16 +68,16 @@ fun UserProfilePage(onLogout:()->Unit, user: User) {
             .fillMaxSize()
             .background(Color.White)
     ) {
-        ProfileHeaderSection(user= user)
+        ProfileHeaderSection(user= user,onLogout=onLogout)
 
         Divider(color = Color.LightGray, thickness = 0.5.dp)
         Spacer(modifier = Modifier.size(2.dp))
-        ProfileMenu(onLogout=onLogout)
+        ProfileMenu()
     }
 }
 
 @Composable
-fun ProfileMenu(onLogout: () -> Unit) {
+fun ProfileMenu() {
     Column(  modifier = Modifier
         .fillMaxSize()
 
@@ -93,7 +93,7 @@ fun ProfileMenu(onLogout: () -> Unit) {
                     Text(text = "Diskusikan Tanaman mu", fontSize = 16.sp, fontWeight = FontWeight.W400)
                 }
             }
-            TextButton(onClick = onLogout, colors = ButtonDefaults.buttonColors(contentColor = BlackMed, containerColor = Color.Transparent),contentPadding= PaddingValues(vertical = 0.dp, horizontal = 16.dp)) {
+            TextButton(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(contentColor = BlackMed, containerColor = Color.Transparent),contentPadding= PaddingValues(vertical = 0.dp, horizontal = 16.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Image(imageVector = Icons.Outlined.ShoppingCart, contentDescription = null, colorFilter = ColorFilter.tint(
                         BlackMed), modifier = Modifier.size(20.dp))
@@ -104,7 +104,7 @@ fun ProfileMenu(onLogout: () -> Unit) {
     }
 }
 @Composable
-fun ProfileHeaderSection(user: User) {
+fun ProfileHeaderSection(user: User, onLogout: () -> Unit) {
     Log.d("TAG", "ProfileHeaderSection: ${user.foto}")
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -173,7 +173,7 @@ fun ProfileHeaderSection(user: User) {
                     })
                 DropdownMenuItem(
                     text = { Text("logout") },
-                    onClick = { /* Handle settings! */ },
+                    onClick = onLogout,
                     leadingIcon = {
                         Icon(
                             Icons.Outlined.ExitToApp,

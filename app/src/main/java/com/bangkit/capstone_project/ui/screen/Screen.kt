@@ -8,7 +8,9 @@ sealed class Screen(val route: String) {
     object Camera : Screen("camera")
     object ListPlant : Screen("listplant")
     object Splash : Screen("splash")
-    object DetailPlant : Screen("detailPlant")
+    object DetailPlant : Screen("detailPlant/{slug}"){
+        fun createRoute(slug:String) = "detailPlant/$slug"
+    }
     object Task : Screen("task")
 
     object Login : Screen("login")

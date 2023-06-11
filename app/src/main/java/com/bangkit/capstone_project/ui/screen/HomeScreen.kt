@@ -55,7 +55,7 @@ fun HomeScreen(
     id: String?
 ) {
 
-
+    userViewModel.resetResponseState()
     if (token != null) {
         currentLocation?.latitude?.let { lat ->
             currentLocation.longitude.let { long ->
