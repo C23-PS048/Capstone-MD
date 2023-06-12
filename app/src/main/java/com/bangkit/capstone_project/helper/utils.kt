@@ -137,3 +137,8 @@ fun getCurrentDate(): String {
 
     return sdf.format(currentDate)
 }
+
+fun convertToHyphenated(input: String): String {
+    val lowerCasedInput = input.lowercase()
+    return lowerCasedInput.replace(" ", "-")
+}

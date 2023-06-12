@@ -53,6 +53,7 @@ import com.bangkit.capstone_project.data.network.user.UserFactory
 import com.bangkit.capstone_project.data.network.user.UserInjection
 import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.data.network.userplant.UserPlantItem
+import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
@@ -90,6 +91,9 @@ fun App(
     plantViewModel: PlantViewModel = viewModel(
 
     ),
+    userPlantViewModel: UserPlantViewModel = viewModel(
+
+    ),
     context: Context,
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
@@ -113,13 +117,12 @@ fun App(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     val currentRoute = navBackStackEntry?.destination?.route
-    val uiState = userViewModel.uiState.collectAsState()
-    val userPlantState = userViewModel.userPlant.collectAsState()
+
 
     lateinit var photoUri: Uri
 
 
-    var myList: MutableList<UserPlantItem> = mutableListOf()
+
 
 
     val locationPermissions = rememberMultiplePermissionsState(
@@ -190,7 +193,7 @@ fun App(
                                 prefViewModel = prefViewModel,
 
                                 id = it2,
-                                userViewModel = userViewModel,
+                                userPlantViewModel = userPlantViewModel,
                                 currentLocation = currentLocation,
 
                                 plantViewModel = plantViewModel,
@@ -213,6 +216,8 @@ fun App(
                     OwnedPlantScreen(plantId = id as Int,
                         onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
+                        userPlantViewModel = userPlantViewModel,
+                        prefViewModel = prefViewModel,
                         sendNotification = sendNotification,
                         navigateEdit = { taskId ->
                             navController.navigate(
@@ -232,6 +237,8 @@ fun App(
                     EditTaskScreen(
                         id = id as Int,
                         onBack = { navController.navigateUp() },
+                        userPlantViewModel = userPlantViewModel,
+                        prefViewModel = prefViewModel,
                         taskViewModel = taskViewModel,
                         navigateHome = { navController.navigate(Screen.Home.route) },
                     )
@@ -266,6 +273,8 @@ fun App(
                         taskViewModel = taskViewModel,
                         plantId = slug,
                         plantViewModel=plantViewModel,
+                        preferenceViewModel = prefViewModel,
+                        userPlantViewModel=userPlantViewModel,
                         navigateHome = {
                             navController.navigate(Screen.Home.route) {
 

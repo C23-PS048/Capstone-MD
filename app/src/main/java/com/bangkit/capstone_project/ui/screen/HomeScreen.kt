@@ -32,6 +32,7 @@ import com.bangkit.capstone_project.data.network.plant.PlantResult
 import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.data.network.userplant.UserPlantItem
+import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
 import com.bangkit.capstone_project.helper.getCurrentDate
 import com.bangkit.capstone_project.ui.UiState
@@ -49,6 +50,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 
     plantViewModel: PlantViewModel,
+    userPlantViewModel: UserPlantViewModel,
     weatherViewModel: WeatherViewModel = viewModel(
         factory = ViewModelFactory(Injection.provideRepository())
     ),
@@ -57,7 +59,7 @@ fun HomeScreen(
     token: String,
 
 
-    userViewModel: UserViewModel,
+
     id: String,
 
     prefViewModel: PreferenceViewModel
@@ -100,13 +102,15 @@ fun HomeScreen(
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
 
-    userViewModel.userPlant.collectAsState(initial = UiState.Loading).value.let { uiState ->
+    userPlantViewModel.userPlant.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
         when (uiState) {
             is UiState.Loading -> {
-                CircularProgressIndicator()
+               Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                   CircularProgressIndicator()
+               }
                 session?.apply {
-                    userViewModel.getUserPlant(id, token)
+                    userPlantViewModel.getUserPlant(id, token)
 
                 }
             }

@@ -41,6 +41,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -58,15 +59,17 @@ import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.plant.PlantResult
 import com.bangkit.capstone_project.data.network.plant.PlantViewModel
+import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.helper.calculateScheduleDates
 import com.bangkit.capstone_project.helper.convertMillisToDateString
 import com.bangkit.capstone_project.model.Frequency
-import com.bangkit.capstone_project.model.Task
+import com.bangkit.capstone_project.model.UserModel
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.cards.ScheduleInput
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 
@@ -77,8 +80,11 @@ fun TaskScreen(
     modifier: Modifier = Modifier,
     taskViewModel: TaskViewModel,
     plantViewModel: PlantViewModel,
+    preferenceViewModel: PreferenceViewModel,
+    userPlantViewModel: UserPlantViewModel,
     plantId: String
 ) {
+    val session by preferenceViewModel.getLoginSession().collectAsState(initial = null)
     plantViewModel.plantState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
@@ -96,10 +102,12 @@ fun TaskScreen(
                 if (data != null) {
                     TaskContent(
                         onBack = onBack,
+                        session = session,
                         navigateHome = navigateHome,
                         taskViewModel = taskViewModel,
                         modifier = modifier,
-                        plant=data
+                        plant=data,
+                        userPlantViewModel=userPlantViewModel
                         )
                 }
 
@@ -121,6 +129,8 @@ fun TaskContent(
     modifier: Modifier = Modifier,
     taskViewModel: TaskViewModel,
     plant: PlantResult,
+    userPlantViewModel: UserPlantViewModel,
+    session: UserModel?,
 ) {
     val openWeatherDate = remember { mutableStateOf(false) }
     val openWeatherRepeat = remember { mutableStateOf(false) }
@@ -252,13 +262,25 @@ fun TaskContent(
                         )
                         Button(
                             onClick = {
-                                saveData(
-                                    location = textLocation.value,
-                                    frequency = selectedOption.frequency,
-                                    startDate = dateWeatherState.selectedDateMillis,
-                                    taskviewmodel = taskViewModel
-                                )
-                                navigateHome()
+                                if (session != null) {
+                                    session.token?.let {
+
+                                        session.id?.let { it1 ->
+                                            saveData(
+                                                location = textLocation.value,
+                                                frequency = selectedOption.frequency,
+                                                startDate = dateWeatherState.selectedDateMillis,
+
+                                                plantId = plant.id,
+                                                userId = it1.toInt(),
+                                                token = it,
+                                                userPlantViewModel  =userPlantViewModel
+                                            )
+                                        }
+
+                                    }
+                                }
+                             /*   navigateHome()*/
                             },
                             modifier = modifier.fillMaxWidth()
                         ) {
@@ -366,24 +388,32 @@ fun TaskContent(
     }
 }
 
-fun saveData(frequency: Int, startDate: Long?, location: String, taskviewmodel: TaskViewModel) {
+fun saveData(
+    frequency: Int, startDate: Long?, location: String, userPlantViewModel: UserPlantViewModel,
+    plantId: Int,
+    userId:Int,
+    token: String) {
 
-    val task = startDate?.let {
+    startDate?.let {
         val (lastDate, NextDate) = calculateScheduleDates(
             frequency = frequency,
             startDate = startDate
         )
-        Task(
+
+        userPlantViewModel.saveUserPlant(
             location = location,
-            startDate = it,
-            nextScheduledDate = NextDate,
-            lastScheduledDate = lastDate,
-            frequency = frequency
+            disease = "healthy",
+            startDate = startDate.toString(),
+            lastScheduledDate = lastDate.toString(),
+            nextScheduledDate = NextDate.toString(),
+            frequency = frequency.toString(),
+            plantId = plantId.toString(),
+            userId =userId.toString(),
+            token = token
         )
     }
-    if (task != null) {
-        taskviewmodel.insert(task)
-    }
+
+
 
 
 }

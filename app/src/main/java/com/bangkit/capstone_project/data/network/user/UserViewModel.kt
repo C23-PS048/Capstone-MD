@@ -25,10 +25,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         get() = _uiState
 
 
-    private val _userPlant: MutableStateFlow<UiState<UserPlantResponse>> =
-        MutableStateFlow(UiState.Loading)
-    val userPlant: StateFlow<UiState<UserPlantResponse>>
-        get() = _userPlant
+
 
     fun resetResponseState() {
         _responseState.value = null
@@ -113,31 +110,6 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun getUserPlant(id: String, token: String) {
-        _userPlant.value = UiState.Loading
-        val token = "Bearer $token"
 
-
-        viewModelScope.launch {
-
-
-            try {
-                val response = ApiConfig.getUserService().getUserPlant(id, token)
-
-                Log.d("TAG", "registerUser: ${response.toString()}")
-                if (response.isSuccessful) {
-
-                    _userPlant.value = UiState.Success(response.body())
-                } else {
-                    _userPlant.value = UiState.Error(response.toString() ?: "Unknown error")
-                }
-            } catch (e: HttpException) {
-                _userPlant.value = UiState.Error(e.message ?: "Unknown error")
-            } catch (e: Exception) {
-                _userPlant.value = UiState.Error(e.message ?: "Unknown error")
-            }
-            Log.d("TAG", "registerUser: ${userPlant.value}")
-        }
-    }
 
 }

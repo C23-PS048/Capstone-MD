@@ -40,13 +40,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.data.network.userplant.UserPlant
+import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.helper.getDaysBetween
 
 import com.bangkit.capstone_project.model.Task
@@ -56,6 +57,7 @@ import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.GrayDark
 import com.bangkit.capstone_project.ui.theme.GreenMed
 import com.bangkit.capstone_project.ui.theme.Ivory
+import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 @Composable
@@ -64,31 +66,38 @@ fun OwnedPlantScreen(
     plantId: Int,
     taskViewModel: TaskViewModel,
     navigateEdit: (Int) -> Unit,
-    sendNotification: () -> Unit
+    sendNotification: () -> Unit,
+    userPlantViewModel: UserPlantViewModel,
+    prefViewModel: PreferenceViewModel
 ) {
+    val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     Log.d("TAG", "OwnedPlantScreen: $plantId")
 
 
-    taskViewModel.detailState.collectAsState(initial = UiState.Loading).value.let { detailState ->
-        when (detailState) {
+    userPlantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
             is UiState.Loading -> {
-                taskViewModel.getTaskById(plantId)
+                session?.token?.let { userPlantViewModel.getPlant(plantId, it) }
             }
 
             is UiState.Success -> {
+                val data =uiState.data?.userPlant
                 val startTimestamp = System.currentTimeMillis()
                 val daysBetween =
-                    detailState.data?.nextScheduledDate?.let { getDaysBetween(startTimestamp, it) }
-                val location =    detailState.data?.location
+                    data?.nextScheduledDate?.let { getDaysBetween(startTimestamp, it.toLong()) }
+                val location =    data?.location
                 if (daysBetween != null) {
                     if (daysBetween == 0L) {
                         sendNotification()
                     }
                     if (location != null) {
-                        OwnedPlantContent(onBack = onBack,daysBetween = daysBetween,location = location, task = detailState.data, navigateEdit=navigateEdit)
+                        OwnedPlantContent(
+                            onBack = onBack,
+                            daysBetween = daysBetween,
+                            location = location, task =data, navigateEdit =navigateEdit)
                     }
                 }
-                Log.d("TAG", "HomeScreen: ${detailState.data}")
+                Log.d("TAG", "HomeScreen: ${uiState.data}")
             }
 
             is UiState.Error -> {}
@@ -98,7 +107,7 @@ fun OwnedPlantScreen(
 
 @Composable
 fun OwnedPlantContent(
-    task:Task,
+    task: UserPlant?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     daysBetween: Long,
@@ -348,7 +357,11 @@ fun OwnedPlantContent(
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuItem(
                     text = { Text("Edit") },
-                    onClick = { navigateEdit(task.id)},
+                    onClick = {
+                        if (task != null) {
+                            task.id?.let { navigateEdit(it) }
+                        }
+                    },
                     leadingIcon = {
                         Icon(
                             Icons.Outlined.Edit,
@@ -391,6 +404,6 @@ fun OwnedPlantContent(
 @Preview
 @Composable
 fun previewOwned() {
-    OwnedPlantContent(onBack = {}, daysBetween = 7, location = "location", navigateEdit = {1}, task = Task(1,"ad",1231313131L,3,1231313131L,1231313131L))
+    OwnedPlantContent(onBack = {}, daysBetween = 7, location = "location", navigateEdit = {1}, task = UserPlant("1","ad",3,"3",3,3))
 }
 
