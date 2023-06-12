@@ -60,8 +60,17 @@ class MainActivity : ComponentActivity() {
 
     private val mInputSize = 224
     private val mModelPath = "chili_disease.tflite"
-    private val mLabelPath = "label.txt"
-    private lateinit var classifier: DeseaseClassifier
+    private val mDiseaseLabel = "label.txt"
+    private val mPlantModel = "plant.tflite"
+    private val mPlantlabel = "LabelPlants.txt"
+    private lateinit var tomatoClassifier: DeseaseClassifier
+    private lateinit var plantClassifier: DeseaseClassifier
+    private lateinit var chiliClassifier: DeseaseClassifier
+
+
+
+
+
 
     private var currentState: MutableState<ScreenState> = mutableStateOf(ScreenState.Camera)
     private lateinit var taskViewModel: TaskViewModel
@@ -88,7 +97,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initClassifier() {
-        classifier = DeseaseClassifier(assets, mModelPath, mLabelPath, mInputSize)
+        chiliClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)
+        tomatoClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)
+   /*     chiliClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)*/
+        plantClassifier = DeseaseClassifier(assets, mPlantModel, mPlantlabel, mInputSize)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -173,7 +185,9 @@ class MainActivity : ComponentActivity() {
                         currentState = currentState,
                         outputDirectory = outputDirectory,
                         cameraExecutor = cameraExecutor,
-                        classifier = classifier,
+                        tomatoClassifier = tomatoClassifier,
+                        chiliClassifier = chiliClassifier,
+                        plantClassifier = plantClassifier,
                         taskViewModel = taskViewModel,
                         prefViewModel = prefViewModel,
                         showToast = {text->showToast(text)},

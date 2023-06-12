@@ -14,6 +14,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -76,7 +77,18 @@ fun takePhoto(
                 }
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
+                    var savedUri = Uri.fromFile(photoFile)
+
+                    // Rotate the image if taken from the camera
+                    val isTakenFromCamera = pickedImageUri == null
+                    if (isTakenFromCamera) {
+                        val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                        val rotatedBitmap = rotateImage(bitmap)
+                        val rotatedFile = File(outputDirectory, photoFile.name)
+                        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, FileOutputStream(rotatedFile))
+                        savedUri = Uri.fromFile(rotatedFile)
+                    }
+
                     onImageCaptured(savedUri)
                 }
             }

@@ -114,7 +114,7 @@ fun CameraScreen(
                         tint = GreenDark
                     )
                 }
-                Text(text = "Diagnose Your Plant", modifier = Modifier.align(Alignment.Center))
+                Text(text = "Identifikasi Tanaman Mu", modifier = Modifier.align(Alignment.Center))
             }
         },
         bottomBar = {

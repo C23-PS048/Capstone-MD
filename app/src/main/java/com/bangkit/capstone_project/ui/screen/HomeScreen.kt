@@ -36,6 +36,7 @@ import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
 import com.bangkit.capstone_project.helper.getCurrentDate
 import com.bangkit.capstone_project.ui.UiState
+import com.bangkit.capstone_project.ui.component.InfoScreen
 import com.bangkit.capstone_project.ui.component.cards.OwnPlantCard
 import com.bangkit.capstone_project.ui.component.cards.WeatherCards
 import com.bangkit.capstone_project.ui.theme.BlackLight
@@ -182,42 +183,42 @@ fun HomeContent(
         )
         Text(text = "Your Plant", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         if (listTask != null) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
+            if (listTask.isNotEmpty()) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
 
-                items(listTask) { item ->
+                    items(listTask) { item ->
 
-                    if (item != null) {
-                        item.location?.let { loc ->
-                            item.id?.let { id ->
-                                plantList.forEach { plantResult ->
-                                    if (plantResult.id == item.plantId) {
-                                        OwnPlantCard(
-                                            location = loc,
-                                            plantName = plantResult.plantName,
-                                            plantImage = plantResult.image,
-                                            plantScientifi = plantResult.scientificName,
-                                            navigatetoOwned = navigatetoOwned,
-                                            id = id
-                                        )
+                        if (item != null) {
+                            item.location?.let { loc ->
+                                item.id?.let { id ->
+                                    plantList.forEach { plantResult ->
+                                        if (plantResult.id == item.plantId) {
+                                            OwnPlantCard(
+                                                location = loc,
+                                                plantName = plantResult.plantName,
+                                                plantImage = plantResult.image,
+                                                plantScientifi = plantResult.scientificName,
+                                                navigatetoOwned = navigatetoOwned,
+                                                id = id
+                                            )
+                                        }
                                     }
-                                }
 
+                                }
                             }
                         }
                     }
+
+
                 }
+            } else {
 
+                InfoScreen()
 
             }
-        } else {
-
-            Box(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(text = "Notask")
-            }
-
         }
 
     }

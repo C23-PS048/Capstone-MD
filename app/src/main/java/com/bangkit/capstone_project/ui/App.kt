@@ -1,6 +1,7 @@
 package com.bangkit.capstone_project.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -78,6 +79,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import java.io.File
 import java.util.concurrent.ExecutorService
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun App(
@@ -98,17 +100,19 @@ fun App(
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
     outputDirectory: File,
-    classifier: DeseaseClassifier,
     taskViewModel: TaskViewModel,
     sendNotification: () -> Unit,
-    showToast: (String) -> Unit
+    showToast: (String) -> Unit,
+    chiliClassifier: DeseaseClassifier,
+    tomatoClassifier: DeseaseClassifier,
+    plantClassifier: DeseaseClassifier,
 ) {
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    var edgeToEdgeEnabled by remember { mutableStateOf(false) }
+    val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = skipPartiallyExpanded
     )
@@ -119,9 +123,9 @@ fun App(
     val currentRoute = navBackStackEntry?.destination?.route
 
 
-    lateinit var photoUri: Uri
 
 
+    var photoUri by mutableStateOf<Uri?>(null)
 
 
 
@@ -323,8 +327,7 @@ fun App(
                                     outputDirectory = outputDirectory,
                                     executor = cameraExecutor,
                                     onImageCaptured = { uri ->
-                                        // Check if the image was captured from the camera or picked from the gallery
-                                        // Image captured from the camera
+
                                         photoUri = uri
                                         currentState.value = ScreenState.Photo
                                     },
@@ -333,14 +336,19 @@ fun App(
                             }
 
                             is ScreenState.Photo -> {
-                                ResultScreen(modifier = Modifier.fillMaxSize(),
-                                    photoUri = photoUri,
-                                    classifer = classifier,
-                                    context = context,
-                                    onBack = {
-                                        currentState.value = ScreenState.Camera
+                                photoUri?.let { it1 ->
+                                    ResultScreen(modifier = Modifier.fillMaxSize(),
+                                        photoUri = it1,
+                                        plantClassifier = plantClassifier,
+                                        plantViewModel = plantViewModel,
+                                        context = context,
+                                        navigateDetail = {slug-> navController.navigate(Screen.DetailPlant.createRoute(slug))
+                                            currentState.value = ScreenState.Photo},
+                                        onBack = {
+                                            currentState.value = ScreenState.Camera
 
-                                    })
+                                        })
+                                }
                             }
                         }
                     }
