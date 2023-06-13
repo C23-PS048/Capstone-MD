@@ -13,14 +13,13 @@ import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -45,15 +44,16 @@ import com.bangkit.capstone_project.ui.theme.GreenDark
 import com.bangkit.capstone_project.ui.theme.Ivory
 import java.io.File
 import java.util.concurrent.Executor
+
 @Composable
-fun CameraScreen(
+fun UserCameraScreen(
     modifier: Modifier = Modifier,
     outputDirectory: File,
     executor: Executor,
     onImageCaptured: (Uri) -> Unit,
     onError: (ImageCaptureException) -> Unit,
     onBack: () -> Unit,
-
+    isBack: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -61,9 +61,8 @@ fun CameraScreen(
     val preview = remember { Preview.Builder().build() }
     val previewView = remember { PreviewView(context) }
     val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
-    val cameraSelector = CameraSelector.Builder()
-        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-        .build()
+    val isFrontCamera = remember { mutableStateOf(false) }
+
 
     val pickedImageUri = remember { mutableStateOf<Uri?>(null) }
 
@@ -89,12 +88,21 @@ fun CameraScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(isFrontCamera.value) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
+
+        val updatedCameraSelector = CameraSelector.Builder().apply {
+            if (isFrontCamera.value) {
+                requireLensFacing(CameraSelector.LENS_FACING_FRONT)
+            } else {
+                requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            }
+        }.build()
+
         cameraProvider.bindToLifecycle(
             lifecycleOwner,
-            cameraSelector,
+            updatedCameraSelector,
             preview,
             imageCapture
         )
@@ -102,8 +110,9 @@ fun CameraScreen(
         preview.setSurfaceProvider(previewView.surfaceProvider)
     }
 
+
     Scaffold(
-        topBar = {
+        topBar ={
             Box(modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = onBack, Modifier.align(Alignment.CenterStart)) {
                     Icon(
@@ -112,14 +121,14 @@ fun CameraScreen(
                         tint = GreenDark
                     )
                 }
-                Text(text = "Identifikasi Tanaman Mu", modifier = Modifier.align(Alignment.Center))
+                Text(text = "Ambil Foto Anda", modifier = Modifier.align(Alignment.Center))
             }
         },
         bottomBar = {
-            Box(modifier = Modifier.fillMaxWidth().padding(32.dp,16.dp)) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp, 16.dp)) {
                 CameraButton(
-                    modifier = Modifier
-                        .align(Alignment.Center),
                     onclick = {
                         takePhoto(
                             filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
@@ -128,22 +137,41 @@ fun CameraScreen(
                             executor = executor,
                             onImageCaptured = onImageCaptured,
                             onError = onError,
-                            pickedImageUri = null
+                            pickedImageUri = null,
+                            isBack = !isFrontCamera.value
                         )
-                    }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .height(48.dp)
                 )
 
                 IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart),
                     onClick = {
                         val galleryIntent = Intent(
                             Intent.ACTION_PICK,
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                         )
                         launcher.launch(galleryIntent)
-                    }
+                    },
+                    modifier = Modifier.align(Alignment.CenterStart)
                 ) {
-                    Icon(painter = painterResource(id = R.drawable.gallery), contentDescription = "Pick Image From Galley Button")
+                    Icon(
+                        painter = painterResource(id = R.drawable.gallery),
+                        contentDescription = "Pick Image From Gallery Button"
+                    )
+                }
+
+                IconButton(
+                    onClick = {
+                        isFrontCamera.value = !isFrontCamera.value
+                    },
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.scanner),
+                        contentDescription = "Flip Camera Button"
+                    )
                 }
             }
         }

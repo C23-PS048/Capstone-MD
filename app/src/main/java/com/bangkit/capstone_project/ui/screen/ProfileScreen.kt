@@ -57,7 +57,8 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     prefViewModel: PreferenceViewModel,
     userViewModel: UserViewModel,
-    showToast: (String) -> Unit,) {
+    showToast: (String) -> Unit,
+    navigateToCam:() -> Unit) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     userViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
@@ -80,7 +81,9 @@ fun ProfileScreen(
                     if (name != null) {
                         if (email != null) {
 
-                                UserProfilePage(onLogout = onLogout,userEmail = email, userName = name, userImage = foto,showToast=showToast)
+                                UserProfilePage(onLogout = onLogout,userEmail = email, userName = name, userImage = foto,showToast=showToast,  navigateToCam=
+                                    navigateToCam
+                                )
 
                         }
                     }
@@ -105,13 +108,14 @@ fun UserProfilePage(
     userName: String,
     userImage: String?,
     userEmail: String,
-    showToast: (String) -> Unit, ) {
+    showToast: (String) -> Unit,
+    navigateToCam: () -> Unit, ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        ProfileHeaderSection(userEmail =userEmail, userName = userName, userImage = userImage ,onLogout=onLogout)
+        ProfileHeaderSection(userEmail =userEmail, userName = userName, userImage = userImage ,onLogout=onLogout,  navigateToCam=  navigateToCam)
 
         Divider(color = Color.LightGray, thickness = 0.5.dp)
         Spacer(modifier = Modifier.size(2.dp))
@@ -147,7 +151,13 @@ fun ProfileMenu(showToast: (String) -> Unit) {
     }
 }
 @Composable
-fun ProfileHeaderSection(userName: String,userImage:String?,userEmail:String, onLogout: () -> Unit) {
+fun ProfileHeaderSection(
+    userName: String,
+    userImage: String?,
+    userEmail: String,
+    onLogout: () -> Unit,
+    navigateToCam: () -> Unit
+) {
 val foto = if (userImage==null){
     "https://ui-avatars.com/api/?name=John+Doe"
 }else{
@@ -175,7 +185,7 @@ val foto = if (userImage==null){
 
                 AsyncImage(
                     model = foto,
-                    contentScale = ContentScale.FillWidth,
+                    contentScale = ContentScale.FillBounds,
                     contentDescription = null
                 )
 
@@ -212,7 +222,7 @@ val foto = if (userImage==null){
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuItem(
                     text = { Text("Edit") },
-                    onClick = {},
+                    onClick = navigateToCam,
                     leadingIcon = {
                         Icon(
                             Icons.Outlined.Edit,

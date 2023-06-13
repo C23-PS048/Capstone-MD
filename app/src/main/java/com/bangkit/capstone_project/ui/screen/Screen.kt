@@ -25,5 +25,5 @@ sealed class Screen(val route: String) {
     object EditTask : Screen("editTask/{id}"){
         fun createRoute(id:Int) = "editTask/$id"
     }
-
+    object UserCamera : Screen("userCamera")
 }

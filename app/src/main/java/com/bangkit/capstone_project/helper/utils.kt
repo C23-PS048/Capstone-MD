@@ -1,21 +1,28 @@
 package com.bangkit.capstone_project.helper
 
 import android.annotation.SuppressLint
+import android.app.Application
+import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.location.Geocoder
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.bangkit.capstone_project.R
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -38,10 +45,14 @@ fun getAddressName(context: Context, lat: Double, lon: Double): MutableState<Str
     return addressName
 }
 
-fun rotateImage(bitmap: Bitmap): Bitmap {
+fun rotateImage(bitmap: Bitmap, isBack: Boolean = false): Bitmap {
     val matrix = Matrix()
-    val rotate = 90f
+
+    val rotate = if (isBack) 90f else -90f
     matrix.postRotate(rotate)
+    if (!isBack) {
+        matrix.postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
+    }
 
 
     val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
@@ -55,7 +66,9 @@ fun takePhoto(
     executor: Executor,
     onImageCaptured: (Uri) -> Unit,
     onError: (ImageCaptureException) -> Unit,
-    pickedImageUri: Uri?
+    pickedImageUri: Uri?,
+    isBack: Boolean = false
+
 ) {
     if (pickedImageUri != null) {
         onImageCaptured(pickedImageUri)
@@ -83,7 +96,7 @@ fun takePhoto(
                     val isTakenFromCamera = pickedImageUri == null
                     if (isTakenFromCamera) {
                         val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                        val rotatedBitmap = rotateImage(bitmap)
+                        val rotatedBitmap = rotateImage(bitmap,isBack)
                         val rotatedFile = File(outputDirectory, photoFile.name)
                         rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, FileOutputStream(rotatedFile))
                         savedUri = Uri.fromFile(rotatedFile)
@@ -153,4 +166,72 @@ fun getCurrentDate(): String {
 fun convertToHyphenated(input: String): String {
     val lowerCasedInput = input.lowercase()
     return lowerCasedInput.replace(" ", "-")
+}
+
+
+
+
+private const val FILENAME_FORMAT = "dd-MMM-yyyy"
+private const val MAXIMAL_SIZE = 1000000
+val timeStamp: String = SimpleDateFormat(
+    FILENAME_FORMAT, Locale.US
+).format(System.currentTimeMillis())
+
+fun createFile(application: Application): File {
+    val mediaDir = application.externalMediaDirs.firstOrNull()?.let {
+        File(it, application.getString(R.string.app_name)).apply {
+            mkdir()
+        }
+    }
+    val output = if (mediaDir != null && mediaDir.exists()) mediaDir else application.filesDir
+    return File(output, "$timeStamp.jpg")
+}
+
+fun rotateImage(file: File, isBack: Boolean = false) {
+    val matrix = Matrix()
+    val bitmap = BitmapFactory.decodeFile(file.path)
+    val rotate = if (isBack) 90f else -90f
+    matrix.postRotate(rotate)
+    if (!isBack) {
+        matrix.postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
+    }
+    val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    result.compress(Bitmap.CompressFormat.JPEG, 100, FileOutputStream(file))
+
+}
+
+fun createTempFile(context: Context): File {
+    val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    return File.createTempFile(timeStamp, ".jpg", storageDir)
+}
+
+fun uriToFile(selectedImg: Uri, context: Context): File {
+    val contentResolver: ContentResolver = context.contentResolver
+    val myFile = createTempFile(context)
+    val inputStream = contentResolver.openInputStream(selectedImg) as InputStream
+    val outputStream: OutputStream = FileOutputStream(myFile)
+    val buf = ByteArray(1024)
+    var len: Int
+    while (inputStream.read(buf).also { len = it } >= 0) outputStream.write(buf, 0, len)
+    outputStream.close()
+    inputStream.close()
+    return myFile
+}
+
+fun reduceFileImage(file: File): File {
+    val bitmap = BitmapFactory.decodeFile(file.path)
+    var compressQuality = 100
+    var streamLength: Int
+    do {
+        val bmpStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, compressQuality, bmpStream)
+        val bmpPicByteArray = bmpStream.toByteArray()
+        streamLength = bmpPicByteArray.size
+        compressQuality -= 5
+
+
+    } while (streamLength > MAXIMAL_SIZE)
+    bitmap.compress(Bitmap.CompressFormat.JPEG, compressQuality, FileOutputStream(file))
+    return file
+
 }

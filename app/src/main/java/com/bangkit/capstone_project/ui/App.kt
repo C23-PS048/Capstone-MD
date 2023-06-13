@@ -53,7 +53,6 @@ import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.user.UserFactory
 import com.bangkit.capstone_project.data.network.user.UserInjection
 import com.bangkit.capstone_project.data.network.user.UserViewModel
-import com.bangkit.capstone_project.data.network.userplant.UserPlantItem
 import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
@@ -71,6 +70,8 @@ import com.bangkit.capstone_project.ui.screen.RegisterScreen
 import com.bangkit.capstone_project.ui.screen.ResultScreen
 import com.bangkit.capstone_project.ui.screen.Screen
 import com.bangkit.capstone_project.ui.screen.TaskScreen
+import com.bangkit.capstone_project.ui.screen.UserCameraScreen
+import com.bangkit.capstone_project.ui.screen.UserResultScreen
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
@@ -123,10 +124,8 @@ fun App(
     val currentRoute = navBackStackEntry?.destination?.route
 
 
-
-
     var photoUri by mutableStateOf<Uri?>(null)
-
+    var isBack by mutableStateOf<Boolean>(false)
 
 
     val locationPermissions = rememberMultiplePermissionsState(
@@ -276,9 +275,9 @@ fun App(
                     TaskScreen(onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
                         plantId = slug,
-                        plantViewModel=plantViewModel,
+                        plantViewModel = plantViewModel,
                         preferenceViewModel = prefViewModel,
-                        userPlantViewModel=userPlantViewModel,
+                        userPlantViewModel = userPlantViewModel,
                         navigateHome = {
                             navController.navigate(Screen.Home.route) {
 
@@ -291,6 +290,7 @@ fun App(
                 composable(Screen.Forum.route) {
 
                     ProfileScreen(
+                        navigateToCam = { navController.navigate(Screen.UserCamera.route) },
                         onLogout = {
                             prefViewModel.deleteSession()
                             navController.navigate(Screen.Login.route)
@@ -316,7 +316,7 @@ fun App(
                         token = session?.token,
                         plantViewModel = plantViewModel,
                         slug = slug,
-                        navigateTask = { id-> navController.navigate(Screen.Task.createRoute(id)) },
+                        navigateTask = { id -> navController.navigate(Screen.Task.createRoute(id)) },
                         onBack = { navController.navigateUp() })
                 }
                 composable(Screen.Camera.route) {
@@ -331,6 +331,7 @@ fun App(
                                         photoUri = uri
                                         currentState.value = ScreenState.Photo
                                     },
+
                                     onError = { Log.e("kilo", "View error:", it) },
                                     onBack = { navController.navigateUp() })
                             }
@@ -339,11 +340,18 @@ fun App(
                                 photoUri?.let { it1 ->
                                     ResultScreen(modifier = Modifier.fillMaxSize(),
                                         photoUri = it1,
+
                                         plantClassifier = plantClassifier,
                                         plantViewModel = plantViewModel,
                                         context = context,
-                                        navigateDetail = {slug-> navController.navigate(Screen.DetailPlant.createRoute(slug))
-                                            currentState.value = ScreenState.Photo},
+                                        navigateDetail = { slug ->
+                                            navController.navigate(
+                                                Screen.DetailPlant.createRoute(
+                                                    slug
+                                                )
+                                            )
+                                            currentState.value = ScreenState.Photo
+                                        },
                                         onBack = {
                                             currentState.value = ScreenState.Camera
 
@@ -352,6 +360,56 @@ fun App(
                             }
                         }
                     }
+                }
+                composable(
+                    route = Screen.UserCamera.route
+                ) {
+
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        when (currentState.value) {
+                            is ScreenState.Camera -> {
+                                UserCameraScreen(modifier = Modifier.fillMaxSize(),
+                                    outputDirectory = outputDirectory,
+                                    executor = cameraExecutor,
+                                    onImageCaptured = { uri ->
+
+                                        photoUri = uri
+                                        currentState.value = ScreenState.Photo
+                                    },
+                                    isBack = { isBack = it },
+                                    onError = { Log.e("kilo", "View error:", it) },
+                                    onBack = { navController.navigateUp() })
+                            }
+
+                            is ScreenState.Photo -> {
+                                photoUri?.let { it1 ->
+                                    session?.id?.let { it2 ->
+                                        UserResultScreen(modifier = Modifier.fillMaxSize(),
+                                            id = it2,
+                                            isBack = isBack,
+                                            photoUri = it1,
+                                            plantClassifier = plantClassifier,
+                                            userViewModel = userViewModel,
+                                            preferenceViewModel = prefViewModel,
+                                            context = context,
+                                            navigateDetail = { slug ->
+                                                navController.navigate(
+                                                    Screen.DetailPlant.createRoute(
+                                                        slug
+                                                    )
+                                                )
+                                                currentState.value = ScreenState.Photo
+                                            },
+                                            onBack = {
+                                                currentState.value = ScreenState.Camera
+
+                                            })
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
 
             }

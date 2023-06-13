@@ -2,7 +2,6 @@ package com.bangkit.capstone_project.data.network.user
 
 import com.bangkit.capstone_project.data.network.userplant.UserPlantResponse
 import okhttp3.MultipartBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -31,23 +30,19 @@ interface UserService {
     ): Response<LoginResponse>
 
 
-
     @GET("user/{id}")
     suspend fun getUserInfo(
         @Path("id") id: String,
         @Header("Authorization") token: String
     ): Response<DetailUserResponse>
 
-
     @Multipart
     @PATCH("/user/{id}")
-    fun updateUser(
-        @Path("id") id: String,
-        @Header("Authorization") token: String,
-        @Part foto: MultipartBody.Part,
-
-
-    ): Call<ResponseMessage>
+    suspend fun updateUserPhoto(
+        @Path("id") id: Int,
+        @Part file: MultipartBody.Part,
+        @Header("Authorization") token: String
+    ): Response<ResponseMessage>
 
     @GET("user/{id}/plant")
     suspend fun getUserPlant(
