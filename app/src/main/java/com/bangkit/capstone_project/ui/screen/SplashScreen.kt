@@ -2,6 +2,7 @@ package com.bangkit.capstone_project.ui.screen
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,11 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GreenDark
+import com.bangkit.capstone_project.ui.theme.Ivory
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 import kotlinx.coroutines.delay
 
@@ -58,17 +62,17 @@ fun AnimatedSplash(navController: NavHostController, prefViewModel: PreferenceVi
 fun SplashScreen(alpha: Float) {
     Box(
         modifier = Modifier
-            .background(GreenDark)
+            .background(Ivory)
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
+        Image(
             modifier = Modifier
                 .size(120.dp)
                 .alpha(alpha = alpha),
-            imageVector = Icons.Default.Email,
+            painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo Icon",
-            tint = Color.White
+
         )
     }
 }

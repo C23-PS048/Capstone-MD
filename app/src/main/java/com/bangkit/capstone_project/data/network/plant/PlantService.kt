@@ -33,4 +33,11 @@ interface PlantService {
 
     ): Response<SinglePlantResponse>
 
+    @GET("plant/{id}")
+    suspend fun getPlantId(
+        @Path("id") id: Int,
+
+        ): Response<SinglePlantResponse>
+
+
 }

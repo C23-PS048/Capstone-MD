@@ -29,6 +29,10 @@ class UserPlantViewModel() : ViewModel() {
 
 
     }
+    fun resetData(){
+        _uiState.value=UiState.Loading
+        _userPlant.value=UiState.Loading
+    }
 
     fun getUserPlant(id: String, token: String) {
         _userPlant.value = UiState.Loading
@@ -37,7 +41,7 @@ class UserPlantViewModel() : ViewModel() {
             try {
                 val response = ApiConfig.getUserService().getUserPlant(id, token)
 
-                Log.d("TAG", "registerUser: ${response.toString()}")
+
                 if (response.isSuccessful) {
 
                     _userPlant.value = UiState.Success(response.body())

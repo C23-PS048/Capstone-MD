@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
 
     private val mInputSize = 224
     private val mModelPath = "chili_disease.tflite"
+    private val mModelTomato = "tomato_disease.tflite"
     private val mDiseaseLabel = "label.txt"
     private val mPlantModel = "plant.tflite"
     private val mPlantlabel = "LabelPlants.txt"
@@ -86,19 +87,11 @@ class MainActivity : ComponentActivity() {
 
             currentState.value = ScreenState.Camera
         }
-        val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
-        if (permission[notificationPermission] == true) {
-            // Notification permission granted
-            // Perform necessary actions here
-        } else {
-            // Notification permission denied
-            // Handle the denial or show a message to the user
-        }
     }
 
     private fun initClassifier() {
         chiliClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)
-        tomatoClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)
+        tomatoClassifier = DeseaseClassifier(assets, mModelTomato, mDiseaseLabel, mInputSize)
    /*     chiliClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)*/
         plantClassifier = DeseaseClassifier(assets, mPlantModel, mPlantlabel, mInputSize)
     }
@@ -112,13 +105,7 @@ class MainActivity : ComponentActivity() {
         )
         val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
         val permissionsToRequest = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(
-                this,
-                notificationPermission
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionsToRequest.add(notificationPermission)
-        }
+
         if (ContextCompat.checkSelfPermission(
                 this,
                 cameraPermission
@@ -214,35 +201,12 @@ class MainActivity : ComponentActivity() {
 
         return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
     }
-    @SuppressLint("ServiceCast")
-    fun sendNotification() {
-        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val mBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.bell)
-            .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.bell))
-            .setContentTitle("Test")
-            .setContentText("Content")
-            .setSubText("Subtext")
-            .setAutoCancel(true)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            /* Create or update. */
-            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
-            channel.description = CHANNEL_NAME
-            mBuilder.setChannelId(CHANNEL_ID)
-            mNotificationManager.createNotificationChannel(channel)
-        }
-        val notification = mBuilder.build()
-        mNotificationManager.notify(NOTIFICATION_ID, notification)
-    }
+
 
     fun showToast(message:String){
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
     }
-    companion object {
-        private const val NOTIFICATION_ID = 1
-        private const val CHANNEL_ID = "channel_01"
-        private const val CHANNEL_NAME = "dicoding channel"
-    }
+
 }
 
 sealed class ScreenState {

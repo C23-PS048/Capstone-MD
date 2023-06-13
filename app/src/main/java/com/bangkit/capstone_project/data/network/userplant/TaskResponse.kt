@@ -17,31 +17,31 @@ data class TaskResponse(
 data class UserPlant(
 
 	@field:SerializedName("disease")
-	val disease: String? = null,
+	val disease: String,
 
 	@field:SerializedName("lastScheduledDate")
-	val lastScheduledDate: String? = null,
+	val lastScheduledDate: String,
 
 	@field:SerializedName("plantId")
-	val plantId: Int? = null,
+	val plantId: Int,
 
 	@field:SerializedName("location")
-	val location: String? = null,
+	val location: String,
 
 	@field:SerializedName("frequency")
-	val frequency: Int? = null,
+	val frequency: Int,
 
 	@field:SerializedName("id")
-	val id: Int? = null,
+	val id: Int,
 
 	@field:SerializedName("nextScheduledDate")
-	val nextScheduledDate: String? = null,
+	val nextScheduledDate: String,
 
 	@field:SerializedName("userId")
-	val userId: Int? = null,
+	val userId: Int,
 
 	@field:SerializedName("startDate")
-	val startDate: String? = null
+	val startDate: String
 )
 data class Response(
 

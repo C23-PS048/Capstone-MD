@@ -198,12 +198,14 @@ fun App(
                                 id = it2,
                                 userPlantViewModel = userPlantViewModel,
                                 currentLocation = currentLocation,
-
+                                navController = navController,
                                 plantViewModel = plantViewModel,
                                 navigatetoOwned = { id ->
                                     navController.navigate(
                                         Screen.OwnedPlant.createRoute(id)
-                                    )
+                                    ) {
+                                        restoreState = true
+                                    }
                                 }
                             )
                         }
@@ -215,10 +217,19 @@ fun App(
                     route = Screen.OwnedPlant.route,
                     arguments = listOf(navArgument("id") { type = NavType.IntType })
                 ) {
-                    val id = it.arguments?.getInt("id") ?: -1L
-                    OwnedPlantScreen(plantId = id as Int,
-                        onBack = { navController.navigateUp() },
-                        taskViewModel = taskViewModel,
+                    val id = it.arguments?.getInt("id") ?: -1
+                    OwnedPlantScreen(plantId = id,
+                        onBack = {
+                            navController.navigate(Screen.Home.route) {
+                                launchSingleTop = true
+                                restoreState = true
+
+                            }
+                            plantViewModel.resetResponseState()
+                            userPlantViewModel.resetData()
+
+                        },
+                        plantViewModel = plantViewModel,
                         userPlantViewModel = userPlantViewModel,
                         prefViewModel = prefViewModel,
                         sendNotification = sendNotification,

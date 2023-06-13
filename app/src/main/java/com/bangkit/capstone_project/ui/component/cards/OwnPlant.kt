@@ -34,13 +34,13 @@ import com.bangkit.capstone_project.ui.theme.GreenMed
 fun OwnPlantCard(
     location: String,
     modifier: Modifier = Modifier,
-    navigatetoOwned: (Int) -> Unit,
+    navigatetoOwned: () -> Unit,
     id: Int,
     plantName: String,
     plantImage: List<String>,
     plantScientifi: String
 ) {
-    Card(onClick = { navigatetoOwned(id) }, modifier = modifier
+    Card(onClick =  navigatetoOwned , modifier = modifier
         .fillMaxWidth()
         .height(110.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) ) {
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

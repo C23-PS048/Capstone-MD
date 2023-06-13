@@ -21,7 +21,11 @@ class PlantViewModel : ViewModel() {
         MutableStateFlow(UiState.Loading)
     val plantState: StateFlow<UiState<SinglePlantResponse>>
         get() = _plantState
+    fun resetResponseState() {
+        _plantState.value = UiState.Loading
 
+
+    }
     fun getAll() {
 
         _uiState.value = UiState.Loading
@@ -78,5 +82,31 @@ class PlantViewModel : ViewModel() {
         }
     }
 
+    fun getPlantId(id: Int) {
 
+        _plantState.value = UiState.Loading
+
+
+
+        viewModelScope.launch {
+
+
+            try {
+                val response = ApiConfig.getPlantService().getPlantId(id)
+
+                Log.d("TAG", "Plants: ${response.toString()}")
+                if (response.isSuccessful) {
+
+                    _plantState.value = UiState.Success(response.body())
+                } else {
+                    _plantState.value = UiState.Error(response.toString() ?: "Unknown error")
+                }
+            } catch (e: HttpException) {
+                _plantState.value = UiState.Error(e.message ?: "Unknown error")
+            } catch (e: Exception) {
+                _plantState.value = UiState.Error(e.message ?: "Unknown error")
+            }
+            Log.d("TAG", "Plants: ${plantState.value}")
+        }
+    }
 }

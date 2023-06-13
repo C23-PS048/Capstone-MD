@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -85,38 +86,39 @@ fun EditTaskScreen(
     prefViewModel: PreferenceViewModel
 ) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
-    Log.d("TAG", "OwnedPlantScreen: $id")
+    val plantId = mutableIntStateOf(id)
 
 
     userPlantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
-                session?.token?.let { userPlantViewModel.getPlant(id, it) }
+                session?.token?.let { userPlantViewModel.getPlant(plantId.value, it) }
             }
 
             is UiState.Success -> {
-                val data =uiState.data?.userPlant
+                val data = uiState.data?.userPlant
                 val startTimestamp = System.currentTimeMillis()
 
-                val location =    data?.location
+                val location = data?.location
 
 
-                    if (location != null) {
-                        EditTaskContent(
-                            task =data,
-                            session = session,
-                            onBack = onBack,
-                            navigateHome = navigateHome,
-                            taskViewModel = taskViewModel,
-                            userPlantViewModel = userPlantViewModel,
+                if (location != null) {
+                    EditTaskContent(
+                        task = data,
+                        session = session,
+                        onBack = onBack,
+                        navigateHome = navigateHome,
+                        taskViewModel = taskViewModel,
+                        userPlantViewModel = userPlantViewModel,
 
                         )
-                    }
+                }
 
                 Log.d("TAG", "HomeScreen: ${uiState.data}")
             }
 
             is UiState.Error -> {}
+            else -> {}
         }
     }
 
@@ -144,10 +146,10 @@ fun EditTaskContent(
         Frequency("Every Day", 4),
 
         )
-    
+
     val options = task?.frequency?.toInt()
     Log.d("TAG", "EditTaskContent:$options")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[options!!-1]) }
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[options!! - 1]) }
     val textLocation = mutableStateOf(task?.location)
     val dateWeatherState =
         rememberDatePickerState(initialSelectedDateMillis = task?.lastScheduledDate?.toLong())
@@ -272,7 +274,7 @@ fun EditTaskContent(
                             onClick = {
                                 if (task != null) {
                                     if (session != null) {
-                                        textLocation.value?.let {loc->
+                                        textLocation.value?.let { loc ->
                                             dateWeatherState.selectedDateMillis?.let { lastDate ->
                                                 task.startDate?.let { date ->
                                                     session.token?.let { token ->
@@ -282,7 +284,8 @@ fun EditTaskContent(
                                                             frequency = selectedOption.frequency,
                                                             lastDate = lastDate,
                                                             startDate = date.toLong(),
-                                                            userPlantViewModel = userPlantViewModel, token = token
+                                                            userPlantViewModel = userPlantViewModel,
+                                                            token = token
                                                         )
                                                     }
                                                 }
@@ -290,7 +293,7 @@ fun EditTaskContent(
                                         }
                                     }
                                 }
-                               /* onBack()*/
+                                /* onBack()*/
                             },
                             modifier = modifier.fillMaxWidth()
                         ) {
@@ -299,18 +302,18 @@ fun EditTaskContent(
                         Button(
                             onClick = {
 
-                               if (task != null) {
-                                   session?.token?.let {
-                                       deleteData(
-                                           task = task,
-                                           userPlantViewModel = userPlantViewModel, token = it
-                                       )
-                                   }
-                               }
+                                if (task != null) {
+                                    session?.token?.let {
+                                        deleteData(
+                                            task = task,
+                                            userPlantViewModel = userPlantViewModel, token = it
+                                        )
+                                    }
+                                }
 
                                 navigateHome()
                             },
-                            colors=ButtonDefaults.buttonColors(containerColor = RedDark),
+                            colors = ButtonDefaults.buttonColors(containerColor = RedDark),
                             modifier = modifier.fillMaxWidth()
                         ) {
                             Text(text = "Delete")
@@ -420,8 +423,9 @@ fun EditTaskContent(
 fun asas(
     frequency: Int, startDate: Long?, location: String, userPlantViewModel: UserPlantViewModel,
     plantId: Int,
-    userId:Int,
-    token: String) {
+    userId: Int,
+    token: String
+) {
 
     startDate?.let {
         val (lastDate, NextDate) = calculateScheduleDates(
@@ -437,15 +441,14 @@ fun asas(
             nextScheduledDate = NextDate.toString(),
             frequency = frequency.toString(),
             plantId = plantId.toString(),
-            userId =userId.toString(),
+            userId = userId.toString(),
             token = token
         )
     }
 
 
-
-
 }
+
 fun updateData(
     task: UserPlant?,
     frequency: Int,
@@ -457,10 +460,10 @@ fun updateData(
 ) {
 
 
-        val (lastScheduledDate, nextScheduledDate) = calculateScheduleDates(
-            lastDate,
-            frequency
-        )
+    val (lastScheduledDate, nextScheduledDate) = calculateScheduleDates(
+        lastDate,
+        frequency
+    )
 
 
 
@@ -472,13 +475,13 @@ fun updateData(
         nextScheduledDate = nextScheduledDate.toString(),
         frequency = frequency.toString(),
         plantId = task?.plantId.toString(),
-        userId =task?.userId.toString(),
+        userId = task?.userId.toString(),
         token = token,
         id = task?.id.toString()
     )
 }
 
 fun deleteData(task: UserPlant, userPlantViewModel: UserPlantViewModel, token: String) {
-    task.id?.let { userPlantViewModel.deletePlant(it,token) }
+    task.id?.let { userPlantViewModel.deletePlant(it, token) }
 }
 

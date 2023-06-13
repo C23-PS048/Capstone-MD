@@ -1,7 +1,6 @@
 package com.bangkit.capstone_project.helper
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
@@ -15,7 +14,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.bangkit.capstone_project.R
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
@@ -136,13 +134,16 @@ fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
     return Pair(lastScheduledDate, nextScheduledDate)
 }
 
-fun getDaysBetween(startMillis: Long, endMillis: Long): Long {
+fun getTimeBetween(startMillis: Long, endMillis: Long): Long {
     val differenceMillis = endMillis - startMillis
-    return TimeUnit.MILLISECONDS.toDays(differenceMillis)
+    return TimeUnit.MILLISECONDS.toHours(differenceMillis)
+}
+fun convertHoursToDays(hours: Long): Long {
+    return TimeUnit.HOURS.toDays(hours)
 }
 
 fun decodeUriAsBitmap(context: Context, uri: Uri?): Bitmap? {
-    var bitmap: Bitmap? = null //from   w  ww  . j  a  v  a2s.  c om
+    var bitmap: Bitmap? = null
     bitmap = try {
         BitmapFactory.decodeStream(
             context
@@ -176,29 +177,6 @@ private const val MAXIMAL_SIZE = 1000000
 val timeStamp: String = SimpleDateFormat(
     FILENAME_FORMAT, Locale.US
 ).format(System.currentTimeMillis())
-
-fun createFile(application: Application): File {
-    val mediaDir = application.externalMediaDirs.firstOrNull()?.let {
-        File(it, application.getString(R.string.app_name)).apply {
-            mkdir()
-        }
-    }
-    val output = if (mediaDir != null && mediaDir.exists()) mediaDir else application.filesDir
-    return File(output, "$timeStamp.jpg")
-}
-
-fun rotateImage(file: File, isBack: Boolean = false) {
-    val matrix = Matrix()
-    val bitmap = BitmapFactory.decodeFile(file.path)
-    val rotate = if (isBack) 90f else -90f
-    matrix.postRotate(rotate)
-    if (!isBack) {
-        matrix.postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
-    }
-    val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    result.compress(Bitmap.CompressFormat.JPEG, 100, FileOutputStream(file))
-
-}
 
 fun createTempFile(context: Context): File {
     val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)

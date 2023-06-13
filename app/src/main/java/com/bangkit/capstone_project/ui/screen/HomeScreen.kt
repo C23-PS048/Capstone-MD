@@ -27,10 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.plant.PlantResult
 import com.bangkit.capstone_project.data.network.plant.PlantViewModel
-import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.data.network.userplant.UserPlantItem
 import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
@@ -60,10 +60,10 @@ fun HomeScreen(
     token: String,
 
 
-
     id: String,
 
-    prefViewModel: PreferenceViewModel
+    prefViewModel: PreferenceViewModel,
+    navController: NavHostController
 ) {
 
     var list = mutableListOf<PlantResult>()
@@ -119,6 +119,7 @@ fun HomeScreen(
             is UiState.Success -> {
 
                 HomeContent(
+                    navController=navController,
                     weatherViewModel = weatherViewModel,
                     currentLocation = currentLocation,
                     listTask = uiState.data?.userPlant,
@@ -146,7 +147,8 @@ fun HomeContent(
     listTask: List<UserPlantItem?>?,
     plantList: MutableList<PlantResult>,
     weatherViewModel: WeatherViewModel,
-    navigatetoOwned: (Int) -> Unit
+    navigatetoOwned: (Int) -> Unit,
+    navController: NavHostController
 ) {
     Column(
         modifier = modifier
@@ -201,9 +203,10 @@ fun HomeContent(
                                                 plantName = plantResult.plantName,
                                                 plantImage = plantResult.image,
                                                 plantScientifi = plantResult.scientificName,
-                                                navigatetoOwned = navigatetoOwned,
+                                                navigatetoOwned = {navController.navigate(Screen.OwnedPlant.createRoute(id))},
                                                 id = id
                                             )
+                                            Log.d("TAG", "HomeContent: id = $id")
                                         }
                                     }
 

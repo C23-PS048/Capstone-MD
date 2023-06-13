@@ -2,4 +2,8 @@
     <string name="app_name">PlantCare</string>
     <string name="title_activity_camera">CameraActivity</string>
     <string name="login_response">Login Sukses</string>
+    <string name="watering_tag">Penyiraman Selanjutnya</string>
+    <string name="hour_tag">Jam</string>
+    <string name="day_tag">Hari</string>
+    <string name="image_desc">Image of Your Plant</string>
 </resources>

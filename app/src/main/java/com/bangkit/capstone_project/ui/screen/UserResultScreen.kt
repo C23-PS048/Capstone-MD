@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.helper.decodeUriAsBitmap
+import com.bangkit.capstone_project.helper.reduceFileImage
 import com.bangkit.capstone_project.helper.uriToFile
 import com.bangkit.capstone_project.model.UserModel
 import com.bangkit.capstone_project.tflite.DeseaseClassifier
@@ -201,7 +202,7 @@ fun UserResultContent(
             Button(onClick = {
                 if (session != null) {
                     session.id?.let { session.token?.let { token ->
-                        userViewModel.updateUserPhoto(it.toInt(), imageFile,
+                        userViewModel.updateUserPhoto(it.toInt(), reduceFileImage(imageFile),
                             token
                         )
                     } }
