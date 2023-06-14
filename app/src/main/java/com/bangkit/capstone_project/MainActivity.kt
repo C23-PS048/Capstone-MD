@@ -1,14 +1,10 @@
 package com.bangkit.capstone_project
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -24,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -61,12 +56,16 @@ class MainActivity : ComponentActivity() {
     private val mInputSize = 224
     private val mModelPath = "chili_disease.tflite"
     private val mModelTomato = "tomato_disease.tflite"
-    private val mDiseaseLabel = "label.txt"
+    private val mModelCauli = "cauli_disease.tflite"
+    private val mTomatoLabel = "tomato_label.txt"
+    private val mCauliLabel = "Cauli_label.txt"
+    private val mChiliLabel = "chili_label.txt"
     private val mPlantModel = "plant.tflite"
     private val mPlantlabel = "LabelPlants.txt"
     private lateinit var tomatoClassifier: DeseaseClassifier
     private lateinit var plantClassifier: DeseaseClassifier
     private lateinit var chiliClassifier: DeseaseClassifier
+    private lateinit var cauilClassifier: DeseaseClassifier
 
 
 
@@ -90,9 +89,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initClassifier() {
-        chiliClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)
-        tomatoClassifier = DeseaseClassifier(assets, mModelTomato, mDiseaseLabel, mInputSize)
-   /*     chiliClassifier = DeseaseClassifier(assets, mModelPath, mDiseaseLabel, mInputSize)*/
+        chiliClassifier = DeseaseClassifier(assets, mModelPath, mChiliLabel, mInputSize)
+        tomatoClassifier = DeseaseClassifier(assets, mModelTomato, mTomatoLabel, mInputSize)
+      cauilClassifier = DeseaseClassifier(assets, mModelCauli, mCauliLabel, mInputSize)
         plantClassifier = DeseaseClassifier(assets, mPlantModel, mPlantlabel, mInputSize)
     }
 
@@ -148,7 +147,7 @@ class MainActivity : ComponentActivity() {
             outputDirectory = getOutputDirectory()
             cameraExecutor = Executors.newSingleThreadExecutor()
 
-
+            prefViewModel.checkTokenExpirationAndDelete()
 
             CapstoneProjectTheme {
                 LaunchedEffect(Unit) {
@@ -175,6 +174,7 @@ class MainActivity : ComponentActivity() {
                         tomatoClassifier = tomatoClassifier,
                         chiliClassifier = chiliClassifier,
                         plantClassifier = plantClassifier,
+                        cauilClassifier=cauilClassifier,
                         taskViewModel = taskViewModel,
                         prefViewModel = prefViewModel,
                         showToast = {text->showToast(text)},

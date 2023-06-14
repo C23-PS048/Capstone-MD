@@ -26,4 +26,9 @@ sealed class Screen(val route: String) {
         fun createRoute(id:Int) = "editTask/$id"
     }
     object UserCamera : Screen("userCamera")
+
+    object DiseaseCam : Screen("diseaseCam/{slug}"){
+        fun createRoute(slug:String) = "diseaseCam/$slug"
+    }
+
 }

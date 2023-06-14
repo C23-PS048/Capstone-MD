@@ -31,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.plant.PlantResult
@@ -74,7 +76,8 @@ fun OwnedPlantScreen(
     navigateEdit: (Int) -> Unit,
     sendNotification: () -> Unit,
     userPlantViewModel: UserPlantViewModel,
-    prefViewModel: PreferenceViewModel
+    prefViewModel: PreferenceViewModel,
+    navController: NavHostController
 ) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     val task: MutableState<UserPlant?> = remember {
@@ -82,6 +85,13 @@ fun OwnedPlantScreen(
     }
     val planData: MutableState<PlantResult?> = remember {
         mutableStateOf(null)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            userPlantViewModel.resetData()
+
+        }
     }
 
     userPlantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
@@ -133,7 +143,7 @@ fun OwnedPlantScreen(
                 }
                 if (location != null) {
                     OwnedPlantContent(
-
+                        navController = navController,
                         onBack = onBack,
                         session = session,
                         timeBetween = timeBetween,
@@ -172,7 +182,8 @@ fun OwnedPlantContent(
     navigateEdit: (Int) -> Unit,
     userPlantViewModel: UserPlantViewModel,
     plantViewModel: PlantViewModel,
-    session: UserModel?
+    session: UserModel?,
+    navController: NavHostController
 ) {
     if (data != null) {
         Box(
@@ -460,7 +471,7 @@ fun OwnedPlantContent(
                 ) {
                     ButtonIcon(
                         onClick = {
-
+                            navController.navigate(Screen.DiseaseCam.createRoute(data.slug))
                         },
                         title = "Something Wrong? scan here ",
                         description = "Button To scan Your Plant",

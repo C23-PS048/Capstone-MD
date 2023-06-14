@@ -128,7 +128,8 @@ fun CameraScreen(
                             executor = executor,
                             onImageCaptured = onImageCaptured,
                             onError = onError,
-                            pickedImageUri = null
+                            pickedImageUri = null,
+                            isBack = true
                         )
                     }
                 )

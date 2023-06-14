@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -42,15 +43,17 @@ fun AnimatedSplash(navController: NavHostController, prefViewModel: PreferenceVi
             durationMillis = 3000
         )
     )
+
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     LaunchedEffect(key1 = true) {
+
         startAnimation = true
         delay(4000)
         navController.popBackStack()
-        if (session==null){
-
+        if (session?.token ==null){
         navController.navigate(Screen.Login.route)
         }else{
+
         navController.navigate(Screen.Home.route)
 
         }

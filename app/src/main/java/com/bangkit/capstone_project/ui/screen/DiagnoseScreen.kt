@@ -46,7 +46,8 @@ fun DiagnoseScreen(
     executor: Executor,
     onImageCaptured: (Uri) -> Unit,
     onError: (ImageCaptureException) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    slug: String
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -80,7 +81,7 @@ fun DiagnoseScreen(
                       tint = GreenDark
                   )
               }
-              Text(text = "Diagnose Your Plant", modifier = Modifier.align(Alignment.Center))
+              Text(text = "Diagnose Your Plant $slug", modifier = Modifier.align(Alignment.Center))
           }
         },
         bottomBar = {
@@ -98,7 +99,8 @@ fun DiagnoseScreen(
                             executor = executor,
                             onImageCaptured = onImageCaptured,
                             onError = onError,
-                            pickedImageUri = null
+                            pickedImageUri = null,
+                            isBack = true
                         )
                     },
 

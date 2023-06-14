@@ -48,6 +48,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ScreenState
+import com.bangkit.capstone_project.data.network.disease.DiseaseViewModel
 import com.bangkit.capstone_project.data.network.location.LocationViewModel
 import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.user.UserFactory
@@ -59,6 +60,8 @@ import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.component.navigation.NavigationBottomBar
 import com.bangkit.capstone_project.ui.screen.AnimatedSplash
 import com.bangkit.capstone_project.ui.screen.CameraScreen
+import com.bangkit.capstone_project.ui.screen.DiagnoseResultScreen
+import com.bangkit.capstone_project.ui.screen.DiagnoseScreen
 import com.bangkit.capstone_project.ui.screen.EditTaskScreen
 import com.bangkit.capstone_project.ui.screen.HomeScreen
 import com.bangkit.capstone_project.ui.screen.ListScreen
@@ -91,12 +94,9 @@ fun App(
     userViewModel: UserViewModel = viewModel(
         factory = UserFactory(UserInjection.provideRepository())
     ),
-    plantViewModel: PlantViewModel = viewModel(
-
-    ),
-    userPlantViewModel: UserPlantViewModel = viewModel(
-
-    ),
+    plantViewModel: PlantViewModel = viewModel(),
+    userPlantViewModel: UserPlantViewModel = viewModel(),
+    diseaseViewModel: DiseaseViewModel = viewModel(),
     context: Context,
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
@@ -107,6 +107,7 @@ fun App(
     chiliClassifier: DeseaseClassifier,
     tomatoClassifier: DeseaseClassifier,
     plantClassifier: DeseaseClassifier,
+    cauilClassifier: DeseaseClassifier,
 ) {
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
@@ -118,7 +119,7 @@ fun App(
         skipPartiallyExpanded = skipPartiallyExpanded
     )
     val currentLocation = locationViewModel.currentLocation
-    val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     val currentRoute = navBackStackEntry?.destination?.route
@@ -220,15 +221,11 @@ fun App(
                     val id = it.arguments?.getInt("id") ?: -1
                     OwnedPlantScreen(plantId = id,
                         onBack = {
-                            navController.navigate(Screen.Home.route) {
-                                launchSingleTop = true
-                                restoreState = true
+                            navController.popBackStack()
 
-                            }
-                            plantViewModel.resetResponseState()
-                            userPlantViewModel.resetData()
 
                         },
+                        navController = navController,
                         plantViewModel = plantViewModel,
                         userPlantViewModel = userPlantViewModel,
                         prefViewModel = prefViewModel,
@@ -417,6 +414,56 @@ fun App(
                                             })
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                }
+
+                composable(
+                    route = Screen.DiseaseCam.route,
+                    arguments = listOf(navArgument("slug") { type = NavType.StringType })
+                ) {
+                    val slug = it.arguments?.getString("slug") ?: ""
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        when (currentState.value) {
+                            is ScreenState.Camera -> {
+                                DiagnoseScreen(modifier = Modifier.fillMaxSize(),
+                                    slug = slug,
+                                    outputDirectory = outputDirectory,
+                                    executor = cameraExecutor,
+                                    onImageCaptured = { uri ->
+
+                                        photoUri = uri
+                                        currentState.value = ScreenState.Photo
+                                    },
+
+                                    onError = { Log.e("kilo", "View error:", it) },
+                                    onBack = { navController.navigateUp() })
+                            }
+
+                            is ScreenState.Photo -> {
+                                photoUri?.let { it1 ->
+                                    val classifier = listOf(
+                                        "chiliClassifier" to chiliClassifier,
+                                        "tomatoClassifier" to tomatoClassifier,
+                                        "cauilClassifier" to cauilClassifier,
+                                    ).associateBy({ (key, _) -> key }, { (_, value) -> value })
+                                    DiagnoseResultScreen(
+                                        modifier = Modifier.fillMaxSize(),
+                                        slug = slug,
+                                        photoUri = it1,
+                                        classifier = classifier,
+                                        context = context,
+                                        diseaseViewModel = diseaseViewModel,
+                                        userPlantViewModel = userPlantViewModel,
+                                        onBack = {
+                                            navController.navigateUp()
+                                            currentState.value = ScreenState.Camera
+
+                                        })
+                                }
+
                             }
                         }
                     }

@@ -26,4 +26,18 @@ class PreferenceViewModel(private val pref: LoginPreference) : ViewModel() {
             pref.deleteSession()
         }
     }
+
+    suspend fun isTokenExpired(): Boolean {
+        return pref.isTokenExpired()
+    }
+    fun checkTokenExpirationAndDelete() {
+        viewModelScope.launch {
+            val tokenExpired = isTokenExpired()
+            if (tokenExpired) {
+                deleteSession()
+
+            }
+        }
+    }
+
 }

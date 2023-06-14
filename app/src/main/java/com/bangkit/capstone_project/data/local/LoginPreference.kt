@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.bangkit.capstone_project.model.UserModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -25,12 +26,9 @@ class LoginPreference private constructor(private val dataStore: DataStore<Prefe
                 preferences[ID]
             )
 
-
-
             userModel
         }
     }
-
 
     suspend fun saveSession(userModel: UserModel) {
         Log.d("saveSession", "saveSession: $userModel")
@@ -41,6 +39,7 @@ class LoginPreference private constructor(private val dataStore: DataStore<Prefe
             preferences[CREATION_TIME] = Date().time.toString()
         }
     }
+
     suspend fun deleteSession() {
         dataStore.edit { preferences ->
             preferences.remove(TOKEN)
@@ -49,19 +48,15 @@ class LoginPreference private constructor(private val dataStore: DataStore<Prefe
             preferences.remove(CREATION_TIME)
         }
     }
-    private suspend fun deleteExpiredSessions(preferences: Preferences) {
-        val currentTime = Date().time
-        val expirationTime = TimeUnit.DAYS.toMillis(3)
 
-        val creationTime = preferences[CREATION_TIME]?.toLongOrNull() ?: 0L
-        if (currentTime - creationTime >= expirationTime) {
-            dataStore.edit { pref ->
-                pref.remove(TOKEN)
-                pref.remove(NAME)
-                pref.remove(ID)
-                pref.remove(CREATION_TIME)
-            }
-        }
+    suspend fun isTokenExpired(): Boolean {
+        val preferences = dataStore.data.first()
+        val creationTime = preferences[CREATION_TIME]?.toLongOrNull() ?: return true
+        val currentTime = Date().time
+        val elapsedTime = currentTime - creationTime
+        val expirationTime = TimeUnit.DAYS.toMillis(2) // Set your token expiration time in milliseconds
+
+        return elapsedTime > expirationTime
     }
 
     companion object {

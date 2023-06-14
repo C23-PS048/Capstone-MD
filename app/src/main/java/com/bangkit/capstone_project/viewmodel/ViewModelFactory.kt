@@ -24,7 +24,7 @@ object Injection {
     }
 }
 /*
-class PrefFactory(private val pref: com.bangkit.capstone_project.data.local.LoginPreference) : ViewModelProvider.NewInstanceFactory() {
+class PrefFactory(private val pref: com.bangkit.capstone_project.data.local.com.bangkit.capstone_project.data.local.LoginPreference) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
