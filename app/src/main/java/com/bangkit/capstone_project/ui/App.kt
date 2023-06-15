@@ -326,11 +326,12 @@ fun App(
 
                 }
                 composable(Screen.ListPlant.route) {
-                    ListScreen(token = session?.token,
+                    ListScreen(
+                        onBack = { navController.navigateUp() },
                         plantViewModel = plantViewModel,
                         navController = navController,
-                        onBack = { navController.navigateUp() },
-                        onclick = { navController.navigate(Screen.DetailPlant.route) })
+                        showToast = showToast
+                    )
                 }
                 composable(
                     route = Screen.DetailPlant.route,
@@ -340,6 +341,7 @@ fun App(
                     PlantInfoScreen(token = session?.token,
                         plantViewModel = plantViewModel,
                         slug = slug,
+                        showToast=showToast,
                         navigateTask = { id -> navController.navigate(Screen.Task.createRoute(id)) },
                         onBack = { navController.navigateUp() })
                 }
@@ -401,7 +403,7 @@ fun App(
                                         currentState.value = ScreenState.Photo
                                     },
                                     isBack = { isBack = it },
-                                    onError = { Log.e("kilo", "View error:", it) },
+                                    onError = { it.message?.let { it1 -> showToast(it1) } },
                                     onBack = { navController.navigateUp() })
                             }
 

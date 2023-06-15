@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.data.network.plant.PlantResult
 
@@ -44,7 +46,7 @@ fun PlantCards(onClick: () -> Unit, modifier: Modifier = Modifier, data: PlantRe
                 AsyncImage(
                     model = data.image[0],
                     contentDescription = "Plant Hint",
-                    contentScale = ContentScale.FillBounds,
+                    contentScale = ContentScale.Crop,
                     modifier = modifier.fillMaxWidth()
                 )
             }
@@ -53,7 +55,7 @@ fun PlantCards(onClick: () -> Unit, modifier: Modifier = Modifier, data: PlantRe
                    .fillMaxWidth()
                    .padding(15.dp, 8.dp)) {
                Text(text = data.plantName, style = MaterialTheme.typography.titleLarge)
-               Text(text = data.scientificName, style = MaterialTheme.typography.bodySmall)
+               Text(text = data.scientificName, style = MaterialTheme.typography.bodySmall, lineHeight = 11.sp, overflow = TextOverflow.Ellipsis, modifier = modifier.fillMaxWidth())
            }
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,13 +60,18 @@ fun PlantInfoScreen(
     onBack: () -> Unit,
     slug: String,
     token: String?,
-    plantViewModel: PlantViewModel
+    plantViewModel: PlantViewModel,
+    showToast: (String) -> Unit
 ) {
 
 
     plantViewModel.plantState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
+
             is UiState.Loading -> {
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
                 token.let { it1 ->
                     if (it1 != null) {
                         plantViewModel.getPlant(slug)
@@ -86,7 +92,9 @@ fun PlantInfoScreen(
 
             }
 
-            is UiState.Error -> {}
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
 
         }
     }
@@ -111,7 +119,7 @@ fun DetailContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Return To Login",
+                        contentDescription = "Kembail Ke menu Sebelumnya",
                         tint = Color.White
                     )
                 }
@@ -152,7 +160,7 @@ fun DetailContent(
                             AsyncImage(
                                 model = plant.image[0],
                                 contentDescription = "Plant Hint",
-                                contentScale = ContentScale.FillBounds,
+                                contentScale = ContentScale.Crop,
                                 modifier = modifier.fillMaxWidth()
                             )
                         }
@@ -279,7 +287,7 @@ fun DetailContent(
                                             AsyncImage(
                                                 model = image,
                                                 contentDescription = "Plant Hint",
-                                                contentScale = ContentScale.FillBounds,
+                                                contentScale = ContentScale.Crop,
                                                 modifier = modifier.fillMaxWidth()
                                             )
                                         }
@@ -300,7 +308,7 @@ fun DetailContent(
         ) {
             ButtonIcon(
                 onClick = { navigateTask(plant.slug) },
-                title = "Add Plant",
+                title = "Tambahkan Tanaman",
                 description = "Button to add your plant",
                 icon = painterResource(id = R.drawable.leaf),
                 corner = 15,

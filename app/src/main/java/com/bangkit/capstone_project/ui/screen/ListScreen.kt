@@ -1,11 +1,11 @@
 package com.bangkit.capstone_project.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,16 +38,17 @@ import com.bangkit.capstone_project.ui.theme.GrayLight
 fun ListScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    onclick: () -> Unit,
     plantViewModel: PlantViewModel,
-    token: String?,
-    navController: NavHostController
+    navController: NavHostController,
+    showToast: (String) -> Unit
 ) {
     plantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
-
-                        plantViewModel.getAll()
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
+                plantViewModel.getAll()
 
 
             }
@@ -54,17 +56,20 @@ fun ListScreen(
             is UiState.Success -> {
 
                 val data = uiState.data?.plantList
-                Log.d("TAG", "ListScreen: $data")
+
 
                 if (data != null) {
                     ListContent(
-                        onBack = onBack, listPlant = data, onclick = onclick,
-                        navController =navController)
+                        onBack = onBack, listPlant = data,
+                        navController = navController
+                    )
                 }
 
             }
 
-            is UiState.Error -> {}
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
 
         }
     }
@@ -77,27 +82,32 @@ fun ListContent(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     listPlant: List<PlantResult>,
-    onclick: () -> Unit,
+
     navController: NavHostController
 ) {
-    Log.d("TAG", "ListContent: $listPlant")
-    Scaffold(topBar = {
-        Column() {
-            Row(
-                verticalAlignment = Alignment.CenterVertically, modifier = modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp, bottom = 16.dp)
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back Button")
-                }
-                Text(text = "List Plant", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-            }
-            Divider(thickness = 3.dp, color = GrayLight)
-        }
 
-    }, modifier = modifier
-        .fillMaxWidth()) { padding ->
+    Scaffold(
+        topBar = {
+            Column() {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically, modifier = modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp, bottom = 16.dp)
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back Button"
+                        )
+                    }
+                    Text(text = "Daftar Tanaman", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Divider(thickness = 3.dp, color = GrayLight)
+            }
+
+        }, modifier = modifier
+            .fillMaxWidth()
+    ) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -106,12 +116,15 @@ fun ListContent(
             modifier = modifier.padding(padding)
         ) {
 
-              items(listPlant) {
-                  Box(Modifier.width(150.dp), contentAlignment = Alignment.Center) {
-                      PlantCards(onClick = { navController.navigate(Screen.DetailPlant.createRoute(it.slug)) }, data = it)
-                  }
-              }
-          }
+            items(listPlant) {
+                Box(Modifier.width(150.dp), contentAlignment = Alignment.Center) {
+                    PlantCards(
+                        onClick = { navController.navigate(Screen.DetailPlant.createRoute(it.slug)) },
+                        data = it
+                    )
+                }
+            }
         }
-
     }
+
+}
