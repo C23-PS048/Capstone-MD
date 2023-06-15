@@ -191,7 +191,8 @@ fun App(
 
                     session?.token?.let { it1 ->
                         session?.id?.let { it2 ->
-                            HomeScreen(token = it1,
+                            HomeScreen(
+                                token = it1,
 
                                 prefViewModel = prefViewModel,
 
@@ -201,13 +202,7 @@ fun App(
                                 navController = navController,
                                 plantViewModel = plantViewModel,
                                 showToast = showToast,
-                                navigatetoOwned = { id ->
-                                    navController.navigate(
-                                        Screen.OwnedPlant.createRoute(id)
-                                    ) {
-                                        restoreState = true
-                                    }
-                                })
+                            )
                         }
                     }
 
@@ -272,7 +267,8 @@ fun App(
 
                 }
                 composable(Screen.Register.route) {
-                    RegisterScreen(viewModel = userViewModel,
+                    RegisterScreen(
+                        viewModel = userViewModel,
                         navigateLogin = {
                             navController.navigate(Screen.Login.route) {
                                 launchSingleTop = true
@@ -282,7 +278,8 @@ fun App(
                             }
                         },
                         onBack = { navController.navigateUp() },
-                    showToast = showToast)
+                        showToast = showToast
+                    )
 
                 }
 
@@ -508,7 +505,7 @@ fun App(
                     verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
                     Text(
-                        text = "Add Your Plant",
+                        text = "Tambahkan Tanaman",
                         textAlign = TextAlign.Center,
                         modifier = modifier.fillMaxWidth()
                     )
@@ -522,7 +519,7 @@ fun App(
                                 navController.navigate(Screen.Camera.route)
                                 openBottomSheet = false
                             },
-                            title = "Already Planted",
+                            title = "Sudah Punya Tanaman",
                             description = "button",
                             icon = painterResource(
                                 id = R.drawable.scanner
@@ -537,7 +534,7 @@ fun App(
                                 navController.navigate(Screen.ListPlant.route)
                                 openBottomSheet = false
                             },
-                            title = "Planning To Plant",
+                            title = "Pilih Tanaman",
                             description = "button",
                             icon = painterResource(
                                 id = R.drawable.leaf

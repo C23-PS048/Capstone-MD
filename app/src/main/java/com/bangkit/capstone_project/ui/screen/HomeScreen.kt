@@ -65,7 +65,6 @@ fun HomeScreen(
         factory = ViewModelFactory(Injection.provideRepository())
     ),
     currentLocation: Location?,
-    navigatetoOwned: (Int) -> Unit,
     token: String,
     modifier: Modifier = Modifier,
 
@@ -145,7 +144,6 @@ fun HomeScreen(
                     weatherViewModel = weatherViewModel,
                     currentLocation = currentLocation,
                     listTask = uiState.data?.userPlant,
-                    navigatetoOwned = navigatetoOwned,
                     username = session?.name,
                     showToast = showToast,
                     plantList = list, address = addressState.value
@@ -172,7 +170,6 @@ fun HomeContent(
     listTask: List<UserPlantItem?>?,
     plantList: MutableList<PlantResult>,
     weatherViewModel: WeatherViewModel,
-    navigatetoOwned: (Int) -> Unit,
     navController: NavHostController,
     address: String,
     showToast: (String) -> Unit
@@ -276,7 +273,7 @@ fun HomeContent(
         if (listTask != null) {
             if (listTask.isNotEmpty()) {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
+
                     modifier = Modifier.padding(bottom = 16.dp)
                 ) {
 

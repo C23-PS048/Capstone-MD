@@ -1,6 +1,5 @@
 package com.bangkit.capstone_project.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,19 +13,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,11 +52,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.theme.BlackMed
+import com.bangkit.capstone_project.ui.theme.GrayDark
+import com.bangkit.capstone_project.ui.theme.OrangeLight
+import com.bangkit.capstone_project.ui.theme.OrangeReg
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 
 @Composable
@@ -59,14 +67,16 @@ fun ProfileScreen(
     prefViewModel: PreferenceViewModel,
     userViewModel: UserViewModel,
     showToast: (String) -> Unit,
-    navigateToCam:() -> Unit) {
+    navigateToCam: () -> Unit
+) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
-    Log.d("TAG", "Profile: $session")
     userViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
         when (uiState) {
             is UiState.Loading -> {
-                CircularProgressIndicator()
+             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                 CircularProgressIndicator()
+             }
                 session?.apply {
                     if (id != null) {
                         if (token != null) {
@@ -78,14 +88,19 @@ fun ProfileScreen(
             }
 
             is UiState.Success -> {
-            val data = uiState.data?.userResult
-                data?.apply{
+                val data = uiState.data?.userResult
+                data?.apply {
                     if (name != null) {
                         if (email != null) {
 
-                                UserProfilePage(onLogout = onLogout,userEmail = email, userName = name, userImage = foto,showToast=showToast,  navigateToCam=
-                                    navigateToCam
-                                )
+                            UserProfilePage(
+                                onLogout = onLogout,
+                                userEmail = email,
+                                userName = name,
+                                showToast = showToast,
+                                navigateToCam =
+                                navigateToCam
+                            )
 
                         }
                     }
@@ -103,68 +118,156 @@ fun ProfileScreen(
 }
 
 
-
 @Composable
 fun UserProfilePage(
     onLogout: () -> Unit,
     userName: String,
-    userImage: String?,
     userEmail: String,
     showToast: (String) -> Unit,
-    navigateToCam: () -> Unit, ) {
+    navigateToCam: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-        ProfileHeaderSection(userEmail =userEmail, userName = userName, userImage = userImage ,onLogout=onLogout,  navigateToCam=  navigateToCam)
+        ProfileHeaderSection(
+            userEmail = userEmail,
+            userName = userName,
+            onLogout = onLogout,
+            navigateToCam = navigateToCam
+        )
 
         Divider(color = Color.LightGray, thickness = 0.5.dp)
         Spacer(modifier = Modifier.size(2.dp))
-        ProfileMenu(showToast=showToast)
+        ProfileMenu(showToast = showToast)
     }
 }
 
 @Composable
 fun ProfileMenu(showToast: (String) -> Unit) {
-    Column(  modifier = Modifier
-        .fillMaxSize()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
 
-        .background(Color.White)) {
-        Text(text = "Aktifitas", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
-        Column( modifier = Modifier
-            .fillMaxSize()) {
+            .background(Color.White)
+    ) {
+        Text(
+            text = "Aktifitas",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
 
-            TextButton(onClick = { showToast("Forum Coming soon!!!") }, colors = ButtonDefaults.buttonColors(contentColor = BlackMed, containerColor = Color.Transparent),contentPadding= PaddingValues(vertical = 0.dp, horizontal = 16.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Image(painter = painterResource(id = R.drawable.chat), contentDescription = null, colorFilter = ColorFilter.tint(
-                        BlackMed), modifier = Modifier.size(20.dp))
-                    Text(text = "Diskusikan Tanaman mu", fontSize = 16.sp, fontWeight = FontWeight.W400)
+            TextButton(
+                onClick = { showToast("Forum Coming soon!!!") },
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = BlackMed,
+                    containerColor = Color.Transparent
+                ),
+                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.chat),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(
+                                BlackMed
+                            ),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "Diskusikan Tanaman mu",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(shape = RoundedCornerShape(50), color = OrangeLight)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Coming Soon",
+                            color = OrangeReg,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                        )
+                    }
                 }
             }
-            TextButton(onClick = { showToast("Marketplace Coming soon!!!") }, colors = ButtonDefaults.buttonColors(contentColor = BlackMed, containerColor = Color.Transparent),contentPadding= PaddingValues(vertical = 0.dp, horizontal = 16.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Image(imageVector = Icons.Outlined.ShoppingCart, contentDescription = null, colorFilter = ColorFilter.tint(
-                        BlackMed), modifier = Modifier.size(20.dp))
-                    Text(text = "Jual Panen kamu", fontSize = 16.sp, fontWeight = FontWeight.W400)
+            TextButton(
+                onClick = { showToast("Marketplace Coming soon!!!") },
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = BlackMed,
+                    containerColor = Color.Transparent
+                ),
+                contentPadding = PaddingValues(vertical = 0.dp, horizontal = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Image(
+                            imageVector = Icons.Outlined.ShoppingCart,
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(
+                                BlackMed
+                            ),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "Jual Panen kamu",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(shape = RoundedCornerShape(50), color = OrangeLight)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Coming Soon",
+                            color = OrangeReg,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileHeaderSection(
     userName: String,
-    userImage: String?,
     userEmail: String,
     onLogout: () -> Unit,
     navigateToCam: () -> Unit
 ) {
-val foto = if (userImage==null){
-    "https://ui-avatars.com/api/?name=John+Doe"
-}else{
-    BuildConfig.BASE_URL+userImage
-}
+
+    val openDialog = remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -186,7 +289,7 @@ val foto = if (userImage==null){
             ) {
 
                 AsyncImage(
-                    model = foto,
+                    model = "https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg",
                     contentScale = ContentScale.FillBounds,
                     contentDescription = null
                 )
@@ -196,19 +299,19 @@ val foto = if (userImage==null){
 
             Column(modifier = Modifier.padding(start = 16.dp)) {
 
-                    Text(
-                        text = userName,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Text(
+                    text = userName,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = userEmail,
-                        fontSize = 18.sp,
+                Text(
+                    text = userEmail,
+                    fontSize = 18.sp,
 
-                        )
+                    )
 
             }
         }
@@ -222,18 +325,13 @@ val foto = if (userImage==null){
             }
 
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                DropdownMenuItem(
-                    text = { Text("Edit") },
-                    onClick = navigateToCam,
-                    leadingIcon = {
-                        Icon(
-                            Icons.Outlined.Edit,
-                            contentDescription = null
-                        )
-                    })
+
                 DropdownMenuItem(
                     text = { Text("logout") },
-                    onClick = onLogout,
+                    onClick = {
+                        openDialog.value = !openDialog.value
+                        expanded = !expanded
+                    },
                     leadingIcon = {
                         Icon(
                             Icons.Outlined.ExitToApp,
@@ -245,5 +343,39 @@ val foto = if (userImage==null){
         }
 
     }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            icon = { Icon(Icons.Outlined.ExitToApp, contentDescription = null, tint = Color.DarkGray) },
+            title = {
+                Text(text = "Logout")
+            },
+            text = {
+                Text(
+                    "Apa Anda yakin mau Keluar Aplikasi?"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onLogout
+                ) {
+                    Text("Keluar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                    }
+                ) {
+                    Text("Tidak")
+                }
+            }
+        )
+    }
+
 }
 
