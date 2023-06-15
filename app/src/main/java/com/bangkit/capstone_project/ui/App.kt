@@ -150,7 +150,7 @@ fun App(
 
 
 
-    CapstoneProjectTheme() {
+    CapstoneProjectTheme {
         Scaffold(
             bottomBar = {
                 if (currentRoute == Screen.Home.route || currentRoute == Screen.Profile.route) {
@@ -183,8 +183,7 @@ fun App(
             ) {
                 composable(Screen.Splash.route) {
                     AnimatedSplash(
-                        navController = navController,
-                        prefViewModel = prefViewModel
+                        navController = navController, prefViewModel = prefViewModel
                     )
 
                 }
@@ -207,8 +206,7 @@ fun App(
                                     ) {
                                         restoreState = true
                                     }
-                                }
-                            )
+                                })
                         }
                     }
 
@@ -261,16 +259,29 @@ fun App(
                     LoginScreen(prefViewModel = prefViewModel,
                         viewModel = userViewModel,
                         showToast = showToast,
-                        navigateMain = { navController.navigate(Screen.Home.route) },
+                        navigateMain = {
+                            navController.navigate(Screen.Home.route) {
+                                launchSingleTop = true
+                                popUpTo(Screen.Login.route) {
+                                    inclusive = true
+                                }
+                            }
+                        },
                         navigateRegis = { navController.navigate(Screen.Register.route) })
 
                 }
                 composable(Screen.Register.route) {
-                    RegisterScreen(viewModel = userViewModel, navigateLogin = {
-                        navController.navigate(Screen.Login.route) {
-                            launchSingleTop = true
-                        }
-                    }, onBack = { navController.navigateUp() })
+                    RegisterScreen(viewModel = userViewModel,
+                        navigateLogin = {
+                            navController.navigate(Screen.Login.route) {
+                                launchSingleTop = true
+                                popUpTo(Screen.Register.route) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        onBack = { navController.navigateUp() },
+                    showToast = showToast)
 
                 }
 
@@ -302,8 +313,16 @@ fun App(
                         navigateToCam = { navController.navigate(Screen.UserCamera.route) },
                         onLogout = {
                             prefViewModel.deleteSession()
-                            navController.navigate(Screen.Login.route)
-                        }, prefViewModel = prefViewModel, userViewModel = userViewModel,
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Login.route) {
+                                    inclusive = true
+                                }
+                            }
+
+
+                        },
+                        prefViewModel = prefViewModel,
+                        userViewModel = userViewModel,
                         showToast = showToast
                     )
 
@@ -321,8 +340,7 @@ fun App(
                     arguments = listOf(navArgument("slug") { type = NavType.StringType })
                 ) {
                     val slug = it.arguments?.getString("slug") ?: ""
-                    PlantInfoScreen(
-                        token = session?.token,
+                    PlantInfoScreen(token = session?.token,
                         plantViewModel = plantViewModel,
                         slug = slug,
                         navigateTask = { id -> navController.navigate(Screen.Task.createRoute(id)) },
@@ -450,8 +468,7 @@ fun App(
                                         "tomatoClassifier" to tomatoClassifier,
                                         "cauilClassifier" to cauilClassifier,
                                     ).associateBy({ (key, _) -> key }, { (_, value) -> value })
-                                    DiagnoseResultScreen(
-                                        modifier = Modifier.fillMaxSize(),
+                                    DiagnoseResultScreen(modifier = Modifier.fillMaxSize(),
                                         slug = slug,
                                         photoUri = it1,
                                         classifier = classifier,

@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +61,7 @@ fun ProfileScreen(
     showToast: (String) -> Unit,
     navigateToCam:() -> Unit) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
+    Log.d("TAG", "Profile: $session")
     userViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
         when (uiState) {

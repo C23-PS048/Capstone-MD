@@ -1,6 +1,5 @@
 package com.bangkit.capstone_project.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,7 +43,6 @@ import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 fun LoginScreen(
     prefViewModel: PreferenceViewModel,
     viewModel: UserViewModel,
-    modifier: Modifier = Modifier,
     navigateMain: () -> Unit,
     navigateRegis: () -> Unit,
     showToast: (String) -> Unit
@@ -53,20 +50,17 @@ fun LoginScreen(
 
     LoginContent(
         viewModel = viewModel,
-        loading = false,
         navigateMain = navigateMain,
         navigateRegis = navigateRegis,
         prefViewModel = prefViewModel,
-        showToast =  showToast
+        showToast = showToast
     )
 }
-
 
 
 @Composable
 fun LoginContent(
     navigateRegis: () -> Unit,
-    loading: Boolean,
     modifier: Modifier = Modifier,
     navigateMain: () -> Unit,
     prefViewModel: PreferenceViewModel,
@@ -129,7 +123,7 @@ fun LoginContent(
                 ) {
 
                     InputTextField(
-                        label = "email",
+                        label = "Email",
                         keyboardType = KeyboardType.Email,
                         placeholder = "Email",
                         modifier = modifier.fillMaxWidth(),
@@ -143,10 +137,22 @@ fun LoginContent(
                     )
                     Button(
                         onClick = {
-                            viewModel.loginUser(
-                                inputEmail,
-                                password
-                            )
+                            if (inputEmail.isEmpty()) {
+                                showToast("Email Tidak Boleh Kosong")
+
+                            } else if (password.isEmpty()) {
+                                showToast("Password Tidak Boleh Kosong")
+
+                            } else if (password.length < 8) {
+                                showToast("Password Tidak Valid")
+
+                            } else {
+
+                                viewModel.loginUser(
+                                    inputEmail,
+                                    password
+                                )
+                            }
 
 
                         },
@@ -161,9 +167,9 @@ fun LoginContent(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "I Have an Account?", fontSize = 16.sp)
+                    Text(text = "Belum punya akun? ", fontSize = 16.sp)
                     TextButton(onClick = navigateRegis) {
-                        Text(text = "Register", fontSize = 16.sp)
+                        Text(text = "Daftar", fontSize = 16.sp)
 
                     }
                 }
@@ -173,7 +179,7 @@ fun LoginContent(
             when (responseState) {
                 is UiState.Loading -> {
 
-                    CircularProgressIndicator(color = Color.Red)
+                    CircularProgressIndicator()
                 }
 
                 is UiState.Success -> {
@@ -181,21 +187,24 @@ fun LoginContent(
                     val response = responseState.data
                     if (response != null) {
                         prefViewModel.saveSession(
-                             UserModel(
-                                 response.loginResult.name,
-                                 response.loginResult.token,
-                                 response.loginResult.id
-                             )
+                            UserModel(
+                                response.loginResult.name,
+                                response.loginResult.token,
+                                response.loginResult.id
+                            )
                         )
                         showToast(stringResource(R.string.login_response))
                         viewModel.resetResponseState()
                         navigateMain()
                     }
-                    Log.d("TAG", "RegisterScreen: ${response.toString()}")
+
 
                 }
 
-                is UiState.Error -> {}
+                is UiState.Error -> {
+                    showToast(responseState.errorMessage)
+                }
+
                 else -> {}
             }
         }

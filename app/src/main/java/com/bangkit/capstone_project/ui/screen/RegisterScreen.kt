@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -33,19 +32,17 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bangkit.capstone_project.R
-
 import com.bangkit.capstone_project.data.network.user.UserFactory
 import com.bangkit.capstone_project.data.network.user.UserInjection
 import com.bangkit.capstone_project.data.network.user.UserViewModel
 import com.bangkit.capstone_project.ui.UiState
-
 import com.bangkit.capstone_project.ui.component.input.InputTextField
 import com.bangkit.capstone_project.ui.component.input.PasswordTextField
 
@@ -54,28 +51,29 @@ import com.bangkit.capstone_project.ui.component.input.PasswordTextField
 fun RegisterScreen(
     onBack: () -> Unit,
     navigateLogin: () -> Unit,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    showToast: (String) -> Unit
 ) {
-    var loading by remember {
-        mutableStateOf(false)
-    }
+
 
     RegisterContent(
-        loading = loading,
+
+        showToast = showToast,
         navigateLogin = navigateLogin,
         onBack = onBack,
         viewModel = viewModel
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun RegisterContent(
     onBack: () -> Unit,
-    loading: Boolean,
+
     modifier: Modifier = Modifier,
     navigateLogin: () -> Unit,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    showToast: (String) -> Unit
 ) {
     var inputEmail by remember {
         mutableStateOf("")
@@ -115,13 +113,13 @@ fun RegisterContent(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Register",
+                            text = stringResource(R.string.register_title),
                             fontSize = 48.sp,
                             color = Color.White,
                             fontWeight = FontWeight.W500
                         )
                         Text(
-                            text = "Create Your Account",
+                            text = stringResource(R.string.register_info),
                             fontSize = 18.sp,
                             color = Color.LightGray
                         )
@@ -141,15 +139,15 @@ fun RegisterContent(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         InputTextField(
-                            label = "username",
+                            label = "Name",
                             keyboardType = KeyboardType.Text,
-                            placeholder = "username",
+                            placeholder = "ex. John Doe",
                             modifier = modifier.fillMaxWidth(),
                             text = username,
                             onValueChange = { username = it }
                         )
                         InputTextField(
-                            label = "email",
+                            label = "Email",
                             keyboardType = KeyboardType.Email,
                             placeholder = "Email",
                             modifier = modifier.fillMaxWidth(),
@@ -163,17 +161,31 @@ fun RegisterContent(
                         )
                         Button(
                             onClick = {
-                                viewModel.registerUser(
-                                    name = username,
-                                    email = inputEmail,
-                                    password = password
-                                )
+
+                                if (username.isEmpty()) {
+                                    showToast("Username Tidak Boleh Kosong")
+                                } else if (inputEmail.isEmpty()) {
+                                    showToast("Email Tidak Boleh Kosong")
+
+                                } else if (password.isEmpty()) {
+                                    showToast("Password Tidak Boleh Kosong")
+
+                                } else if (password.length < 8) {
+                                    showToast("Password Tidak Valid")
+
+                                } else {
+                                    viewModel.registerUser(
+                                        name = username,
+                                        email = inputEmail,
+                                        password = password
+                                    )
+                                }
                             },
                             modifier = modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(5.dp)
                         ) {
                             Text(
-                                text = "Register",
+                                text = stringResource(R.string.daftar),
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 21.sp
                             )
@@ -184,9 +196,9 @@ fun RegisterContent(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "I Have an Account?", fontSize = 16.sp)
+                        Text(text = stringResource(R.string.have_account), fontSize = 16.sp)
                         TextButton(onClick = navigateLogin) {
-                            Text(text = "Login", fontSize = 16.sp)
+                            Text(text = stringResource(R.string.login), fontSize = 16.sp)
 
                         }
                     }
@@ -197,19 +209,23 @@ fun RegisterContent(
             when (responseState) {
                 is UiState.Loading -> {
 
-                    CircularProgressIndicator(color = Color.Red)
+                    CircularProgressIndicator()
                 }
 
                 is UiState.Success -> {
 
                     val response = responseState.data
 
-                    Log.d("TAG", "RegisterScreen: ${response.toString()}")
+
                     viewModel.resetResponseState()
+                    showToast("Register Berhasil")
+                    showToast("Silahkan Login")
                     navigateLogin()
                 }
 
-                is UiState.Error -> {}
+                is UiState.Error -> {
+                    showToast(responseState.errorMessage)
+                }
                 else -> {}
             }
         }
@@ -220,7 +236,11 @@ fun RegisterContent(
 @Preview
 @Composable
 fun RegisterPreview() {
-    RegisterScreen(navigateLogin = {}, viewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+    RegisterScreen(onBack = {},
+        navigateLogin = {},
+        viewModel = androidx.lifecycle.viewmodel.compose.viewModel(
             factory = UserFactory(UserInjection.provideRepository())
-            ), onBack = {})
+        ),
+        showToast = { }
+    )
 }

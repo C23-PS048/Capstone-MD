@@ -111,7 +111,7 @@ fun HomeScreen(
     }
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
-
+    Log.d("TAG", "HomeScreen: $session")
     userPlantViewModel.userPlant.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
         when (uiState) {

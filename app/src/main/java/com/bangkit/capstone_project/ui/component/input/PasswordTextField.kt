@@ -2,6 +2,7 @@ package com.bangkit.capstone_project.ui.component.input
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 
@@ -52,7 +54,7 @@ fun PasswordTextField(
             placeholder = { Text(text = "Password") },
             trailingIcon = {
                 IconButton(onClick = { visible = !visible }) {
-                    Icon(painter = icon, contentDescription = "Password Peek Button")
+                    Icon(painter = icon, contentDescription = "Password Peek Button",modifier.size(20.dp))
                 }
             },
             singleLine = true,
@@ -60,7 +62,7 @@ fun PasswordTextField(
         )
 
         if (text.length < 8 && text.isNotBlank()) {
-            Text(text = "Password must at least 8 characters", color = Color.Red)
+            Text(text = "Password Minimal Berjumlah 8 karakter", color = Color.Red)
         }
     }
 }

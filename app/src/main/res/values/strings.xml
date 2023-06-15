@@ -6,4 +6,9 @@
     <string name="hour_tag">Jam</string>
     <string name="day_tag">Hari</string>
     <string name="image_desc">Image of Your Plant</string>
+    <string name="have_account">Sudah Punya Akun?</string>
+    <string name="login">Login</string>
+    <string name="daftar">Daftar</string>
+    <string name="register_info">Buat Akun Kamu</string>
+    <string name="register_title">Register</string>
 </resources>
