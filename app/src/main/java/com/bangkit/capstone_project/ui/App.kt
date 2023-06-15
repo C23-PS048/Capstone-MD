@@ -153,7 +153,7 @@ fun App(
     CapstoneProjectTheme() {
         Scaffold(
             bottomBar = {
-                if (currentRoute == Screen.Home.route || currentRoute == Screen.Forum.route) {
+                if (currentRoute == Screen.Home.route || currentRoute == Screen.Profile.route) {
                     NavigationBottomBar(navController = navController, openDialog = {
 
                         openBottomSheet = !openBottomSheet
@@ -283,6 +283,7 @@ fun App(
                     TaskScreen(onBack = { navController.navigateUp() },
                         taskViewModel = taskViewModel,
                         plantId = slug,
+                        showToast = showToast,
                         plantViewModel = plantViewModel,
                         preferenceViewModel = prefViewModel,
                         userPlantViewModel = userPlantViewModel,
@@ -295,7 +296,7 @@ fun App(
 
                 }
 
-                composable(Screen.Forum.route) {
+                composable(Screen.Profile.route) {
 
                     ProfileScreen(
                         navigateToCam = { navController.navigate(Screen.UserCamera.route) },

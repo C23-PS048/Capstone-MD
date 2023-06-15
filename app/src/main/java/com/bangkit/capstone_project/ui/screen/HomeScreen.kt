@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
@@ -12,15 +13,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,9 +41,11 @@ import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.userplant.UserPlantItem
 import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
+import com.bangkit.capstone_project.helper.getAddressName
 import com.bangkit.capstone_project.helper.getCurrentDate
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.InfoScreen
+import com.bangkit.capstone_project.ui.component.LoadingAnimation
 import com.bangkit.capstone_project.ui.component.cards.OwnPlantCard
 import com.bangkit.capstone_project.ui.component.cards.WeatherCards
 import com.bangkit.capstone_project.ui.theme.BlackLight
@@ -107,9 +116,9 @@ fun HomeScreen(
 
         when (uiState) {
             is UiState.Loading -> {
-               Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                   CircularProgressIndicator()
-               }
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
                 session?.apply {
                     userPlantViewModel.getUserPlant(id, token)
 
@@ -119,12 +128,13 @@ fun HomeScreen(
             is UiState.Success -> {
 
                 HomeContent(
-                    navController=navController,
+                    navController = navController,
                     weatherViewModel = weatherViewModel,
                     currentLocation = currentLocation,
                     listTask = uiState.data?.userPlant,
                     navigatetoOwned = navigatetoOwned,
                     username = session?.name,
+                    context = LocalContext.current,
                     plantList = list
                 )
 
@@ -148,7 +158,8 @@ fun HomeContent(
     plantList: MutableList<PlantResult>,
     weatherViewModel: WeatherViewModel,
     navigatetoOwned: (Int) -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    context: Context
 ) {
     Column(
         modifier = modifier
@@ -178,11 +189,79 @@ fun HomeContent(
             Icon(painter = painterResource(id = R.drawable.bell), contentDescription = null)
         }
 
-        WeatherCards(
-            weatherViewModel = weatherViewModel,
-            currentLocation = currentLocation,
-            context = LocalContext.current
-        )
+
+        var address:String = "Semarang"
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            weatherViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+
+                when (uiState) {
+                    is UiState.Loading -> {
+                        Card(
+                            modifier = modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Row(
+                                modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                LoadingAnimation()
+                            }
+                        }
+                        val lat = currentLocation?.latitude ?: -6.966667
+                        val lon = currentLocation?.longitude ?: 110.416664
+
+                        weatherViewModel.getWeather(
+                            lat,
+                            lon
+                        )
+                        address = getAddressName(context, lat, lon)
+                    }
+
+                    is UiState.Success -> {
+
+
+
+                            WeatherCards(
+                                address = address,
+                                icon = uiState.data?.weather?.get(0)?.icon,
+                                info = "${uiState.data?.weather?.get(0)?.main} | ${uiState.data?.main?.temp} C",
+                                weatherViewModel = weatherViewModel,
+                                currentLocation = currentLocation,
+                                context = LocalContext.current
+                            )
+
+                    }
+
+                    is UiState.Error -> {
+                        // Handle the error state
+                    }
+
+
+                }
+
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
         Text(text = "Your Plant", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         if (listTask != null) {
             if (listTask.isNotEmpty()) {
@@ -203,7 +282,13 @@ fun HomeContent(
                                                 plantName = plantResult.plantName,
                                                 plantImage = plantResult.image,
                                                 plantScientifi = plantResult.scientificName,
-                                                navigatetoOwned = {navController.navigate(Screen.OwnedPlant.createRoute(id))},
+                                                navigatetoOwned = {
+                                                    navController.navigate(
+                                                        Screen.OwnedPlant.createRoute(
+                                                            id
+                                                        )
+                                                    )
+                                                },
                                                 id = id
                                             )
                                             Log.d("TAG", "HomeContent: id = $id")
@@ -226,11 +311,3 @@ fun HomeContent(
 
     }
 }
-/*
-@Preview
-@Composable
-fun HomePreview() {
-    CapstoneProjectTheme {
-        HomeScreen(currentLocation = null,)
-    }
-}*/

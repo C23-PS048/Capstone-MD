@@ -24,6 +24,7 @@ import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
@@ -82,41 +83,77 @@ fun TaskScreen(
     plantViewModel: PlantViewModel,
     preferenceViewModel: PreferenceViewModel,
     userPlantViewModel: UserPlantViewModel,
-    plantId: String
+    plantId: String,
+    showToast: (String) -> Unit
 ) {
     val session by preferenceViewModel.getLoginSession().collectAsState(initial = null)
-    plantViewModel.plantState.collectAsState(initial = UiState.Loading).value.let { uiState ->
-        when (uiState) {
-            is UiState.Loading -> {
+    CapstoneProjectTheme() {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
+            userPlantViewModel.responseState.collectAsState(initial = null).value.let { responseState ->
+                when (responseState) {
+                    is UiState.Loading -> {
 
 
-                plantViewModel.getPlant(plantId)
+                        CircularProgressIndicator(modifier.align(Alignment.Center))
 
 
-            }
+                    }
 
-            is UiState.Success -> {
+                    is UiState.Success -> {
 
-                val data = uiState.data?.plantResult
-                Log.d("TAG", "ListScreen: $data")
-                if (data != null) {
-                    TaskContent(
-                        onBack = onBack,
-                        session = session,
-                        navigateHome = navigateHome,
-                        taskViewModel = taskViewModel,
-                        modifier = modifier,
-                        plant=data,
-                        userPlantViewModel=userPlantViewModel
-                        )
+                        showToast("Data Tersimpan")
+                        userPlantViewModel.resetResponseState()
+                        navigateHome()
+                    }
+
+                    is UiState.Error -> {
+                        showToast(responseState.errorMessage)
+                    }
+
+                    else -> {}
                 }
 
             }
+            plantViewModel.plantState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+                when (uiState) {
+                    is UiState.Loading -> {
 
-            is UiState.Error -> {}
 
+                        plantViewModel.getPlant(plantId)
+
+
+                    }
+
+                    is UiState.Success -> {
+
+                        val data = uiState.data?.plantResult
+                        Log.d("TAG", "ListScreen: $data")
+                        if (data != null) {
+                            TaskContent(
+                                onBack = onBack,
+                                session = session,
+                                navigateHome = navigateHome,
+                                taskViewModel = taskViewModel,
+                                modifier = modifier,
+                                plant = data,
+                                userPlantViewModel = userPlantViewModel
+                            )
+                        }
+
+                    }
+
+                    is UiState.Error -> {
+                        showToast(uiState.errorMessage)
+                    }
+
+                }
+
+            }
         }
-
     }
 }
 
@@ -145,254 +182,252 @@ fun TaskContent(
     val textLocation = mutableStateOf("")
     val dateWeatherState =
         rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
-    CapstoneProjectTheme() {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-            Scaffold(
-                topBar = {
-                    Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 32.dp, bottom = 16.dp)
-                        ) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Back Button"
-                                )
-                            }
-                            Text(
-                                text = "Schedule Your Plant",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Divider(thickness = 3.dp, color = GrayLight)
-                    }
-                },
-                modifier = modifier
-            ) { padding ->
-                Box(
+
+    Scaffold(
+        topBar = {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(padding)
+                        .fillMaxWidth()
+                        .padding(top = 32.dp, bottom = 16.dp)
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back Button"
+                        )
+                    }
+                    Text(
+                        text = "Schedule Your Plant",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Divider(thickness = 3.dp, color = GrayLight)
+            }
+        },
+        modifier = modifier
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .padding(padding)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Card(
+                    modifier = modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom,
+                        modifier = modifier
+                            .fillMaxWidth()
                             .padding(16.dp)
-                            .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
-                        Card(
-                            modifier = modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(4.dp)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom,
-                                modifier = modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                Column() {
-                                    Text(
-                                        plant.plantName,
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = BlackMed
-                                    )
-                                    Text(
-                                        plant.scientificName,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = Color.LightGray
-                                    )
-                                }
-                                Box(
-                                    modifier = modifier
-                                        .width(120.dp)
-                                        .height(150.dp)
-                                        .clip(shape = RoundedCornerShape(15))
-                                ) {
-                                    Log.d("TAG", "TaskContent: ${BuildConfig.BASE_URL+plant.image[0]}")
-                                    AsyncImage(
-                                        model =plant.image[0] ,
-                                        contentDescription = "Plant Hint",
-                                        contentScale = ContentScale.FillWidth,
-                                        modifier = modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-                        }
-
-
-
-
-
-                        dateWeatherState.selectedDateMillis?.let {
-                            convertMillisToDateString(it)
-                        }?.let {
-                            ScheduleInput(
-                                value = openWeatherDate.value,
-                                onValueChange = { openWeatherDate.value = it },
-                                selectDialog = openWeatherRepeat.value,
-                                isSelectOpen = { openWeatherRepeat.value = it },
-                                Date = it,
-                                Selected = selectedOption.label,
-                                modifier = modifier.background(Color.White)
+                        Column() {
+                            Text(
+                                plant.plantName,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = BlackMed
+                            )
+                            Text(
+                                plant.scientificName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.LightGray
                             )
                         }
-
-                        OutlinedTextField(
-                            value = textLocation.value,
-                            onValueChange = { textLocation.value = it },
-                            label = { Text("Plant Location") },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.marker),
-                                    contentDescription = " Location Input"
-                                )
-                            },
-                            modifier = modifier.fillMaxWidth()
-                        )
-                        Button(
-                            onClick = {
-                                if (session != null) {
-                                    session.token?.let {
-
-                                        session.id?.let { it1 ->
-                                            saveData(
-                                                location = textLocation.value,
-                                                frequency = selectedOption.frequency,
-                                                startDate = dateWeatherState.selectedDateMillis,
-
-                                                plantId = plant.id,
-                                                userId = it1.toInt(),
-                                                token = it,
-                                                userPlantViewModel  =userPlantViewModel
-                                            )
-                                        }
-
-                                    }
-                                }
-                             /*   navigateHome()*/
-                            },
-                            modifier = modifier.fillMaxWidth()
+                        Box(
+                            modifier = modifier
+                                .width(120.dp)
+                                .height(150.dp)
+                                .clip(shape = RoundedCornerShape(15))
                         ) {
-                            Text(text = "Input")
+                            Log.d(
+                                "TAG",
+                                "TaskContent: ${BuildConfig.BASE_URL + plant.image[0]}"
+                            )
+                            AsyncImage(
+                                model = plant.image[0],
+                                contentDescription = "Plant Hint",
+                                contentScale = ContentScale.FillWidth,
+                                modifier = modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
-            }
-            if (openWeatherDate.value) {
-                val confirmEnabled = derivedStateOf { dateWeatherState.selectedDateMillis != null }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.8f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    DatePickerDialog(
-                        onDismissRequest = {
 
+
+
+
+
+                dateWeatherState.selectedDateMillis?.let {
+                    convertMillisToDateString(it)
+                }?.let {
+                    ScheduleInput(
+                        value = openWeatherDate.value,
+                        onValueChange = { openWeatherDate.value = it },
+                        selectDialog = openWeatherRepeat.value,
+                        isSelectOpen = { openWeatherRepeat.value = it },
+                        Date = it,
+                        Selected = selectedOption.label,
+                        modifier = modifier.background(Color.White)
+                    )
+                }
+
+                OutlinedTextField(
+                    value = textLocation.value,
+                    onValueChange = { textLocation.value = it },
+                    label = { Text("Plant Location") },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.marker),
+                            contentDescription = " Location Input"
+                        )
+                    },
+                    modifier = modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = {
+                        if (session != null) {
+                            session.token?.let {
+
+                                session.id?.let { it1 ->
+                                    saveData(
+                                        location = textLocation.value,
+                                        frequency = selectedOption.frequency,
+                                        startDate = dateWeatherState.selectedDateMillis,
+
+                                        plantId = plant.id,
+                                        userId = it1.toInt(),
+                                        token = it,
+                                        userPlantViewModel = userPlantViewModel
+                                    )
+                                }
+
+                            }
+                        }
+                        /*   navigateHome()*/
+                    },
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Input")
+                }
+            }
+        }
+    }
+    if (openWeatherDate.value) {
+        val confirmEnabled = derivedStateOf { dateWeatherState.selectedDateMillis != null }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.8f)),
+            contentAlignment = Alignment.Center
+        ) {
+            DatePickerDialog(
+                onDismissRequest = {
+
+                    openWeatherDate.value = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
                             openWeatherDate.value = false
                         },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    openWeatherDate.value = false
-                                },
-                                enabled = confirmEnabled.value
-                            ) {
-                                Text("OK")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    openWeatherDate.value = false
-                                }
-                            ) {
-                                Text("Cancel")
-                            }
+                        enabled = confirmEnabled.value
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            openWeatherDate.value = false
                         }
                     ) {
-                        DatePicker(state = dateWeatherState)
+                        Text("Cancel")
                     }
                 }
+            ) {
+                DatePicker(state = dateWeatherState)
             }
-            if (openWeatherRepeat.value) {
-                val confirmEnabled = derivedStateOf { dateWeatherState.selectedDateMillis != null }
-                AlertDialog(
-                    onDismissRequest = {
+        }
+    }
+    if (openWeatherRepeat.value) {
+        val confirmEnabled = derivedStateOf { dateWeatherState.selectedDateMillis != null }
+        AlertDialog(
+            onDismissRequest = {
 
-                        openWeatherRepeat.value = false
-                    }
+                openWeatherRepeat.value = false
+            }
 
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .wrapContentHeight(),
-                        shape = MaterialTheme.shapes.large,
-                        tonalElevation = AlertDialogDefaults.TonalElevation
-                    ) {
+        ) {
+            Surface(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = AlertDialogDefaults.TonalElevation
+            ) {
 
 // Note that Modifier.selectableGroup() is essential to ensure correct accessibility behavior
-                        Column(modifier.fillMaxWidth()) {
-                            Column(Modifier.selectableGroup()) {
-                                radioOptions.forEach { text ->
-                                    Row(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .height(56.dp)
-                                            .selectable(
-                                                selected = (text == selectedOption),
-                                                onClick = { onOptionSelected(text) },
-                                                role = Role.RadioButton
-                                            )
-                                            .padding(horizontal = 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        RadioButton(
-                                            selected = (text == selectedOption),
-                                            onClick = null // null recommended for accessibility with screenreaders
-                                        )
-                                        Text(
-                                            text = text.label,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            modifier = Modifier.padding(start = 16.dp)
-                                        )
-                                    }
-                                }
-                            }
-
-                            TextButton(
-                                onClick = {
-                                    openWeatherRepeat.value = false
-                                },
-                                modifier = Modifier.align(Alignment.End)
+                Column(modifier.fillMaxWidth()) {
+                    Column(Modifier.selectableGroup()) {
+                        radioOptions.forEach { text ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .selectable(
+                                        selected = (text == selectedOption),
+                                        onClick = { onOptionSelected(text) },
+                                        role = Role.RadioButton
+                                    )
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Confirm")
+                                RadioButton(
+                                    selected = (text == selectedOption),
+                                    onClick = null // null recommended for accessibility with screenreaders
+                                )
+                                Text(
+                                    text = text.label,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(start = 16.dp)
+                                )
                             }
                         }
+                    }
+
+                    TextButton(
+                        onClick = {
+                            openWeatherRepeat.value = false
+                        },
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text("Confirm")
                     }
                 }
             }
         }
     }
+
 }
 
 fun saveData(
     frequency: Int, startDate: Long?, location: String, userPlantViewModel: UserPlantViewModel,
     plantId: Int,
-    userId:Int,
-    token: String) {
+    userId: Int,
+    token: String
+) {
 
     startDate?.let {
         val (lastDate, NextDate) = calculateScheduleDates(
@@ -408,12 +443,10 @@ fun saveData(
             nextScheduledDate = NextDate.toString(),
             frequency = frequency.toString(),
             plantId = plantId.toString(),
-            userId =userId.toString(),
+            userId = userId.toString(),
             token = token
         )
     }
-
-
 
 
 }

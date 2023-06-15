@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PlantCare</string>
+    <string name="app_name">Sprout</string>
     <string name="title_activity_camera">CameraActivity</string>
     <string name="login_response">Login Sukses</string>
     <string name="watering_tag">Penyiraman Selanjutnya</string>

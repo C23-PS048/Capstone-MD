@@ -28,18 +28,16 @@ import java.util.Locale
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
-fun getAddressName(context: Context, lat: Double, lon: Double): MutableState<String?> {
-    var addressName: MutableState<String?> = mutableStateOf(null)
+fun getAddressName(context: Context, lat: Double, lon: Double): String{
+    var addressName:String = "semarang"
     val geocoder = Geocoder(context, Locale.US)
-    try {
+
         val list = geocoder.getFromLocation(lat, lon, 1)
         if (list != null && list.size != 0) {
-            addressName = mutableStateOf("${list[0].subAdminArea}, ${list[0].countryName}")
+            addressName = "${list[0].subAdminArea}, ${list[0].countryName}"
 
         }
-    } catch (e: IOException) {
-        e.printStackTrace()
-    }
+
     return addressName
 }
 
@@ -57,6 +55,15 @@ fun rotateImage(bitmap: Bitmap, isBack: Boolean = false): Bitmap {
     return result
 }
 
+fun getFirstWord(str: String): String {
+    val trimmedStr = str.trim()
+    val firstSpaceIndex = trimmedStr.indexOf(' ')
+    return if (firstSpaceIndex == -1) {
+        trimmedStr
+    } else {
+        trimmedStr.substring(0, firstSpaceIndex)
+    }
+}
 fun takePhoto(
     filenameFormat: String,
     imageCapture: ImageCapture,

@@ -14,13 +14,23 @@ import javax.inject.Inject
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     private val locationTracker: LocationTracker
-) : ViewModel(){
+) : ViewModel() {
 
-    var currentLocation by mutableStateOf<Location?>(null)
+    var currentLocation by mutableStateOf<Location?>(getDefaultLocation())
+        private set
 
     fun getCurrentLocation() {
         viewModelScope.launch {
             currentLocation = locationTracker.getCurrentLocation()
         }
+    }
+
+    private fun getDefaultLocation(): Location {
+        val defaultLatitude = 	-6.9
+        val defaultLongitude =110.4
+        val location = Location("")
+        location.latitude = defaultLatitude
+        location.longitude = defaultLongitude
+        return location
     }
 }

@@ -53,7 +53,7 @@ fun AnimatedSplash(navController: NavHostController, prefViewModel: PreferenceVi
         if (session?.token ==null){
         navController.navigate(Screen.Login.route)
         }else{
-
+            Log.d("TAG", "AnimatedSplash: $session")
         navController.navigate(Screen.Home.route)
 
         }

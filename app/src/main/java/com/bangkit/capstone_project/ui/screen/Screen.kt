@@ -1,10 +1,8 @@
 package com.bangkit.capstone_project.ui.screen
 
-import com.bangkit.capstone_project.model.Task
-
 sealed class Screen(val route: String) {
     object Home : Screen("home")
-    object Forum : Screen("forum")
+    object Profile : Screen("profile")
     object Camera : Screen("camera")
     object ListPlant : Screen("listplant")
     object Splash : Screen("splash")

@@ -70,6 +70,7 @@ class UserPlantViewModel() : ViewModel() {
         token: String
     ) {
         val headerToken = "Bearer $token"
+        _responseState.value = UiState.Loading
         viewModelScope.launch {
             try {
                 val response = ApiConfig.getUserPlantService().saveUserPlant(

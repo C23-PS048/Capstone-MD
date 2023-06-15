@@ -114,7 +114,7 @@ fun Prev() {
             NavItem(
                 name = "HOME",
                 icon = painterResource(id = R.drawable.user_regular),
-                route = Screen.Forum
+                route = Screen.Profile
             ),
         )
         BottomBar(openDialog = { }) {

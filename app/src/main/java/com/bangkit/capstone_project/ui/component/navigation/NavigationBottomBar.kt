@@ -44,7 +44,7 @@ fun NavigationBottomBar(
             ), NavItem(
                 name = "Profile",
                 icon = painterResource(id = R.drawable.user_regular),
-                route = Screen.Forum
+                route = Screen.Profile
             ),
         )
         BottomBar(openDialog=openDialog) {
