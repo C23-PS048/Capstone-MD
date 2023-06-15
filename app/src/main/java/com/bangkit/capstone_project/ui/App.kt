@@ -243,7 +243,8 @@ fun App(
                         onBack = { navController.navigateUp() },
                         userPlantViewModel = userPlantViewModel,
                         prefViewModel = prefViewModel,
-                        taskViewModel = taskViewModel,
+                        plantViewModel = plantViewModel,
+                        showToast=showToast,
                         navigateHome = { navController.navigate(Screen.Home.route) },
                     )
 
@@ -289,7 +290,6 @@ fun App(
                 ) {
                     val slug = it.arguments?.getString("slug") ?: ""
                     TaskScreen(onBack = { navController.navigateUp() },
-                        taskViewModel = taskViewModel,
                         plantId = slug,
                         showToast = showToast,
                         plantViewModel = plantViewModel,

@@ -131,10 +131,12 @@ fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
 
 
     when (frequency) {
-        1 -> calendar.add(Calendar.MONTH, 1)
-        2 -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
+        1 -> calendar.add(Calendar.DAY_OF_YEAR, 1)
+        2 -> calendar.add(Calendar.DAY_OF_YEAR, 2)
         3 -> calendar.add(Calendar.DAY_OF_YEAR, 3)
-        4 -> calendar.add(Calendar.DAY_OF_YEAR, 1)
+        4 -> calendar.add(Calendar.DAY_OF_YEAR, 4)
+        5 -> calendar.add(Calendar.DAY_OF_YEAR, 5)
+        6 -> calendar.add(Calendar.DAY_OF_YEAR, 6)
     }
     val nextScheduledDate = calendar.timeInMillis
 

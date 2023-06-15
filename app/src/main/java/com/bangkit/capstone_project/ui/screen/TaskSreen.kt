@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -56,7 +57,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.bangkit.capstone_project.BuildConfig
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.plant.PlantResult
 import com.bangkit.capstone_project.data.network.plant.PlantViewModel
@@ -71,7 +71,6 @@ import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
-import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 
 @Composable
@@ -79,7 +78,7 @@ fun TaskScreen(
     onBack: () -> Unit,
     navigateHome: () -> Unit,
     modifier: Modifier = Modifier,
-    taskViewModel: TaskViewModel,
+
     plantViewModel: PlantViewModel,
     preferenceViewModel: PreferenceViewModel,
     userPlantViewModel: UserPlantViewModel,
@@ -137,9 +136,9 @@ fun TaskScreen(
                                 onBack = onBack,
                                 session = session,
                                 navigateHome = navigateHome,
-                                taskViewModel = taskViewModel,
                                 modifier = modifier,
                                 plant = data,
+                                showToast = showToast,
                                 userPlantViewModel = userPlantViewModel
                             )
                         }
@@ -164,18 +163,20 @@ fun TaskContent(
     onBack: () -> Unit,
     navigateHome: () -> Unit,
     modifier: Modifier = Modifier,
-    taskViewModel: TaskViewModel,
     plant: PlantResult,
     userPlantViewModel: UserPlantViewModel,
     session: UserModel?,
+    showToast: (String) -> Unit,
 ) {
     val openWeatherDate = remember { mutableStateOf(false) }
     val openWeatherRepeat = remember { mutableStateOf(false) }
     val radioOptions = listOf(
-        Frequency("Once a Month", 1),
-        Frequency("Once a Week", 2),
-        Frequency("Every 3 Days", 3),
-        Frequency("Every Day", 4),
+        Frequency("Setiap Hari", 1),
+        Frequency("Dua Hari Sekali", 2),
+        Frequency("Setiap Tiga Hari", 3),
+        Frequency("Setiap Empat Har", 4),
+        Frequency("Lima Hari Sekali", 5),
+        Frequency("Enam Hari Sekali", 6),
 
         )
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
@@ -251,14 +252,11 @@ fun TaskContent(
                                 .height(150.dp)
                                 .clip(shape = RoundedCornerShape(15))
                         ) {
-                            Log.d(
-                                "TAG",
-                                "TaskContent: ${BuildConfig.BASE_URL + plant.image[0]}"
-                            )
+
                             AsyncImage(
                                 model = plant.image[0],
                                 contentDescription = "Plant Hint",
-                                contentScale = ContentScale.FillWidth,
+                                contentScale = ContentScale.Crop,
                                 modifier = modifier.fillMaxWidth()
                             )
                         }
@@ -287,39 +285,48 @@ fun TaskContent(
                     value = textLocation.value,
                     onValueChange = { textLocation.value = it },
                     label = { Text("Plant Location") },
+                    singleLine= true,
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.marker),
                             contentDescription = " Location Input"
                         )
                     },
+                    colors=TextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+
                     modifier = modifier.fillMaxWidth()
                 )
                 Button(
                     onClick = {
-                        if (session != null) {
-                            session.token?.let {
+                        if (textLocation.value.isNotEmpty()) {
 
-                                session.id?.let { it1 ->
-                                    saveData(
-                                        location = textLocation.value,
-                                        frequency = selectedOption.frequency,
-                                        startDate = dateWeatherState.selectedDateMillis,
 
-                                        plantId = plant.id,
-                                        userId = it1.toInt(),
-                                        token = it,
-                                        userPlantViewModel = userPlantViewModel
-                                    )
+                            if (session != null) {
+                                session.token?.let {
+
+                                    session.id?.let { it1 ->
+                                        saveData(
+                                            location = textLocation.value,
+                                            frequency = selectedOption.frequency,
+                                            startDate = dateWeatherState.selectedDateMillis,
+
+                                            plantId = plant.id,
+                                            userId = it1.toInt(),
+                                            token = it,
+                                            userPlantViewModel = userPlantViewModel
+                                        )
+                                    }
+
                                 }
-
                             }
+                        }else{
+                            showToast("Lokasi Kosong")
                         }
                         /*   navigateHome()*/
                     },
                     modifier = modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Input")
+                    Text(text = "Simpan Tanaman")
                 }
             }
         }
@@ -378,7 +385,7 @@ fun TaskContent(
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) {
 
-// Note that Modifier.selectableGroup() is essential to ensure correct accessibility behavior
+
                 Column(modifier.fillMaxWidth()) {
                     Column(Modifier.selectableGroup()) {
                         radioOptions.forEach { text ->
@@ -396,7 +403,7 @@ fun TaskContent(
                             ) {
                                 RadioButton(
                                     selected = (text == selectedOption),
-                                    onClick = null // null recommended for accessibility with screenreaders
+                                    onClick = null
                                 )
                                 Text(
                                     text = text.label,

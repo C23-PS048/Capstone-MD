@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
@@ -40,14 +41,14 @@ fun ScheduleInput(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "Weather")
+            Text(text = "Jadwal Penyiraman", fontWeight = FontWeight.SemiBold)
             Row(modifier = modifier
                 .fillMaxWidth()
                 .clickable {
                     onValueChange(!value)
                 }
                 , horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Date")
+                Text(text = "Tanggal Mulai")
                 Row() {
                     Text(text = Date)
 
@@ -65,7 +66,7 @@ fun ScheduleInput(
                     },
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Repeat")
+                Text(text = "Tiap")
                 Row() {
                     Text(text =Selected)
                     Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)

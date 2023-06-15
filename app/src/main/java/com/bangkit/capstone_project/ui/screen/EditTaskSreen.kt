@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -19,12 +20,14 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
@@ -40,6 +43,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -58,6 +63,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
+import com.bangkit.capstone_project.data.network.plant.PlantResult
+import com.bangkit.capstone_project.data.network.plant.PlantViewModel
 import com.bangkit.capstone_project.data.network.userplant.UserPlant
 import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.helper.calculateScheduleDates
@@ -71,7 +78,6 @@ import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.ui.theme.GrayLight
 import com.bangkit.capstone_project.ui.theme.RedDark
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
-import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,13 +87,59 @@ fun EditTaskScreen(
     onBack: () -> Unit,
     navigateHome: () -> Unit,
     modifier: Modifier = Modifier,
-    taskViewModel: TaskViewModel,
+    plantViewModel: PlantViewModel,
     userPlantViewModel: UserPlantViewModel,
-    prefViewModel: PreferenceViewModel
+    prefViewModel: PreferenceViewModel,
+    showToast: (String) -> Unit
 ) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     val plantId = mutableIntStateOf(id)
+    val planData: MutableState<PlantResult?> = remember {
+        mutableStateOf(null)
+    }
+    val isDelete: MutableState<Boolean> = remember {
+        mutableStateOf(false)
+    }
+    val idPlant = remember {
+        mutableStateOf(0)
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            userPlantViewModel.resetData()
 
+        }
+    }
+    userPlantViewModel.responseState.collectAsState(initial = null).value.let { responseState ->
+        when (responseState) {
+            is UiState.Loading -> {
+
+
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is UiState.Success -> {
+                if(isDelete.value){
+                    showToast("Data Terhapus")
+                    userPlantViewModel.resetResponseState()
+                    navigateHome()
+                }else{
+                    showToast("Data Berhasil Di update")
+                    userPlantViewModel.resetResponseState()
+                    onBack()
+                }
+
+            }
+
+            is UiState.Error -> {
+                showToast(responseState.errorMessage)
+            }
+
+            else -> {}
+        }
+
+    }
 
     userPlantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
@@ -97,28 +149,61 @@ fun EditTaskScreen(
 
             is UiState.Success -> {
                 val data = uiState.data?.userPlant
-                val startTimestamp = System.currentTimeMillis()
+                if (data != null) {
+                    idPlant.value = data.plantId
+                }
 
-                val location = data?.location
-
-
-                if (location != null) {
+                planData.value?.let { plant ->
                     EditTaskContent(
                         task = data,
                         session = session,
                         onBack = onBack,
+                        isDelete = isDelete,
+                        onDeletChange = {isDelete.value = it},
+                        showToast = showToast,
                         navigateHome = navigateHome,
-                        taskViewModel = taskViewModel,
+                        plant = plant,
                         userPlantViewModel = userPlantViewModel,
 
                         )
                 }
 
-                Log.d("TAG", "HomeScreen: ${uiState.data}")
+
             }
 
-            is UiState.Error -> {}
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
+
             else -> {}
+        }
+    }
+    plantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
+            is UiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+
+                plantViewModel.getAll()
+
+
+            }
+
+            is UiState.Success -> {
+                uiState.data?.plantList?.forEach {
+                    if (it.id == idPlant.value) {
+                        planData.value = it
+                    }
+                }
+
+
+            }
+
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
+
         }
     }
 
@@ -132,23 +217,28 @@ fun EditTaskContent(
     onBack: () -> Unit,
     navigateHome: () -> Unit,
     modifier: Modifier = Modifier,
-    taskViewModel: TaskViewModel,
+    plant: PlantResult,
     session: UserModel?,
-    userPlantViewModel: UserPlantViewModel
+    userPlantViewModel: UserPlantViewModel,
+    showToast: (String) -> Unit,
+    isDelete: MutableState<Boolean>,
+    onDeletChange: (Boolean) -> Unit
 ) {
-
+    val openDialog = remember { mutableStateOf(false) }
     val openWeatherDate = remember { mutableStateOf(false) }
     val openWeatherRepeat = remember { mutableStateOf(false) }
     val radioOptions = listOf(
-        Frequency("Once a Month", 1),
-        Frequency("Once a Week", 2),
-        Frequency("Every 3 Days", 3),
-        Frequency("Every Day", 4),
+        Frequency("Setiap Hari", 1),
+        Frequency("Dua Hari Sekali", 2),
+        Frequency("Setiap Tiga Hari", 3),
+        Frequency("Setiap Empat Har", 4),
+        Frequency("Lima Hari Sekali", 5),
+        Frequency("Enam Hari Sekali", 6),
 
         )
 
     val options = task?.frequency?.toInt()
-    Log.d("TAG", "EditTaskContent:$options")
+
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[options!! - 1]) }
     val textLocation = mutableStateOf(task?.location)
     val dateWeatherState =
@@ -211,13 +301,13 @@ fun EditTaskContent(
                             ) {
                                 Column() {
                                     Text(
-                                        "Plant Name",
+                                        plant.plantName,
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = BlackMed
                                     )
                                     Text(
-                                        "Scientific",
+                                        plant.scientificName,
                                         style = MaterialTheme.typography.titleMedium,
                                         color = Color.LightGray
                                     )
@@ -228,10 +318,11 @@ fun EditTaskContent(
                                         .height(150.dp)
                                         .clip(shape = RoundedCornerShape(15))
                                 ) {
+
                                     AsyncImage(
-                                        model = "https://plantnet.com.au/wp-content/uploads/00.jpg",
+                                        model = plant.image[0],
                                         contentDescription = "Plant Hint",
-                                        contentScale = ContentScale.FillWidth,
+                                        contentScale = ContentScale.Crop,
                                         modifier = modifier.fillMaxWidth()
                                     )
                                 }
@@ -272,6 +363,7 @@ fun EditTaskContent(
                         }
                         Button(
                             onClick = {
+                                onDeletChange(false)
                                 if (task != null) {
                                     if (session != null) {
                                         textLocation.value?.let { loc ->
@@ -302,16 +394,7 @@ fun EditTaskContent(
                         Button(
                             onClick = {
 
-                                if (task != null) {
-                                    session?.token?.let {
-                                        deleteData(
-                                            task = task,
-                                            userPlantViewModel = userPlantViewModel, token = it
-                                        )
-                                    }
-                                }
-
-                                navigateHome()
+                                openDialog.value = !openDialog.value
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = RedDark),
                             modifier = modifier.fillMaxWidth()
@@ -417,37 +500,63 @@ fun EditTaskContent(
                 }
             }
         }
+
+        if (openDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+
+                    openDialog.value = false
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = Color.DarkGray,
+                        modifier = modifier.size(32.dp)
+                    )
+                },
+                title = {
+                    Text(text = "Hapus?")
+                },
+                text = {
+                    Text(
+                        "Anda yakin ingin menghapus Tanamn ini?"
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+onDeletChange(true)
+                            if (task != null) {
+                                session?.token?.let {
+                                    deleteData(
+                                        task = task,
+                                        userPlantViewModel = userPlantViewModel, token = it
+                                    )
+                                }
+                            }
+
+
+                            openDialog.value = false
+                        }
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            openDialog.value = false
+                        }
+                    ) {
+                        Text("Dismiss")
+                    }
+                }
+            )
+        }
     }
 }
 
-fun asas(
-    frequency: Int, startDate: Long?, location: String, userPlantViewModel: UserPlantViewModel,
-    plantId: Int,
-    userId: Int,
-    token: String
-) {
-
-    startDate?.let {
-        val (lastDate, NextDate) = calculateScheduleDates(
-            frequency = frequency,
-            startDate = startDate
-        )
-
-        userPlantViewModel.saveUserPlant(
-            location = location,
-            disease = "healthy",
-            startDate = startDate.toString(),
-            lastScheduledDate = lastDate.toString(),
-            nextScheduledDate = NextDate.toString(),
-            frequency = frequency.toString(),
-            plantId = plantId.toString(),
-            userId = userId.toString(),
-            token = token
-        )
-    }
-
-
-}
 
 fun updateData(
     task: UserPlant?,
