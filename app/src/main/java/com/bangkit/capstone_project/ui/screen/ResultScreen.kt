@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -62,8 +64,9 @@ fun ResultScreen(
     context: Context,
     navigateDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
+    showToast: (String) -> Unit,
 
-) {
+    ) {
     var result: List<DeseaseClassifier.Recognition> = listOf()
 
     val bitmap: Bitmap? = decodeUriAsBitmap(context, photoUri)
@@ -138,14 +141,16 @@ fun ResultScreen(
 
                         }
 
-                        is UiState.Error -> {}
+                        is UiState.Error -> {
+                            showToast(plantState.errorMessage)
+                        }
 
                     }
                 }
 
                 Log.d("TAG", "ResultScreen: ${result}")
             } else {
-                InfoScreen(modifier = modifier.padding(padding))
+                InfoScreen(text = "tanaman Tidak TerDeteksi",color= GrayDark,modifier = modifier.padding(padding))
             }
 
         }
@@ -183,13 +188,14 @@ fun ResultContent(
                 ) {
                     Box(
                         modifier
-                            .size(300.dp)
-                            .clip(shape = RoundedCornerShape(15))
+                            .fillMaxWidth()
+                            .height(300.dp)
+
                     ) {
                         Image(
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = null,
-                            contentScale = ContentScale.FillHeight,
+                            contentScale = ContentScale.FillWidth,
                             modifier = Modifier
                         )
                     }
@@ -208,14 +214,20 @@ fun ResultContent(
                         Text(
                             plant.scientificName,
                             style = MaterialTheme.typography.titleMedium,
-                            color = GrayDark
+                            color = Color.DarkGray
                         )
 
                     }
+                   Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                       Text(text = plant.description)
+                   }
+                    
                 }
+                Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
 
                 Button(onClick = { navigateDetail(plant.slug) }, modifier.fillMaxWidth()) {
                     Text(text = "Informasi Selengkap nya")
+                }
                 }
             }
 

@@ -11,19 +11,15 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -41,10 +38,9 @@ import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.getCameraProvider
 import com.bangkit.capstone_project.helper.takePhoto
 import com.bangkit.capstone_project.ui.component.buttons.CameraButton
-import com.bangkit.capstone_project.ui.theme.GreenDark
-import com.bangkit.capstone_project.ui.theme.Ivory
 import java.io.File
 import java.util.concurrent.Executor
+
 @Composable
 fun CameraScreen(
     modifier: Modifier = Modifier,
@@ -54,7 +50,7 @@ fun CameraScreen(
     onError: (ImageCaptureException) -> Unit,
     onBack: () -> Unit,
 
-) {
+    ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -102,61 +98,75 @@ fun CameraScreen(
         preview.setSurfaceProvider(previewView.surfaceProvider)
     }
 
-    Scaffold(
-        topBar = {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                IconButton(onClick = onBack, Modifier.align(Alignment.CenterStart)) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back Button",
-                        tint = GreenDark
-                    )
-                }
-                Text(text = "Identifikasi Tanaman Mu", modifier = Modifier.align(Alignment.Center))
-            }
-        },
-        bottomBar = {
-            Box(modifier = Modifier.fillMaxWidth().padding(32.dp,16.dp)) {
-                CameraButton(
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    onclick = {
-                        takePhoto(
-                            filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
-                            imageCapture = imageCapture,
-                            outputDirectory = outputDirectory,
-                            executor = executor,
-                            onImageCaptured = onImageCaptured,
-                            onError = onError,
-                            pickedImageUri = null,
-                            isBack = true
-                        )
-                    }
-                )
 
-                IconButton(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    onClick = {
-                        val galleryIntent = Intent(
-                            Intent.ACTION_PICK,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        )
-                        launcher.launch(galleryIntent)
-                    }
-                ) {
-                    Icon(painter = painterResource(id = R.drawable.gallery), contentDescription = "Pick Image From Galley Button")
-                }
-            }
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+
     ) {
+
+        AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
         Box(
             modifier = Modifier
-                .background(Ivory)
+                .fillMaxSize()
                 .padding(32.dp)
-                .padding(it)
-                .clip(RoundedCornerShape(10))
         ) {
-            AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+
+            IconButton(onClick = onBack, Modifier.align(Alignment.TopStart)) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back Button",
+                    tint = Color.White
+                )
+            }
+            Box(modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)) {
+
+            Text(
+                text = "Identifikasi Tanaman Mu",
+                color = Color.White,
+
+            )
+            }
+            CameraButton(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+                onclick = {
+                    takePhoto(
+                        filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                        imageCapture = imageCapture,
+                        outputDirectory = outputDirectory,
+                        executor = executor,
+                        onImageCaptured = onImageCaptured,
+                        onError = onError,
+                        pickedImageUri = null,
+                        isBack = true
+                    )
+                }
+            )
+            Image(
+                painter = painterResource(id = R.drawable.camera_box),
+                contentDescription = null,
+                modifier = Modifier.align(
+                    Alignment.Center
+                )
+            )
+            IconButton(
+                modifier = Modifier.align(Alignment.BottomStart),
+                onClick = {
+                    val galleryIntent = Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    )
+                    launcher.launch(galleryIntent)
+                }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.gallery),
+                    tint = Color.White,
+                    contentDescription = "Pick Image From Galley Button"
+                )
+            }
         }
     }
+
 }

@@ -222,7 +222,7 @@ fun App(
                         userPlantViewModel = userPlantViewModel,
                         prefViewModel = prefViewModel,
                         sendNotification = sendNotification,
-                        showToast=showToast,
+                        showToast = showToast,
                         navigateEdit = { taskId ->
                             navController.navigate(
                                 Screen.EditTask.createRoute(
@@ -364,7 +364,7 @@ fun App(
                                 photoUri?.let { it1 ->
                                     ResultScreen(modifier = Modifier.fillMaxSize(),
                                         photoUri = it1,
-
+                                        showToast = showToast,
                                         plantClassifier = plantClassifier,
                                         plantViewModel = plantViewModel,
                                         context = context,
@@ -374,7 +374,7 @@ fun App(
                                                     slug
                                                 )
                                             )
-                                            currentState.value = ScreenState.Photo
+                                            currentState.value = ScreenState.Camera
                                         },
                                         onBack = {
                                             currentState.value = ScreenState.Camera

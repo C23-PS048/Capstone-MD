@@ -129,7 +129,7 @@ fun OwnedPlantScreen(
             }
 
 
-            is UiState.Error -> {}
+            is UiState.Error -> {showToast(uiState.errorMessage)}
 
         }
     }

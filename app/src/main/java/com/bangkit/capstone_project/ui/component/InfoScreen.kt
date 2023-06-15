@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.bangkit.capstone_project.ui.theme.GreenLight
 
 @Composable
-fun InfoScreen(modifier:Modifier=Modifier,icon: ImageVector = Icons.Default.Warning ,text:String = "Data not found",) {
+fun InfoScreen(modifier:Modifier=Modifier,color: Color=GreenLight,icon: ImageVector = Icons.Default.Warning ,text:String = "Data not found",) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -35,14 +35,14 @@ fun InfoScreen(modifier:Modifier=Modifier,icon: ImageVector = Icons.Default.Warn
         Icon(
             imageVector =icon,
             contentDescription = "Warning Icon",
-            modifier = modifier.size(iconSize),
-            tint = GreenLight
+            modifier = Modifier.size(iconSize),
+            tint = color
         )
-        Spacer(modifier = modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = GreenLight
+            color = color
         )
     }
 }
