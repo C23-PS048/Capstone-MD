@@ -216,14 +216,13 @@ fun App(
                     OwnedPlantScreen(plantId = id,
                         onBack = {
                             navController.popBackStack()
-
-
                         },
                         navController = navController,
                         plantViewModel = plantViewModel,
                         userPlantViewModel = userPlantViewModel,
                         prefViewModel = prefViewModel,
                         sendNotification = sendNotification,
+                        showToast=showToast,
                         navigateEdit = { taskId ->
                             navController.navigate(
                                 Screen.EditTask.createRoute(

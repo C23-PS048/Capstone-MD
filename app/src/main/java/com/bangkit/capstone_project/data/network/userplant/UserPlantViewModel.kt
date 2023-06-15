@@ -161,7 +161,7 @@ class UserPlantViewModel() : ViewModel() {
                     _responseState.value = UiState.Error(errorMessage)
                 }
             } catch (e: Exception) {
-                val errorMessage = "An error occurred"
+
                 _responseState.value = e.message?.let { UiState.Error(it) }
                 Log.d("TAG", "saveUserPlant: ${responseState.value}")
             }

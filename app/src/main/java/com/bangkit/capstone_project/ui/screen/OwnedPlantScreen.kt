@@ -1,6 +1,5 @@
 package com.bangkit.capstone_project.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,13 +22,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -64,6 +68,8 @@ import com.bangkit.capstone_project.ui.component.InfoScreen
 import com.bangkit.capstone_project.ui.component.buttons.ButtonIcon
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.GrayDark
+import com.bangkit.capstone_project.ui.theme.GreenDark
+import com.bangkit.capstone_project.ui.theme.GreenLight
 import com.bangkit.capstone_project.ui.theme.GreenMed
 import com.bangkit.capstone_project.ui.theme.Ivory
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
@@ -77,7 +83,8 @@ fun OwnedPlantScreen(
     sendNotification: () -> Unit,
     userPlantViewModel: UserPlantViewModel,
     prefViewModel: PreferenceViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    showToast: (String) -> Unit
 ) {
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
     val task: MutableState<UserPlant?> = remember {
@@ -93,7 +100,24 @@ fun OwnedPlantScreen(
 
         }
     }
+    userPlantViewModel.responseState.collectAsState(initial = UiState.Loading).value.let { uiState ->
+        when (uiState) {
+            is UiState.Loading -> {
 
+            }
+
+            is UiState.Success -> {
+                uiState.data?.let { showToast(it.message) }
+            }
+
+
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
+
+            else -> {}
+        }
+    }
     userPlantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
@@ -112,7 +136,9 @@ fun OwnedPlantScreen(
     plantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
-
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
                 task.value?.plantId.let {
                     if (it != null) {
                         plantViewModel.getAll()
@@ -142,26 +168,26 @@ fun OwnedPlantScreen(
                     sendNotification()
                 }
                 if (location != null) {
-                    OwnedPlantContent(
-                        navController = navController,
-                        onBack = onBack,
-                        session = session,
-                        timeBetween = timeBetween,
-                        plantViewModel = plantViewModel,
-                        userPlantViewModel = userPlantViewModel,
-                        location = location,
-                        task = task.value,
-                        data = planData.value,
-                        navigateEdit = navigateEdit
-                    )
-                } else {
-                    InfoScreen()
+                    planData.value?.let { data ->
+                        OwnedPlantContent(
+                            navController = navController,
+                            onBack = onBack,
+                            session = session,
+                            timeBetween = timeBetween,
+                            userPlantViewModel = userPlantViewModel,
+                            location = location,
+                            task = task.value,
+                            data = data,
+                            navigateEdit = navigateEdit
+                        )
+                    }
                 }
 
             }
 
             is UiState.Error -> {
-
+                InfoScreen(text = uiState.errorMessage)
+                showToast(uiState.errorMessage)
             }
 
         }
@@ -174,246 +200,244 @@ fun OwnedPlantScreen(
 fun OwnedPlantContent(
 
     task: UserPlant?,
-    data: PlantResult?,
+    data: PlantResult,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     timeBetween: Long?,
     location: String,
     navigateEdit: (Int) -> Unit,
     userPlantViewModel: UserPlantViewModel,
-    plantViewModel: PlantViewModel,
+
     session: UserModel?,
     navController: NavHostController
 ) {
-    if (data != null) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Ivory)
-        ) {
+    val openDialog = remember { mutableStateOf(false) }
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Ivory)
+    ) {
 
-            Column(modifier = modifier.fillMaxSize()) {
-                Box(
+        Column(modifier = modifier.fillMaxSize()) {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                AsyncImage(
+                    model = data.image[0],
+                    contentDescription = stringResource(R.string.image_desc),
+                    contentScale = ContentScale.FillBounds,
                     modifier = modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                ) {
-                    AsyncImage(
-                        model = data.image[0],
-                        contentDescription = stringResource(R.string.image_desc),
-                        contentScale = ContentScale.FillWidth,
-                        modifier = modifier
-                            .fillMaxSize()
+                        .fillMaxSize()
 
+                )
+
+            }
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column() {
+                    Text(
+                        text = data.plantName,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.Black
                     )
-
+                    Text(
+                        text = data.scientificName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.DarkGray
+                    )
                 }
                 Row(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Column() {
-                        Text(
-                            text = data.plantName,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = data.scientificName,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.DarkGray
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
 
-                        Image(
-                            painter = painterResource(id = R.drawable.marker),
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(color = GreenMed),
-                            modifier = modifier.size(14.dp)
-                        )
-                        Text(
-                            text = location,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = GreenMed
-                        )
-
-
-                    }
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = modifier.padding(start = 16.dp)
-                ) {
-                    Text(
-                        text = "About",
-                        style = MaterialTheme.typography.titleLarge
+                    Image(
+                        painter = painterResource(id = R.drawable.marker),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(color = GreenMed),
+                        modifier = modifier.size(14.dp)
                     )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = modifier.fillMaxWidth()
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.heightIn(max = 65.dp)
-                            ) {
-                                Box(
-                                    modifier = modifier
-                                        .clip(RoundedCornerShape(15))
-                                        .background(GrayDark)
-                                        .padding(8.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.temperature),
-                                        contentDescription = null,
-                                        tint = BlackMed,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Text(
-                                    text = data.temperature,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = BlackMed,
+                    Text(
+                        text = location,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = GreenMed
+                    )
 
-                                    textAlign = TextAlign.Center
+
+                }
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = modifier.padding(start = 16.dp)
+            ) {
+                Text(
+                    text = "About",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.heightIn(max = 65.dp)
+                        ) {
+                            Box(
+                                modifier = modifier
+                                    .clip(RoundedCornerShape(15))
+                                    .background(GrayDark)
+                                    .padding(8.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.temperature),
+                                    contentDescription = null,
+                                    tint = BlackMed,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier.heightIn(max = 65.dp)
-                            ) {
-                                Box(
-                                    modifier = modifier
-                                        .clip(RoundedCornerShape(15))
-                                        .background(GrayDark)
-                                        .padding(8.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.humidity),
-                                        contentDescription = null,
-                                        tint = BlackMed,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Text(
-                                    text = data.wateringFrequency,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = BlackMed,
+                            Text(
+                                text = data.temperature,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = BlackMed,
 
-                                    textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.heightIn(max = 65.dp)
+                        ) {
+                            Box(
+                                modifier = modifier
+                                    .clip(RoundedCornerShape(15))
+                                    .background(GrayDark)
+                                    .padding(8.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.humidity),
+                                    contentDescription = null,
+                                    tint = BlackMed,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
+                            Text(
+                                text = data.wateringFrequency,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = BlackMed,
 
+                                textAlign = TextAlign.Center
+                            )
                         }
 
-                        Box(
-                            modifier = modifier
-                                .width(150.dp)
-                                .background(
-                                    GreenMed,
-                                    shape = RoundedCornerShape(
-                                        topStartPercent = 15,
-                                        bottomStartPercent = 15
-                                    )
+                    }
+
+                    Box(
+                        modifier = modifier
+                            .width(150.dp)
+                            .background(
+                                GreenMed,
+                                shape = RoundedCornerShape(
+                                    topStartPercent = 15,
+                                    bottomStartPercent = 15
                                 )
-                                .padding(24.dp)
+                            )
+                            .padding(24.dp)
+                    ) {
+                        Column(
+                            modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Column(
-                                modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                if (timeBetween != null) {
-                                    if (timeBetween <= 0) {
-                                        Text(
-                                            text = stringResource(R.string.watering_tag),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White,
-                                            textAlign = TextAlign.Center,
-                                            modifier = modifier.fillMaxWidth()
-                                        )
-                                        Button(onClick = {
-                                            if (session != null) {
-                                                session.token?.let {
-                                                    if (task != null) {
-                                                        updateSchedule(
-                                                            task,
-                                                            it,
-                                                            userPlantViewModel
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }) {
-                                            Box(
-                                                contentAlignment = Alignment.Center,
-                                                modifier = modifier
-                                                    .size(100.dp)
-                                                    .border(
-                                                        border = BorderStroke(
-                                                            5.dp,
-                                                            Color.White
-                                                        ),
-                                                        CircleShape
-                                                    )
-                                                    .padding(16.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Check,
-                                                    contentDescription = null
-                                                )
-                                            }
-                                        }
+                            if (timeBetween != null) {
+                                if (timeBetween <= 0) {
+                                    Text(
+                                        text = stringResource(R.string.sudah_menyiram),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = Color.White,
+                                        textAlign = TextAlign.Center,
+                                        modifier = modifier.fillMaxWidth()
+                                    )
 
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = modifier
+                                            .size(100.dp)
+                                            .border(
+                                                border = BorderStroke(
+                                                    5.dp,
+                                                    Color.White
+                                                ),
+                                                CircleShape
+                                            )
 
-                                    } else {
-                                        Text(
-                                            text = stringResource(R.string.watering_tag),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = Color.White
-                                        )
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = modifier
-                                                .size(100.dp)
-                                                .border(
-                                                    border = BorderStroke(
-                                                        5.dp,
-                                                        Color.White
-                                                    ),
-                                                    CircleShape
-                                                )
-                                                .padding(16.dp)
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                openDialog.value = !openDialog.value
+                                            },
+                                            colors = ButtonDefaults.buttonColors(containerColor = GreenLight),
+                                            modifier = modifier.fillMaxSize()
                                         ) {
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = GreenDark, modifier =
+                                                modifier.size(30.dp)
+                                            )
+                                        }
+                                    }
 
-                                                Text(
-                                                    text = if (timeBetween > 24) convertHoursToDays(
-                                                        timeBetween
-                                                    ).toString() else timeBetween.toString(),
-                                                    style = MaterialTheme.typography.titleLarge,
-                                                    color = Color.White,
-                                                    textAlign = TextAlign.Center
-                                                )
-                                                Text(
-                                                    text = if (timeBetween > 24) stringResource(
-                                                        R.string.day_tag
-                                                    ) else stringResource(
-                                                        R.string.hour_tag
-                                                    ),
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = Color.White,
-                                                    textAlign = TextAlign.Center
-                                                )
-                                            }
+
+                                } else {
+                                    Text(
+                                        text = stringResource(R.string.watering_tag),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = Color.White,
+                                        textAlign = TextAlign.Center,
+                                        modifier = modifier.fillMaxWidth()
+                                    )
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = modifier
+                                            .size(100.dp)
+                                            .border(
+                                                border = BorderStroke(
+                                                    5.dp,
+                                                    Color.White
+                                                ),
+                                                CircleShape
+                                            )
+                                            .padding(16.dp)
+                                    ) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                                            Text(
+                                                text = if (timeBetween > 24) convertHoursToDays(
+                                                    timeBetween
+                                                ).toString() else timeBetween.toString(),
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = Color.White,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            Text(
+                                                text = if (timeBetween > 24) stringResource(
+                                                    R.string.day_tag
+                                                ) else stringResource(
+                                                    R.string.hour_tag
+                                                ),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = Color.White,
+                                                textAlign = TextAlign.Center
+                                            )
                                         }
                                     }
                                 }
@@ -422,86 +446,139 @@ fun OwnedPlantContent(
                     }
                 }
             }
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back To Home Button",
+        }
+        IconButton(
+            onClick = onBack,
+            colors = IconButtonDefaults.iconButtonColors(containerColor = BlackMed.copy(alpha = 0.1f))
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back To Home Button",
 
-                    )
-            }
-            Box(
-                modifier = modifier
-                    .align(Alignment.TopEnd)
+                tint = Color.White
+            )
+        }
+        Box(
+            modifier = modifier
+                .align(Alignment.TopEnd)
+        ) {
+            var expanded by remember { mutableStateOf(false) }
+
+            IconButton(
+                onClick = { expanded = !expanded },
+                colors = IconButtonDefaults.iconButtonColors(containerColor = BlackMed.copy(alpha = 0.1f))
             ) {
-                var expanded by remember { mutableStateOf(false) }
-
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = null
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Edit") },
-                        onClick = {
-                            if (task != null) {
-                                task.id.let { navigateEdit(it) }
-                            }
-                        },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Outlined.Edit,
-                                contentDescription = null
-                            )
-                        })
-
-                }
-
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = null,
+                    tint = Color.White
+                )
             }
-            if (data.slug == "tomato" || data.slug == "pepper-chili") {
-                Box(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    ButtonIcon(
-                        onClick = {
-                            navController.navigate(Screen.DiseaseCam.createRoute(data.slug))
-                        },
-                        title = "Something Wrong? scan here ",
-                        description = "Button To scan Your Plant",
-                        icon = painterResource(id = R.drawable.scanner),
-                        corner = 15,
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = modifier
-                    )
-                }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = {
+                        task?.id?.let { navigateEdit(it) }
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.Edit,
+                            contentDescription = null
+                        )
+                    })
+
             }
 
         }
-    } else {
+        if (data.slug == "tomato" || data.slug == "pepper-chili") {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            ) {
+                ButtonIcon(
+                    onClick = {
+                        navController.navigate(Screen.DiseaseCam.createRoute(data.slug))
+                    },
+                    title = "Check Kesehatan Tanamanu",
+                    description = "Button To scan Your Plant",
+                    icon = painterResource(id = R.drawable.scanner),
+                    corner = 15,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier
+                )
+            }
+        }
 
-        InfoScreen()
     }
-    if (task != null) {
 
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+
+                openDialog.value = false
+            },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.plant_care),
+                    contentDescription = null,
+                    tint = Color.DarkGray,
+                    modifier = modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(text = "Sudah Menyiram?")
+            },
+            text = {
+                Text(
+                    "Pastikan anda sudah menyiram tanaman anda dengan baik"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (session != null) {
+                            session.token?.let {
+                                if (task != null) {
+                                    updateSchedule(
+                                        task,
+                                        it,
+                                        userPlantViewModel
+                                    )
+                                }
+                            }
+                        }
+                        openDialog.value = false
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                    }
+                ) {
+                    Text("Dismiss")
+                }
+            }
+        )
     }
-
-
 }
+
 
 fun updateSchedule(
     task: UserPlant,
     token: String,
     userPlantViewModel: UserPlantViewModel,
 ) {
-    Log.d("TAG", "updateSchedule: $task")
+
     val freq = task.frequency
     val lastDate = task.lastScheduledDate
 
