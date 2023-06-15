@@ -244,7 +244,7 @@ fun App(
                         userPlantViewModel = userPlantViewModel,
                         prefViewModel = prefViewModel,
                         plantViewModel = plantViewModel,
-                        showToast=showToast,
+                        showToast = showToast,
                         navigateHome = { navController.navigate(Screen.Home.route) },
                     )
 
@@ -341,7 +341,7 @@ fun App(
                     PlantInfoScreen(token = session?.token,
                         plantViewModel = plantViewModel,
                         slug = slug,
-                        showToast=showToast,
+                        showToast = showToast,
                         navigateTask = { id -> navController.navigate(Screen.Task.createRoute(id)) },
                         onBack = { navController.navigateUp() })
                 }
@@ -457,7 +457,10 @@ fun App(
                                     },
 
                                     onError = { Log.e("kilo", "View error:", it) },
-                                    onBack = { navController.navigateUp() })
+                                    onBack = {
+                                        navController.navigateUp()
+                                        currentState.value = ScreenState.Camera
+                                    })
                             }
 
                             is ScreenState.Photo -> {
@@ -469,6 +472,7 @@ fun App(
                                     ).associateBy({ (key, _) -> key }, { (_, value) -> value })
                                     DiagnoseResultScreen(modifier = Modifier.fillMaxSize(),
                                         slug = slug,
+                                        showToast = showToast,
                                         photoUri = it1,
                                         classifier = classifier,
                                         context = context,

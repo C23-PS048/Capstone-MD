@@ -1,11 +1,14 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.content.Intent
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,10 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.getCameraProvider
 import com.bangkit.capstone_project.helper.takePhoto
 import com.bangkit.capstone_project.ui.component.buttons.CameraButton
@@ -71,55 +77,60 @@ fun DiagnoseScreen(
 
         preview.setSurfaceProvider(previewView.surfaceProvider)
     }
-    Scaffold(
-        topBar = {
-          Box( modifier = Modifier.fillMaxWidth()) {
-              IconButton(onClick = onBack, Modifier.align(Alignment.CenterStart)) {
-                  Icon(
-                      imageVector = Icons.Default.ArrowBack,
-                      contentDescription = "Back Button",
-                      tint = GreenDark
-                  )
-              }
-              Text(text = "Diagnose Your Plant $slug", modifier = Modifier.align(Alignment.Center))
-          }
-        },
-        bottomBar = {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
 
-                CameraButton(
-                    modifier = Modifier
+    ) {
 
-                        .padding(bottom = 20.dp),
-                    onclick = {
-                        takePhoto(
-                            filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
-                            imageCapture = imageCapture,
-                            outputDirectory = outputDirectory,
-                            executor = executor,
-                            onImageCaptured = onImageCaptured,
-                            onError = onError,
-                            pickedImageUri = null,
-                            isBack = true
-                        )
-                    },
+        AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+        ) {
+
+            IconButton(onClick = onBack, Modifier.align(Alignment.TopStart)) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back Button",
+                    tint = Color.White
+                )
+            }
+            Box(modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)) {
+
+                Text(
+                    text = "Diagosa Tanaman Mu",
+                    color = Color.White,
 
                     )
             }
-        }
-    ) {
-        Box(
-            modifier = Modifier
-                .background(Ivory)
-                .padding(32.dp)
-                .padding(it)
-                .clip(RoundedCornerShape(10))
-        ) {
-            AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
+            CameraButton(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+                onclick = {
+                    takePhoto(
+                        filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                        imageCapture = imageCapture,
+                        outputDirectory = outputDirectory,
+                        executor = executor,
+                        onImageCaptured = onImageCaptured,
+                        onError = onError,
+                        pickedImageUri = null,
+                        isBack = true
+                    )
+                }
+            )
+            Image(
+                painter = painterResource(id = R.drawable.camera_box),
+                contentDescription = null,
+                modifier = Modifier.align(
+                    Alignment.Center
+                )
+            )
+
         }
     }
-    Box(modifier = modifier) {
 
 
-    }
 }

@@ -80,7 +80,6 @@ import com.bangkit.capstone_project.ui.theme.RedDark
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTaskScreen(
     id: Int,

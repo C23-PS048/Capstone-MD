@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,12 +35,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.disease.DiseaseResult
 import com.bangkit.capstone_project.data.network.disease.DiseaseViewModel
 import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
@@ -65,7 +62,8 @@ fun DiagnoseResultScreen(
     diseaseViewModel: DiseaseViewModel,
     userPlantViewModel: UserPlantViewModel,
     context: Context,
-    slug: String
+    slug: String,
+    showToast: (String) -> Unit
 ) {
     var result: List<DeseaseClassifier.Recognition> = listOf()
     lateinit var diseaseClassifier: DeseaseClassifier
@@ -151,17 +149,21 @@ fun DiagnoseResultScreen(
 
                         }
 
-                        is UiState.Error -> {}
+                        is UiState.Error -> {showToast(diseaseState.errorMessage)}
 
+                        else -> {}
                     }
                 }
 
                 Log.d("TAG", "ResultScreen: ${result}")
             } else {
-                InfoScreen(modifier = modifier.padding(padding))
+                InfoScreen(text = "Penyakit Tidak Terdeteksi",modifier = modifier.padding(padding))
             }
 
         }
+    }
+    BackHandler() {
+        onBack()
     }
 }
 
@@ -185,7 +187,10 @@ fun DiagnoseContent(
     ) {
         if (result.isNotEmpty()) {
 
-           Column(modifier.fillMaxWidth().padding(16.dp)) {
+           Column(
+               modifier
+                   .fillMaxWidth()
+                   .padding(16.dp)) {
                disease.diseaseName?.let {
                    Text(
                        text = it,
@@ -231,10 +236,14 @@ fun DiagnoseContent(
                             topStartPercent = 7,
                             topEndPercent = 7
                         ), color = Color.White
-                    ).shadow(elevation = 0.8.dp, shape = RoundedCornerShape(
-                        topStartPercent = 15,
-                        topEndPercent = 15
-                    )).padding(horizontal = 16.dp, vertical = 32.dp),
+                    )
+                    .shadow(
+                        elevation = 0.8.dp, shape = RoundedCornerShape(
+                            topStartPercent = 15,
+                            topEndPercent = 15
+                        )
+                    )
+                    .padding(horizontal = 16.dp, vertical = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
