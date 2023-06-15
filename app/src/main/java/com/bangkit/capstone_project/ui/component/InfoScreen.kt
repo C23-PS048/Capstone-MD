@@ -1,5 +1,6 @@
 package com.bangkit.capstone_project.ui.component
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,13 +16,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.bangkit.capstone_project.ui.theme.GreenLight
 
 @Composable
-fun InfoScreen(modifier:Modifier=Modifier) {
+fun InfoScreen(modifier:Modifier=Modifier,icon: ImageVector = Icons.Default.Warning ,text:String = "Data not found",) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -29,14 +33,16 @@ fun InfoScreen(modifier:Modifier=Modifier) {
     ) {
         val iconSize = with(LocalDensity.current) { 96.dp }
         Icon(
-            imageVector = Icons.Default.Warning,
+            imageVector =icon,
             contentDescription = "Warning Icon",
-            modifier = Modifier.size(iconSize)
+            modifier = modifier.size(iconSize),
+            tint = GreenLight
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = modifier.height(16.dp))
         Text(
-            text = "Data not found",
-            style = MaterialTheme.typography.labelLarge
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = GreenLight
         )
     }
 }

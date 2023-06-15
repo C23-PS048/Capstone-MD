@@ -1,6 +1,5 @@
 package com.bangkit.capstone_project.ui.screen
 
-import android.content.Context
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
@@ -8,8 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -43,6 +44,7 @@ import com.bangkit.capstone_project.data.network.userplant.UserPlantViewModel
 import com.bangkit.capstone_project.data.network.weather.WeatherViewModel
 import com.bangkit.capstone_project.helper.getAddressName
 import com.bangkit.capstone_project.helper.getCurrentDate
+import com.bangkit.capstone_project.helper.getFirstWord
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.component.InfoScreen
 import com.bangkit.capstone_project.ui.component.LoadingAnimation
@@ -57,8 +59,6 @@ import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
-
     plantViewModel: PlantViewModel,
     userPlantViewModel: UserPlantViewModel,
     weatherViewModel: WeatherViewModel = viewModel(
@@ -67,14 +67,15 @@ fun HomeScreen(
     currentLocation: Location?,
     navigatetoOwned: (Int) -> Unit,
     token: String,
-
+    modifier: Modifier = Modifier,
 
     id: String,
 
     prefViewModel: PreferenceViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    showToast: (String) -> Unit
 ) {
-
+    val addressState: MutableState<String> = remember { mutableStateOf("Semarang") }
     var list = mutableListOf<PlantResult>()
     currentLocation?.latitude?.let { lat ->
         currentLocation.longitude.let { long ->
@@ -84,10 +85,20 @@ fun HomeScreen(
             )
         }
     }
+    if (weatherViewModel.uiState.collectAsState(initial = UiState.Loading).value is UiState.Loading) {
+        val address = getAddressName(
+            LocalContext.current,
+            currentLocation?.latitude ?: -6.966667,
+            currentLocation?.longitude ?: 110.416664
+        )
+        addressState.value = address
+    }
     plantViewModel.uiState.collectAsState(initial = UiState.Loading).value.let { uiState ->
         when (uiState) {
             is UiState.Loading -> {
-
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator()
+                }
                 plantViewModel.getAll()
 
 
@@ -96,7 +107,7 @@ fun HomeScreen(
             is UiState.Success -> {
 
                 val data = uiState.data?.plantList
-                Log.d("TAG", "ListScreen: $data")
+
                 if (data != null) {
 
                     list = data.toMutableList()
@@ -105,13 +116,15 @@ fun HomeScreen(
 
             }
 
-            is UiState.Error -> {}
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
 
         }
     }
 
     val session by prefViewModel.getLoginSession().collectAsState(initial = null)
-    Log.d("TAG", "HomeScreen: $session")
+
     userPlantViewModel.userPlant.collectAsState(initial = UiState.Loading).value.let { uiState ->
 
         when (uiState) {
@@ -134,14 +147,16 @@ fun HomeScreen(
                     listTask = uiState.data?.userPlant,
                     navigatetoOwned = navigatetoOwned,
                     username = session?.name,
-                    context = LocalContext.current,
-                    plantList = list
+                    showToast = showToast,
+                    plantList = list, address = addressState.value
                 )
 
 
             }
 
-            is UiState.Error -> {}
+            is UiState.Error -> {
+                showToast(uiState.errorMessage)
+            }
         }
 
     }
@@ -159,13 +174,14 @@ fun HomeContent(
     weatherViewModel: WeatherViewModel,
     navigatetoOwned: (Int) -> Unit,
     navController: NavHostController,
-    context: Context
+    address: String,
+    showToast: (String) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Ivory)
-            .padding(top = 64.dp, start = 16.dp, end = 16.dp),
+            .padding(top = 64.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(22.dp)
     ) {
         Row(
@@ -182,7 +198,7 @@ fun HomeContent(
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(text = "Hello,", fontSize = 20.sp)
                     if (username != null) {
-                        Text(text = username, fontSize = 20.sp, color = GreenMed)
+                        Text(text = getFirstWord(username), fontSize = 20.sp, color = GreenMed)
                     }
                 }
             }
@@ -190,7 +206,7 @@ fun HomeContent(
         }
 
 
-        var address:String = "Semarang"
+
         Card(
             modifier = modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -222,26 +238,25 @@ fun HomeContent(
                             lat,
                             lon
                         )
-                        address = getAddressName(context, lat, lon)
+
                     }
 
                     is UiState.Success -> {
 
 
-
-                            WeatherCards(
-                                address = address,
-                                icon = uiState.data?.weather?.get(0)?.icon,
-                                info = "${uiState.data?.weather?.get(0)?.main} | ${uiState.data?.main?.temp} C",
-                                weatherViewModel = weatherViewModel,
-                                currentLocation = currentLocation,
-                                context = LocalContext.current
-                            )
+                        WeatherCards(
+                            address = address,
+                            icon = uiState.data?.weather?.get(0)?.icon,
+                            info = "${uiState.data?.weather?.get(0)?.main} | ${uiState.data?.main?.temp} °C",
+                            weatherViewModel = weatherViewModel,
+                            currentLocation = currentLocation,
+                            context = LocalContext.current
+                        )
 
                     }
 
                     is UiState.Error -> {
-                        // Handle the error state
+                        showToast(uiState.errorMessage)
                     }
 
 
@@ -251,18 +266,13 @@ fun HomeContent(
 
 
         }
-
-
-
-
-
-
-
-
-
-
-
-        Text(text = "Your Plant", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        
+        Text(
+            text = "Tanaman Kamu",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.DarkGray
+        )
         if (listTask != null) {
             if (listTask.isNotEmpty()) {
                 LazyColumn(
@@ -291,20 +301,22 @@ fun HomeContent(
                                                 },
                                                 id = id
                                             )
-                                            Log.d("TAG", "HomeContent: id = $id")
+
                                         }
                                     }
 
                                 }
                             }
                         }
+                        
+                        Spacer(modifier = modifier.height(16.dp))
                     }
 
 
                 }
             } else {
 
-                InfoScreen()
+                InfoScreen(text = "Kamu Belum Menanam Tanaman")
 
             }
         }

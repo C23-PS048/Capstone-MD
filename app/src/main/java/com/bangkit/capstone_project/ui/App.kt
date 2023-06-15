@@ -200,6 +200,7 @@ fun App(
                                 currentLocation = currentLocation,
                                 navController = navController,
                                 plantViewModel = plantViewModel,
+                                showToast = showToast,
                                 navigatetoOwned = { id ->
                                     navController.navigate(
                                         Screen.OwnedPlant.createRoute(id)
