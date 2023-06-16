@@ -4,6 +4,7 @@ Capstone project Bangkit 2023
 
 ## About Our App
 
+
 A personal gardening assistant which can help people with common knowledge to start gardening like a professional
 
 ## How To Make This Android App Project
@@ -32,3 +33,6 @@ MAPS_KEY = your-api-key
 |[DataStore](https://developer.android.com/topic/libraries/architecture/datastore?gclid=CjwKCAjwnZaVBhA6EiwAVVyv9JJDrHZ0zpyjRp2mCoKIKH2ijLF49ZQpVqUuvUv9E7FziCj7pSo6jRoCkfAQAvD_BwE&gclsrc=aw.ds)| Local Storage|implementation "androidx.datastore:datastore-preferences:1.0.0"|
 |[Tflite](https://www.tensorflow.org/lite)| Machine Learning Processing|implementation 'org.tensorflow:tensorflow-lite:2.7.0'|
 | [Maps](https://developers.google.com/maps) | Google maps service | implementation 'com.google.android.gms:play-services-maps:18.1.0'|
+=======
+TBA
+
