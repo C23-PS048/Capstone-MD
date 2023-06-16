@@ -1,19 +1,19 @@
 <img src="https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_logo.png" width="100" height="100" align="right" />
 
-# C23-PS048 Android App
-Capstone project Bangkit 2023
-![Sprout App](https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_Banner.jpg)
+# Sprout 
 
 ## About Our App
-
-
 A personal gardening assistant which can help people with common knowledge to start gardening like a professional
+
+
+![Sprout App](https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_Banner.jpg)
+
 
 ## How To Make This Android App Project
 
 ### How To Build This Project
 
-If you build this application an error will occur. Because this application requires an API Key to display the Google Map. Follow this tutorial to generate Google map api key
+If you build this application for the first time an error will occur. Because this application requires an API Key to display the Google Map. Follow this important tutorial to generate Google map api key
 >[Set up in Cloud Console](https://developers.google.com/maps/documentation/android-sdk/start#set_up_in_cloud_console) (Note: ignore the other steps from this link)
 
 Once you have the api key, follow these steps:
@@ -35,4 +35,4 @@ MAPS_KEY = your-api-key
 |[DataStore](https://developer.android.com/topic/libraries/architecture/datastore?gclid=CjwKCAjwnZaVBhA6EiwAVVyv9JJDrHZ0zpyjRp2mCoKIKH2ijLF49ZQpVqUuvUv9E7FziCj7pSo6jRoCkfAQAvD_BwE&gclsrc=aw.ds)| Local Storage|implementation "androidx.datastore:datastore-preferences:1.0.0"|
 |[Tflite](https://www.tensorflow.org/lite)| Machine Learning Processing|implementation 'org.tensorflow:tensorflow-lite:2.7.0'|
 | [Maps](https://developers.google.com/maps) | Google maps service | implementation 'com.google.android.gms:play-services-maps:18.1.0'|
-
+| [OpenWeather](https://openweathermap.org/api) | Weather Data Collection | - |
