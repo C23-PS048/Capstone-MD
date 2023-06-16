@@ -31,6 +31,7 @@ class UserPlantViewModel() : ViewModel() {
     }
     fun resetData(){
         _uiState.value=UiState.Loading
+        _userPlant.value = UiState.Loading
 
     }
 

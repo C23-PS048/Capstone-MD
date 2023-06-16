@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bangkit.capstone_project.R
 import com.bangkit.capstone_project.data.network.user.UserViewModel
+import com.bangkit.capstone_project.helper.maskEmail
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.theme.BlackMed
 import com.bangkit.capstone_project.ui.theme.OrangeLight
@@ -89,7 +90,7 @@ fun ProfileScreen(
 
                             UserProfilePage(
                                 onLogout = onLogout,
-                                userEmail = email,
+                                userEmail = maskEmail(email),
                                 userName = name,
                                 showToast = showToast,
                                 navigateToCam =

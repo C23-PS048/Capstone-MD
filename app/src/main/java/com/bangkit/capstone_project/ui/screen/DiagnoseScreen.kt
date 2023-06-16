@@ -1,8 +1,11 @@
 package com.bangkit.capstone_project.ui.screen
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -26,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +69,30 @@ fun DiagnoseScreen(
         .requireLensFacing(CameraSelector.LENS_FACING_BACK)
         .build()
 
+
+    val pickedImageUri = remember { mutableStateOf<Uri?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val uri = data?.data
+            if (uri != null) {
+                pickedImageUri.value = uri
+
+                takePhoto(
+                    filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                    imageCapture = imageCapture,
+                    outputDirectory = outputDirectory,
+                    executor = executor,
+                    onImageCaptured = onImageCaptured,
+                    onError = onError,
+                    pickedImageUri = uri
+                )
+            }
+        }
+    }
     LaunchedEffect(key1 = Unit) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
@@ -128,6 +156,22 @@ fun DiagnoseScreen(
                     Alignment.Center
                 )
             )
+            IconButton(
+                modifier = Modifier.align(Alignment.BottomStart),
+                onClick = {
+                    val galleryIntent = Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    )
+                    launcher.launch(galleryIntent)
+                }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.gallery),
+                    tint = Color.White,
+                    contentDescription = "Pick Image From Galley Button"
+                )
+            }
 
         }
     }

@@ -77,7 +77,6 @@ import com.bangkit.capstone_project.ui.screen.UserCameraScreen
 import com.bangkit.capstone_project.ui.screen.UserResultScreen
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
-import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import java.io.File
@@ -101,7 +100,6 @@ fun App(
     currentState: MutableState<ScreenState>,
     cameraExecutor: ExecutorService,
     outputDirectory: File,
-    taskViewModel: TaskViewModel,
     sendNotification: () -> Unit,
     showToast: (String) -> Unit,
     chiliClassifier: DeseaseClassifier,

@@ -33,8 +33,7 @@ import com.bangkit.capstone_project.ui.App
 import com.bangkit.capstone_project.ui.UiState
 import com.bangkit.capstone_project.ui.theme.CapstoneProjectTheme
 import com.bangkit.capstone_project.viewmodel.preference.PreferenceViewModel
-import com.bangkit.capstone_project.viewmodel.task.TaskVMFactory
-import com.bangkit.capstone_project.viewmodel.task.TaskViewModel
+
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -73,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
 
     private var currentState: MutableState<ScreenState> = mutableStateOf(ScreenState.Camera)
-    private lateinit var taskViewModel: TaskViewModel
+
 
     private lateinit var prefViewModel: PreferenceViewModel
 
@@ -141,7 +140,7 @@ class MainActivity : ComponentActivity() {
         prefViewModel =
             ViewModelProvider(this, PreferenceFactory(pref))[PreferenceViewModel::class.java]
         setContent {
-            taskViewModel = obtainViewModel(this@MainActivity)
+
             initClassifier()
             requestPermissionsOnFirstLaunch()
             outputDirectory = getOutputDirectory()
@@ -150,18 +149,7 @@ class MainActivity : ComponentActivity() {
             prefViewModel.checkTokenExpirationAndDelete()
 
             CapstoneProjectTheme {
-                LaunchedEffect(Unit) {
-                    taskViewModel.uiState.collect { uiState ->
-                        when (uiState) {
-                            is UiState.Loading -> {
 
-                            }
-                            is UiState.Success ->{}
-                            is UiState.Error ->{}
-                            // Handle other UI states if needed
-                        }
-                    }
-                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -175,7 +163,6 @@ class MainActivity : ComponentActivity() {
                         chiliClassifier = chiliClassifier,
                         plantClassifier = plantClassifier,
                         cauilClassifier=cauilClassifier,
-                        taskViewModel = taskViewModel,
                         prefViewModel = prefViewModel,
                         showToast = {text->showToast(text)},
                         sendNotification={}
@@ -188,10 +175,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun obtainViewModel(activity: ComponentActivity): TaskViewModel {
-        val factory = TaskVMFactory.getInstance(activity.application)
-        return ViewModelProvider(activity, factory)[TaskViewModel::class.java]
-    }
+
 
 
     private fun getOutputDirectory(): File {

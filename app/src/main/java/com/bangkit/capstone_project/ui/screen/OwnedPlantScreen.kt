@@ -107,7 +107,12 @@ fun OwnedPlantScreen(
             }
 
             is UiState.Success -> {
-                uiState.data?.let { showToast(it.message) }
+                uiState.data?.let { showToast(it.message)
+
+                userPlantViewModel.resetData()
+                userPlantViewModel.resetResponseState()
+                }
+
             }
 
 
@@ -580,9 +585,9 @@ fun updateSchedule(
 ) {
 
     val freq = task.frequency
-    val lastDate = task.lastScheduledDate
+    val nextDate = task.nextScheduledDate
 
-    val (lastScheduledDate, nextScheduledDate) = calculateScheduleDates(lastDate.toLong(), freq)
+    val (lastScheduledDate, nextScheduledDate) = calculateScheduleDates(nextDate.toLong(), freq)
 
 
 

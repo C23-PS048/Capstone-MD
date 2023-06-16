@@ -121,6 +121,13 @@ fun convertMillisToDateString(milliseconds: Long): String {
     val format = SimpleDateFormat("yyyy-MM-dd") // Customize the date format as per your requirement
     return format.format(date)
 }
+fun maskEmail(email: String): String {
+    val atIndex = email.indexOf('@')
+    val username = email.substring(0, atIndex)
+    val maskedUsername = username[0] + "*".repeat(username.length - 2) + username[username.length - 1]
+    val domain = email.substring(atIndex)
+    return maskedUsername + domain
+}
 
 fun calculateScheduleDates(startDate: Long, frequency: Int): Pair<Long, Long> {
     val calendar = Calendar.getInstance()

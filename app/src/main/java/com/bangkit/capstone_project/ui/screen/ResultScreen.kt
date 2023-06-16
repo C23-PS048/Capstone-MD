@@ -150,7 +150,7 @@ fun ResultScreen(
 
                 Log.d("TAG", "ResultScreen: ${result}")
             } else {
-                InfoScreen(text = "tanaman Tidak TerDeteksi",color= GrayDark,modifier = modifier.padding(padding))
+                InfoScreen(text = "tanaman Tidak Terdeteksi",color= GrayDark,modifier = modifier.padding(padding))
             }
 
         }
@@ -188,15 +188,15 @@ fun ResultContent(
                 ) {
                     Box(
                         modifier
-                            .fillMaxWidth()
                             .height(300.dp)
+                            .fillMaxWidth()
 
                     ) {
                         Image(
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = null,
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
 
