@@ -230,7 +230,7 @@ fun EditTaskContent(
         Frequency("Setiap Hari", 1),
         Frequency("Dua Hari Sekali", 2),
         Frequency("Setiap Tiga Hari", 3),
-        Frequency("Setiap Empat Har", 4),
+        Frequency("Setiap Empat Hari", 4),
         Frequency("Lima Hari Sekali", 5),
         Frequency("Enam Hari Sekali", 6),
 
