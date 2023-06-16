@@ -36,3 +36,4 @@ MAPS_KEY = your-api-key
 |[Tflite](https://www.tensorflow.org/lite)| Machine Learning Processing|implementation 'org.tensorflow:tensorflow-lite:2.7.0'|
 | [Maps](https://developers.google.com/maps) | Google maps service | implementation 'com.google.android.gms:play-services-maps:18.1.0'|
 
+| [OpenWeather](https://openweathermap.org/api) | Weather Data Collection | - |
