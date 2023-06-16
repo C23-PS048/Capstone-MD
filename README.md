@@ -1,13 +1,13 @@
 <img src="https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_logo.png" width="100" height="100" align="right" />
 
 # C23-PS048 Android App
-Capstone project Bangkit 2023
-![Sprout App](https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_Banner.jpg)
 
 ## About Our App
-
-
 A personal gardening assistant which can help people with common knowledge to start gardening like a professional
+
+
+![Sprout App](https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_Banner.jpg)
+
 
 ## How To Make This Android App Project
 
