@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_logo.png" width="100" height="100" align="right" />
 
-# C23-PS048 Android App
+# Sprout 
 
 ## About Our App
 A personal gardening assistant which can help people with common knowledge to start gardening like a professional
@@ -13,7 +13,7 @@ A personal gardening assistant which can help people with common knowledge to st
 
 ### How To Build This Project
 
-If you build this application an error will occur. Because this application requires an API Key to display the Google Map. Follow this tutorial to generate Google map api key
+If you build this application for the first time an error will occur. Because this application requires an API Key to display the Google Map. Follow this important tutorial to generate Google map api key
 >[Set up in Cloud Console](https://developers.google.com/maps/documentation/android-sdk/start#set_up_in_cloud_console) (Note: ignore the other steps from this link)
 
 Once you have the api key, follow these steps:
