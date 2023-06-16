@@ -2,7 +2,7 @@
 
 # C23-PS048 Android App
 Capstone project Bangkit 2023
-![Sprout App](https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_Banner.png)
+![Sprout App](https://raw.githubusercontent.com/C23-PS048/Capstone-MD/main/readme_asset/Sprout_Banner.jpg)
 
 ## About Our App
 
